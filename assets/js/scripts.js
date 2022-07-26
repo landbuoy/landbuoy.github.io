@@ -98,7 +98,7 @@ $(document).ready(function () {
 // Player for channel 1
 
 var musicarr1 = [
-  "assets/audio/ch1/rainy 2021 - 2.wav"
+  "assets/audio/ch1/rainy 2021 - 2.mp3"
 ];
 
 shuffle1(musicarr1);
@@ -171,7 +171,7 @@ function shuffle1(array) {
 // Player for channel 2
 
 var musicarr2 = [
-  "assets/audio/ch2/february twenty fourth 2022 - A3.wav"
+  "assets/audio/ch2/february twenty fourth 2022 - A3.mp3"
   ];
 shuffle2(musicarr2);
 
