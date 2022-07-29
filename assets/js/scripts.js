@@ -98,7 +98,30 @@ $(document).ready(function () {
 // Player for channel 1
 
 var musicarr1 = [
-  "assets/audio/ch1/rainy 2021 - 2.mp3"
+  "assets/audio/ch1/A1.mp3",
+  "assets/audio/ch1/A2.mp3",
+  "assets/audio/ch1/A3.mp3",
+  "assets/audio/ch1/A4.mp3",
+  "assets/audio/ch1/A5.mp3",
+  "assets/audio/ch1/A6.mp3",
+  "assets/audio/ch1/A7.mp3",
+  "assets/audio/ch1/A8.mp3",
+  "assets/audio/ch1/A9.mp3",
+  "assets/audio/ch1/A10.mp3",
+  "assets/audio/ch1/A11.mp3",
+  "assets/audio/ch1/A12.mp3",
+  "assets/audio/ch1/A13.mp3",
+  "assets/audio/ch1/A14.mp3",
+  "assets/audio/ch1/A15.mp3",
+  "assets/audio/ch1/A16.mp3",
+  "assets/audio/ch1/A17.mp3",
+  "assets/audio/ch1/A18.mp3",
+  "assets/audio/ch1/A19.mp3",
+  "assets/audio/ch1/A20.mp3",
+  "assets/audio/ch1/A21.mp3",
+  "assets/audio/ch1/A22.mp3",
+  "assets/audio/ch1/A23.mp3",
+  "assets/audio/ch1/A24.mp3",
 ];
 
 shuffle1(musicarr1);
@@ -171,7 +194,34 @@ function shuffle1(array) {
 // Player for channel 2
 
 var musicarr2 = [
-  "assets/audio/ch2/february twenty fourth 2022 - A3.mp3"
+  "assets/audio/ch2/B1.mp3",
+  "assets/audio/ch2/B2.mp3",
+  "assets/audio/ch2/B3.mp3",
+  "assets/audio/ch2/B4.mp3",
+  "assets/audio/ch2/B5.mp3",
+  "assets/audio/ch2/B6.mp3",
+  "assets/audio/ch2/B7-B8.mp3",
+  "assets/audio/ch2/B9.mp3",
+  "assets/audio/ch2/B10.mp3",
+  "assets/audio/ch2/B11.mp3",
+  "assets/audio/ch2/B12.mp3",
+  "assets/audio/ch2/B13.mp3",
+  "assets/audio/ch2/B14.mp3",
+  "assets/audio/ch2/B15.mp3",
+  "assets/audio/ch2/B16.mp3",
+  "assets/audio/ch2/B17.mp3",
+  "assets/audio/ch2/B18.mp3",
+  "assets/audio/ch2/B19.mp3",
+  "assets/audio/ch2/B20.mp3",
+  "assets/audio/ch2/B21.mp3",
+  "assets/audio/ch2/B22.mp3",
+  "assets/audio/ch2/B23.mp3",
+  "assets/audio/ch2/B24.mp3",
+  "assets/audio/ch2/B25.mp3",
+  "assets/audio/ch2/B26.mp3",
+  "assets/audio/ch2/B27.mp3",
+  "assets/audio/ch2/B28.mp3",
+  "assets/audio/ch2/B29.mp3",
   ];
 shuffle2(musicarr2);
 
