@@ -122,6 +122,15 @@ var musicarr1 = [
   "assets/audio/ch1/A22.mp3",
   "assets/audio/ch1/A23.mp3",
   "assets/audio/ch1/A24.mp3",
+  "assets/audio/ch1/A25.mp3",
+  "assets/audio/ch1/A26.mp3",
+  "assets/audio/ch1/A27.mp3",
+  "assets/audio/ch1/A28.mp3",
+  "assets/audio/ch1/A29.mp3",
+  "assets/audio/ch1/A30.mp3",
+  "assets/audio/ch1/A31.mp3",
+  "assets/audio/ch1/A32.mp3",
+  "assets/audio/ch1/A33.mp3",
 ];
 
 shuffle1(musicarr1);
@@ -222,6 +231,10 @@ var musicarr2 = [
   "assets/audio/ch2/B27.mp3",
   "assets/audio/ch2/B28.mp3",
   "assets/audio/ch2/B29.mp3",
+  "assets/audio/ch2/B30.mp3",
+  "assets/audio/ch2/B31.mp3",
+  "assets/audio/ch2/B32.mp3",
+  "assets/audio/ch2/B33.mp3",
   ];
 shuffle2(musicarr2);
 
