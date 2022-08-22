@@ -140,7 +140,7 @@ init1();
 function init1() {
   current = 0;
   audio1 = $("#audioPlayer1");
-  audio1[0].volume = 0.6;
+  audio1[0].volume = 0.8;
   len = musicarr1.length;
 
   run1(musicarr1[current], audio1[0]);
@@ -243,7 +243,7 @@ init2();
 function init2() {
   current = 0;
   audio2 = $("#audioPlayer2");
-  audio2[0].volume = 0.4;
+  audio2[0].volume = 0.8;
   len = musicarr2.length;
 
   run2(musicarr2[current], audio2[0]);
