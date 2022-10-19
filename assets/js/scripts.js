@@ -22,7 +22,7 @@ $(document).ready(function () {
     $(this).css("zIndex", "9999");
   });
   // Resume modal
-  $(".globeButton--resume").click(function () {
+  $(".button--resume").click(function () {
     $(".modalContainer").css("zIndex", "0");
     $(".modalContainer--resume").fadeIn().css("zIndex", "9999");
   });
@@ -30,28 +30,28 @@ $(document).ready(function () {
     $(".modalContainer--resume").fadeOut();
   });
   // Info modal
-  $(".globeButton--info").click(function () {
+  $(".button--info").click(function () {
     $(".modalContainer").css("zIndex", "0");
     $(".modalContainer--info").fadeIn().css("zIndex", "9999");
   });
   $(".aquaButton--info").click(function () {
     $(".modalContainer--info").fadeOut();
   });
-    // LANDBUOY A1
-  $(".landBuoy--A1").click(function () {
+    // UploadiThought glyph
+  $(".glyph--uploadIThought").click(function () {
     $(".modalContainer").css("zIndex", "0");
-    $(".modalContainer--landBuoyA1").fadeIn().css("zIndex", "9999");
+    $(".modalContainer--uploadIThought").fadeIn().css("zIndex", "9999");
   });
-  $(".aquaButton--landBuoyA1").click(function () {
-    $(".modalContainer--landBuoyA1").fadeOut();
+  $(".aquaButton--uploadIThought").click(function () {
+    $(".modalContainer--uploadIThought").fadeOut();
   });
-    // LANDBUOY B1
-  $(".landBuoy--B1").click(function () {
+    // UploadIIThought glyph
+  $(".glyph--uploadIIThoughts").click(function () {
     $(".modalContainer").css("zIndex", "0");
-    $(".modalContainer--landBuoyB1").fadeIn().css("zIndex", "9999");
+    $(".modalContainer--uploadIIThoughts").fadeIn().css("zIndex", "9999");
   });
-  $(".aquaButton--landBuoyB1").click(function () {
-    $(".modalContainer--landBuoyB1").fadeOut();
+  $(".aquaButton--uploadIIThoughts").click(function () {
+    $(".modalContainer--uploadIIThoughts").fadeOut();
   });  
   // color stuff
   function randomColor() {
@@ -81,13 +81,13 @@ $(document).ready(function () {
     $(".marqueeText").css("color", c2);
     $(".modalContainer--info").css("box-shadow", "0px 0px 32px" + c2);
     $(".modalContainer--resume").css("box-shadow", "0px 0px 32px" + c2);
-    $(".modalContainer--landBuoyA1").css("box-shadow", "0px 0px 32px" + c2);
-    $(".modalContainer--landBuoyB1").css("box-shadow", "0px 0px 32px" + c2);
+    $(".modalContainer--uploadIThought").css("box-shadow", "0px 0px 32px" + c2);
+    $(".modalContainer--uploadIIThoughts").css("box-shadow", "0px 0px 32px" + c2);
    // $(".landBuoyInnerContainer").css("border", "5px" + c2);
     $(".aquaButton--info").css("background", c2);
     $(".aquaButton--resume").css("background", c2);
-    $(".aquaButton--landBuoyA1").css("background", c2);
-    $(".aquaButton--landBuoyB1").css("background", c2);
+    $(".aquaButton--uploadIThought").css("background", c2);
+    $(".aquaButton--uploadIIThoughts").css("background", c2);
 
     //DIV BOX STUFF
     var navBoxHeight = document.querySelector('.nav').offsetHeight;
@@ -157,7 +157,7 @@ function init1() {
 
   // Playing the selected channel
   // and pausing the other channel if it's playing
-  $(".globeButton--channelOne").click(function () {
+  $(".button--channelOne").click(function () {
     if (audio1[0].paused == false) {
       audio1[0].pause();
       $(".mainLogo").removeClass("mainLogo--active");
@@ -260,7 +260,7 @@ function init2() {
 
   // Playing the selected channel
   // and pausing the other channel if it's playing
-  $(".globeButton--channelTwo").click(function () {
+  $(".button--channelTwo").click(function () {
     if (audio2[0].paused == false) {
       audio2[0].pause();
       $(".mainLogo").removeClass("mainLogo--active");

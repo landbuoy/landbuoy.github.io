@@ -21,14 +21,15 @@
   justify-content: center;
 }
 
-/* Globe button base */
+/* glyphs and buttons*/
 
-.globeButton {
+.button {
   width: 178px;
   height: 48px;
 }
 
-.landBuoy {
+.glyph {
+  /*border: 5px outset firebrick;*/
   width: 48px;
   height: 48px; 
   display: flex;
@@ -36,31 +37,31 @@
   justify-content: center;   
 }
 
-.globeButton__icon {
+.buttonIcon {
   width: 100%;
   transform: rotate3d(0, 1, 0, 0deg);
   transition: 0.5s;
 }
 
-.landBuoy__icon {
+.glyphIcon {
   width: 100%;
   transform: rotate3d(0, 1, 0, 0deg);
   transition: 0.5s;
 }
 
-.globeButton:hover {
+.button:hover {
   cursor: pointer;
 }
 
-.landBuoy:hover {
+.glyph:hover {
   cursor: pointer;
 }
 
-.globeButton:hover .globeButton__icon {
+.button:hover .buttonIcon {
   transform: rotate3d(0, 1, 0, 180deg);
 }
 
-.landBuoy:hover .landBuoy__icon {
+.glyph:hover .glyphIcon {
   transform: rotate3d(0, 1, 0, 180deg);
 }
 
@@ -73,22 +74,22 @@
   top: 32px;
 }
 
-.globeButton--info {
+.button--info {
   display: inline-block;
   margin: 8px;
 }
 
-.globeButton--resume {
+.button--resume {
   display: inline-block;
   margin: 8px;
 }
 
-.landBuoy--A1 {
+.glyph--uploadIThought {
   display: inline-block;
   margin: 8px;
 }
 
-.landBuoy--B1 {
+.glyph--uploadIIThoughts {
   display: inline-block;
   margin: 8px;
 }
@@ -168,12 +169,12 @@
   justify-content: center;
 }
 
-.globeButton--channelOne {
+.button--channelOne {
   /*border: 5px outset orange;*/
   margin: 8px;
 }
 
-.globeButton--channelTwo {
+.button--channelTwo {
   /*border: 5px outset goldenrod;*/
   margin: 8px;
 }
@@ -254,7 +255,7 @@
   box-shadow: 0px 0px 32px #ff6347;
 }
 
-.modalContainer--landBuoyA1 {
+.modalContainer--uploadIThought {
   background-color: transparent;
   display: none;
   top: 15%;
@@ -267,7 +268,7 @@
 
 }
 
-.modalContainer--landBuoyB1 {
+.modalContainer--uploadIIThoughts {
   background-color: transparent;
   display: none;
   top: 20%;
@@ -443,27 +444,27 @@
   background: #06c506;
 }
 
-.aquaButton--landBuoyA1 {
+.aquaButton--uploadIThought {
   background: #04c204;
 }
 
-.aquaButton--landBuoyA1:hover {
+.aquaButton--uploadIThought:hover {
   background: #12ee12;
 }
 
-.aquaButton--landBuoyA1:active {
+.aquaButton--uploadIThought:active {
   background: #06c506;
 }
 
-.aquaButton--landBuoyB1 {
+.aquaButton--uploadIIThoughts {
   background: #04c204;
 }
 
-.aquaButton--landBuoyB1:hover {
+.aquaButton--uploadIIThoughts:hover {
   background: #12ee12;
 }
 
-.aquaButton--landBuoyB1:active {
+.aquaButton--uploadIIThoughts:active {
   background: #06c506;
 }
 
