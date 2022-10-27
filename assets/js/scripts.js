@@ -1,6 +1,7 @@
  // General layout functionality
 
 $(document).ready(function () {
+
   // Marquee text
   $(".marqueeContainer").marquee({
     duration: 25000,
@@ -54,6 +55,17 @@ $(document).ready(function () {
     $(".modalContainer--uploadIIThoughts").fadeOut();
   });  
   // color stuff
+
+  var bgimg = [
+    "url(assets/img/background/grape.gif)",
+    "url(assets/img/background/pink.gif)",
+    "url(assets/img/background/red.gif)",
+    "url(assets/img/background/wood.gif)",
+    "url(assets/img/background/grid.gif)",
+  ];
+
+  var randomNumber = Math.floor(Math.random() * bgimg.length);
+
   function randomColor() {
         var color;
         color = Math.floor(Math.random() * 0x1000000); // integer between 0x0 and 0xFFFFFF
@@ -62,6 +74,7 @@ $(document).ready(function () {
         color = "#" + color; // prepend #
         return color;
     }
+  
   function invertColor(hexTripletColor) {
         var color = hexTripletColor;
         color = color.substring(1); // remove #
@@ -77,8 +90,12 @@ $(document).ready(function () {
 
     var c2 = invertColor(c1);
 
+    var b = bgimg[randomNumber];
+
+    $(".mainContainer").css("background-image", b);
     $(".mainContainer").css("background-color", c1);
     $(".marqueeText").css("color", c2);
+    $(".logoContainer").css("color", c2);
     $(".modalContainer--info").css("box-shadow", "0px 0px 32px" + c2);
     $(".modalContainer--resume").css("box-shadow", "0px 0px 32px" + c2);
     $(".modalContainer--uploadIThought").css("box-shadow", "0px 0px 32px" + c2);

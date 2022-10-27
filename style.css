@@ -5,12 +5,19 @@
   -webkit-font-smoothing: none;
 }
 
+@font-face {
+  font-family: MingLiU;
+  src: url(assets/fonts/mingliu.ttf);
+}
+
 .mainContainer {
   /*border: 5px outset firebrick;*/
-  background-color: ##e44644;
-  background-image: url(assets/img/background.);
-  background-repeat: round;
-  background-size: 100%;
+  background-color: #e44644;
+  background-image: ;
+  background-repeat: repeat;
+  background-size: 64px 64px;
+  /*background-blend-mode: difference;*/
+  image-rendering: smooth;
   position: fixed;
   top: 0;
   left: 0;
@@ -107,16 +114,36 @@
 }
 
 .landBuoyContainer2{
-  /*border: 5px outset beige;*/
+  position: fixed;
+  /*border: 5px outset orange;*/
   width: 25%;
+  left: 5px;
+  top: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center; 
 }
 
 .landBuoyContainer3{
-  
+  position: fixed;
+  /*border: 5px outset darkred;*/
+  width: 25%;
+  right: 5px;
+  bottom: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center; 
 }
 
 .landBuoyContainer4{
-  
+  position: fixed;
+  /*border: 5px outset yellow;*/
+  width: 25%;
+  left: 5px;
+  bottom: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center; 
 }
 
 /* Channel selection toggles */
@@ -131,6 +158,12 @@
   /*border: 5px outset yellowgreen;*/
   transition: opacity 1s;
   opacity: 1;
+  color: #f44644;
+  font-size: 60px;
+  font-style: italic;
+  font-stretch: ultra-expanded;
+  font-weight: bold;
+  font-family: "MingLiU", serif;
 }
 
 .logoContainer__inner {
@@ -207,6 +240,7 @@
   text-transform: uppercase;
   font-style: italic;
   color:  greenyellow;
+  font-weight: bold;
 }
 
 .marqueeIcon {
@@ -223,6 +257,7 @@
 .modalContainer {
   position: fixed;
   min-width: 400px;
+  max-width: 400px;
   background-color: #eaeaea;
   display: flex;
   flex-direction: column;
