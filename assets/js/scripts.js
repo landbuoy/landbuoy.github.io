@@ -1,4 +1,4 @@
- // General layout functionality
+  // General layout functionality
 
 $(document).ready(function () {
 
@@ -54,9 +54,19 @@ $(document).ready(function () {
   $(".aquaButton--uploadIIThoughts").click(function () {
     $(".modalContainer--uploadIIThoughts").fadeOut();
   });  
+
+// newgraphic glyph
+  $(".glyph--newGraphic").click(function () {
+    $(".modalContainer").css("zIndex", "0");
+    $(".modalContainer--newGraphic").fadeIn().css("zIndex", "9999");
+  });
+  $(".aquaButton--newGraphic").click(function () {
+    $(".modalContainer--newGraphic").fadeOut();
+  }); 
+
   // color stuff
 
-  var bgimg = [
+  /*var bgimg = [
     "url(assets/img/background/grape.gif)",
     "url(assets/img/background/pink.gif)",
     "url(assets/img/background/red.gif)",
@@ -64,7 +74,7 @@ $(document).ready(function () {
     "url(assets/img/background/grid.gif)",
   ];
 
-  var randomNumber = Math.floor(Math.random() * bgimg.length);
+  var randomNumber = Math.floor(Math.random() * bgimg.length);*/
 
   function randomColor() {
         var color;
@@ -90,9 +100,9 @@ $(document).ready(function () {
 
     var c2 = invertColor(c1);
 
-    var b = bgimg[randomNumber];
+    //var b = bgimg[randomNumber];
 
-    $(".mainContainer").css("background-image", b);
+    //$(".mainContainer").css("background-image", b);
     $(".mainContainer").css("background-color", c1);
     $(".marqueeText").css("color", c2);
     $(".logoContainer").css("color", c2);
@@ -114,7 +124,7 @@ $(document).ready(function () {
 
 // Player for channel 1
 
-var musicarr1 = [
+/*var musicarr1 = [
   "assets/audio/ch1/A1.mp3",
   "assets/audio/ch1/A2.mp3",
   "assets/audio/ch1/A3.mp3",
@@ -318,4 +328,4 @@ function shuffle2(array) {
   }
 
   return array;
-}
+}*/

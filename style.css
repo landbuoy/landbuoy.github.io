@@ -101,6 +101,11 @@
   margin: 8px;
 }
 
+.glyph--newGraphic {
+  display: inline-block;
+  margin: 8px;
+}
+
 /* land buoy containers */
 .landBuoyContainer1{
   position: fixed;
@@ -315,6 +320,11 @@
   box-shadow: 0px 0px 32px #ff6347;
 }
 
+.modalContainer--newGraphic {
+  background-color: transparent;
+  box-shadow: 0px 0px 32px #ff6347;
+}
+
 .modalHeader {
   display: flex;
   align-items: center;
@@ -339,6 +349,10 @@
   overflow-y: scroll;
   /*overflow-y: hidden; */
   padding: 0 1rem 1rem 1rem;
+}
+
+.modalInnerContainer--newGraphic {
+
 }
 
 .landBuoyInnerContainer {
@@ -525,4 +539,3 @@
     min-width: auto;
   }
 }
-
