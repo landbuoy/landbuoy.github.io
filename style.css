@@ -227,6 +227,11 @@
   height: 0px;
 }
 
+.playerContainerNewGraphic {
+  visibility: hidden;
+  height: 0px;
+}
+
 /* Marquee text */
 
 .marqueeContainer {
@@ -321,6 +326,7 @@
 }
 
 .modalContainer--newGraphic {
+  display:none;
   background-color: transparent;
   box-shadow: 0px 0px 32px #ff6347;
 }

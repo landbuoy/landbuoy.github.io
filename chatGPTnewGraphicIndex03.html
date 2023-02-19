@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Modal Example</title>
+    
+    <style>
+      /* Style the modal */
+      .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 300px; /* Width of the modal */
+        height: 300px; /* Height of the modal */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+      }
+      
+      /* Style the modal content */
+      .modal-content {
+        margin: auto;
+        display: block;
+        width: 100%;
+        height: 100%;
+        max-width: 700px;
+      }
+      
+      /* Style the image inside the modal */
+      .modal-content img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      
+      /* Close button */
+      .close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        color: #fff;
+        font-size: 30px;
+        font-weight: bold;
+        transition: all 0.3s;
+        cursor: pointer;
+      }
+      
+      /* Close button hover effect */
+      .close:hover,
+      .close:focus {
+        color: #bbb;
+        text-decoration: none;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- The image to trigger the modal -->
+    <img src="assets/img/gifs/jc-icon.gif" alt="Image" onclick="toggleModal(event)">
+    
+    <!-- The modal -->
+    <div id="myModal" class="modal" draggable="true">
+      <!-- Modal content -->
+      <div class="modal-content">
+        <!-- Image inside the modal -->
+        <img src="assets/img/gifs/fax-icon.gif" alt="Image">
+        
+        <!-- Close button -->
+        <span class="close" onclick="toggleModal(event)">&times;</span>
+      </div>
+    </div>
+    
+    <script>
+      // Get the modal
+      var modal = document.getElementById("myModal");
+      
+      // Function to toggle the modal
+      function toggleModal(event) {
+        if (modal.style.display === "block") {
+          modal.style.display = "none";
+        } else {
+          modal.style.display = "block";
+          modal.style.left = event.pageX - 150 + "px"; // Set the initial position of the modal
+          modal.style.top = event.pageY - 150 + "px";
+        }
+      }
+
+      // Make the modal draggable
+      var isDragging = false;
+      var currentX;
+      var currentY;
+      var initialX;
+      var initialY;
+      var xOffset = 0;
+      var yOffset = 0;
+      
+      modal.addEventListener("mousedown", dragStart);
+      modal.addEventListener("mouseup", dragEnd);
+      modal.addEventListener("mousemove", drag);
+      
+      function dragStart(event) {
+        initialX = event.clientX - xOffset;
+        initialY = event.clientY - yOffset;
+        
+        if (event.target === modal) {
+          isDragging = true;
+        }
+      }
+      
+      function dragEnd(event) {
+        initialX = currentX;
+        initialY = currentY;
+        
+        isDragging = false;
+      }
+      
+      function drag(event) {
+        if (isDragging) {
+          event.preventDefault();
+          
+          currentX = event.clientX - initialX;
+          currentY = event.clientY - initialY;
+      xOffset = currentX;
+      yOffset = currentY;
+      
+      setTranslate(currentX, currentY, modal);
+    }
+  }
+  
+  function setTranslate(xPos, yPos, el) {
+    el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
+  }
+  
+</script>
+</body>
+</html>

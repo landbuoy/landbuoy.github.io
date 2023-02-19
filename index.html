@@ -22,6 +22,10 @@
     ></script>
     <script
       type="text/javascript"
+      src="libraries/p5.js"
+    ></script>
+    <script
+      type="text/javascript"
       src="assets/js/jquery.marquee.min.js"
     ></script>
 
@@ -238,11 +242,22 @@
       </div>
       <!-- new graphic -->
       <div class="modalContainer modalContainer--newGraphic">
-        <header class="modalHeader">
+        <!--<header class="modalHeader">
           <div class="aquaButton aquaButton--newGraphic">X</div>
-        </header>
+        </header>-->
         <div class="modalInnerContainer--newGraphic">
-          <img src="assets/img/modal graphics/newGraphic001/static.gif"/>
+          <div class="playerContainerNewGraphic">
+              <audio id="audioPlayerNewGraphicLeft" autoplay="false" controls type="audio/wav" loop>
+              </audio>
+              <audio id="audioPlayerNewGraphicRight" autoplay="false" controls type="audio/wav" loop>
+              </audio>
+          </div>
+          <canvas id = "teapot" > </canvas>
+          <map name="example-map">
+            <area shape="rect" coords="0,0,200,200" href="http://example.com/page1.html" alt="Link to Page 1">
+            <area shape="circle" coords="300,200,100" href="http://example.com/page2.html" alt="Link to Page 2">
+            <area shape="poly" coords="500,100,600,200,500,300,400,200" href="http://example.com/page3.html" alt="Link to Page 3">
+    </map>
         </div>
       </div>
         <script type="text/javascript" src="assets/js/scripts.js"></script>
