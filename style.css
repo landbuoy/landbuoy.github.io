@@ -5,10 +5,7 @@
   -webkit-font-smoothing: none;
 }
 
-@font-face {
-  font-family: MingLiU;
-  src: url(assets/fonts/mingliu.ttf);
-}
+
 
 .mainContainer {
   background-color: #e44644;
