@@ -2,15 +2,6 @@
 
 $(document).ready(function () {
 
-  // Marquee text
-  $(".marqueeContainer").marquee({
-    duration: 25000,
-    gap: 0,
-    delayBeforeStart: 0,
-    direction: "right",
-    duplicated: true,
-    startVisible: true
-  });
   // Draggable modals
   $(".modalContainer").draggable();
   // Lift up the last clicked modal on vertical stack
@@ -54,6 +45,12 @@ $(document).ready(function () {
   $(".aquaButton--uploadIIThoughts").click(function () {
     $(".modalContainer--uploadIIThoughts").fadeOut();
   });  
+  /* paint shapes glyph
+  $(".glyph--paintShapes").click(function () {
+    $(".paintShapesContainer").fadeToggle().css("zIndex", "9999");
+  };*/
+
+  
 
 
 
@@ -242,70 +239,135 @@ function shuffleR(array) {
   return array;
 }
 
-// teapot
-/*const canvas = document.getElementById('teapot');
-      const ctx = canvas.getContext('2d');
-      
-      const teapot = {
-var vertices = [
-  [-0.5, 0, 0.5],    // 0
-  [-0.5, -0.5, 0.5], // 1
-  [0.5, -0.5, 0.5],  // 2
-  [0.5, 0, 0.5],     // 3
-  [-0.5, 0, -0.5],   // 4
-  [-0.5, -0.5, -0.5],// 5
-  [0.5, -0.5, -0.5], // 6
-  [0.5, 0, -0.5],    // 7
-  [-0.25, 0.25, 0],  // 8
-  [-0.25, 0.25, 0],  // 9
-  [-0.25, -0.25, 0], // 10
-  [-0.25, -0.25, 0], // 11
-  [-0.25, 0.25, 0.5],// 12
-  [-0.25, -0.25, 0.5],// 13
-  [0.25, -0.25, 0.5], // 14
-  [0.25, 0.25, 0.5],  // 15
-  [-0.25, 0.25, -0.5],// 16
-  [-0.25, -0.25, -0.5],// 17
-  [0.25, -0.25, -0.5], // 18
-  [0.25, 0.25, -0.5],  // 19
-  [0, 0.35, 0],       // 20
-  [0, 0.35, 0],       // 21
-  [0, 0.35, 0],       // 22
-  [0, 0.35, 0]        // 23
-];
+/*paint shapes
+  // Playing the selected channel
+  // and pausing the other channel if it's playing
 
+initPaintShapes();
 
-          
-        var edges = [
-  [0,1], [1,2], [2,3], [3,0], // rim
-  [4,5], [5,6], [6,7], [7,4], // body
-  [0,4], [1,5], [2,6], [3,7], // legs
-  [0,8], [1,9], [2,10], [3,11], // handle
-  [4,8], [5,9], [6,10], [7,11], // spout
-  [12,13], [13,14], [14,15], [15,12], // lid
-  [16,17], [17,18], [18,19], [19,16], // base
-  [20,21], [21,22], [22,23], [23,20] // comb
-];
+function initPaintShapes() {
+  audioFlower = $("#flowerAudio");
+  audioLemon = $("#lemonAudio");
+  audioBrnch = $("#brnchAudio");
+  audioLine = $("#lineAudio");
+  audioOrange = $("#orangeAudio");
 
-        
-      };
+  audioFlower.pause();
+  audioLemon.pause();
+  audioBrnch.pause();
+  audioLine.pause();
+  audioOrange.pause();
 
-      function drawTeapot() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.beginPath();
+  $(".paintShape--flower").click(function () {
+    if (audioFlower.paused == false) {
+      audioFlower.pause();
+    } else {
+      audioFlower.play();
+    }
+    if (audioOrange.paused == false) {
+      audioOrange.pause();
+    }
+    if (audioLine.paused == false) {
+      audioLine.pause();
+    }
+    if (audioBrnch.paused == false) {
+      audioBrnch.pause();
+    }
+    if (audioLemon.paused == false) {
+      audioLemon.pause();
+    } 
+  });
+  $(".paintShape--lemon").click(function () {
+    if (audioLemon.paused == false) {
+      audioLemon.pause();
+    } else {
+      audioLemon.play();
+    }
+    if (audioOrange.paused == false) {
+      audioOrange.pause();
+    }
+    if (audioLine.paused == false) {
+      audioLine.pause();
+    }
+    if (audioBrnch.paused == false) {
+      audioBrnch.pause();
+    }
+    if (audioFlower.paused == false) {
+      audioLemon.pause();
+    } else {
+      // Do nothing
+    }
 
-        for (let i = 0; i < teapot.edges.length; i += 2) {
-          const v1 = teapot.vertices[teapot.edges[i]];
-          const v2 = teapot.vertices[teapot.edges[i+1]];
-          ctx.moveTo(v1[0], v1[1]);
-          ctx.lineTo(v2[0], v2[1]);
-        }
+  });
+  $(".paintShape--brnch").click(function () {
+    if (audioBrnch.paused == false) {
+      audioBrnch.pause();
+    } else {
+      audioBrnch.play();
+    }
+    if (audioOrange.paused == false) {
+      audioOrange.pause();
+    }
+    if (audioLine.paused == false) {
+      audioLine.pause();
+    }
+    if (audioFlower.paused == false) {
+      audioBrnch.pause();
+    }
+    if (audioLemon.paused == false) {
+      audioLemon.pause();
+    } else {
+      // Do nothing
+    }
 
-        ctx.stroke();
-      }
+  });
+  $(".paintShape--line").click(function () {
+    if (audioLine.paused == false) {
+      audioLine.pause();
+    } else {
+      audioLine.play();
+    }
+    if (audioOrange.paused == false) {
+      audioOrange.pause();
+    }
+    if (audioFlower.paused == false) {
+      audioLine.pause();
+    }
+    if (audioBrnch.paused == false) {
+      audioBrnch.pause();
+    }
+    if (audioLemon.paused == false) {
+      audioLemon.pause();
+    } else {
+      // Do nothing
+    }
 
-      // Call drawTeapot() here to draw the teapot initially
-      //drawTeapot();*/
+  });
+  $(".paintShape--orange").click(function () {
+    if (audioOrange.paused == false) {
+      audioOrange.pause();
+    } else {
+      audioOrange.play();
+    }
+    if (audioFlower.paused == false) {
+      audioOrange.pause();
+    }
+    if (audioLine.paused == false) {
+      audioLine.pause();
+    }
+    if (audioBrnch.paused == false) {
+      audioBrnch.pause();
+    }
+    if (audioLemon.paused == false) {
+      audioLemon.pause();
+    } else {
+      // Do nothing
+    }
+
+  });
+
+}*/
+
 
 // Player for channel 1
 
