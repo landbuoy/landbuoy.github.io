@@ -44,7 +44,7 @@
             Information
         </div>
         <div class="button button--info">
-            News
+            List of Works
         </div>
         <div class="logoContainer">
           <div class="logoContainer__inner">
@@ -58,16 +58,22 @@
         </div>
       </nav>
 
-      <!-- land buoy containers -->
+      <!-- land buoy containers: grouping example icons for individual pieces inside divisions per project -->
 
-      <div class="landBuoyContainer1">
+      <div class="landbuoyContainers">
+
+      <!-- bandcamp landbuoy -->
+
+      <div class="landbuoy">
+      <div class="bandcampLinks">
+
         <div class="glyph glyph--uploadIThought">
           <img
             class="glyphIcon"
             src="assets/img/button/land buoy modals/tape icon 01.png"
             alt="A1"
           />  
-        </div>
+        </div>        
         <div class="glyph glyph--uploadIIThoughts">
           <img
             class="glyphIcon"
@@ -75,23 +81,66 @@
             alt="B1"
           />  
         </div> 
-        <div class="glyph glyph--newGraphic">
-          <img
-            class="glyphIcon"
-            src="assets/img/button/land buoy modals/size.PNG"
-            alt="size"
-          />  
+        <div class="label">
+          Bandcamp Links
         </div>
-        <div class="glyph glyph--paintShapes">
-          <img
-            class="glyphIcon"
-            src="assets/img/button/land buoy modals/size.PNG"
-            alt="size"
-          />  
-        </div>
+      </div>        
       </div>
 
-       <!-- Personnel modal -->
+      <!-- march composites landbuoy -->
+
+      <div class="landbuoy">
+      <div class="mossComposites">
+        <div class="glyph glyph--dancingTriangle">
+          <img
+            class="glyphIcon"
+            src="assets/img/project icons/mossComposites/dancingTriangle.gif"
+            alt="dancing triangle"
+          />  
+        </div>
+        <div class="glyph glyph--marchComp3-6">
+          <img
+            class="glyphIcon"
+            src="assets/img/project icons/mossComposites/marchComp3-6.gif"
+            alt="extra happy triangle"
+          />         
+        </div>
+        <div class="glyph glyph--marchComp3-8">
+          <img
+            class="glyphIcon"
+            src="assets/img/project icons/mossComposites/marchComp3-8.gif"
+            alt="grass"
+          />         
+        </div>
+        <div class="glyph glyph--marchComp3-18">
+          <img
+            class="glyphIcon"
+            src="assets/img/project icons/mossComposites/marchComp3-18.gif"
+            alt="dancing faces"
+          />         
+        </div>
+        <div class="glyph glyph--marchComp3-31">
+          <img
+            class="glyphIcon"
+            src="assets/img/project icons/mossComposites/marchComp3-31.gif"
+            alt="moving lines and a plastic bag"
+          />         
+        </div>
+        <div class="glyph glyph--mossComposite">
+          <img
+            class="glyphIcon"
+            src="assets/img/project icons/mossComposites/mossComposite.gif"
+            alt="moss"
+          />         
+        </div>
+        <div class="label">
+          Moss Composites
+        </div>
+      </div>
+    </div>
+      <!-- Nav container modals-->
+
+       <!-- information modal: include tabulated CV and download link, contact information and a general statement of intent-->
       <div class="modalContainer modalContainer--resume">
         <header class="modalHeader">
           <div class="aquaButton aquaButton--resume">X</div>
@@ -303,17 +352,40 @@
 
         </div>
       </div> 
-            <!-- Site Info modal -->
+       <!-- List of works modal: provide a general description of each project and a downloadable pdf with links to full versions -->
       <div class="modalContainer modalContainer--info">
         <header class="modalHeader">
           <div class="aquaButton aquaButton--info">X</div>
-          <h2 class="modalTitle">News</h2>
+          <h2 class="modalTitle">List of Works</h2>
         </header>
         <div class="modalInnerContainer">
+          <span class="c7 c11">
 
+            this page represents the collected work of the video art project called Landbuoy started by Max Coker. works are divided chronologically by project and should reflect a development of methods and ideas. 
+
+          </span>
+
+          </br></br>
+
+          <p class="c0">
+            <span class="c3">
+              <a class="c4" href=https://docs.google.com/document/d/e/2PACX-1vQWHNwZN_ZsQzCkGmNWdATRQtKojdcAfr0IQWBy8b05owTOMv22DGp3yPu8BaytRfpxZDpqFu-LM_u9/pub>Letter of Motivation</a>
+            </span>
+          </p>
+
+          </br></br>
+
+          <p class="c0"><span class="c5">2021 March composites</span></p>
+          <p class="c0">
+            <span class="c2">
+              a mix of techniques involving 
+            </span></p>
 
         </div>
       </div>
+
+
+
       <!-- landbuoy CH1/A Side Tracks - 1 -->
       <div class="modalContainer modalContainer--uploadIThought">
         <header class="modalHeader">
@@ -334,24 +406,43 @@
           <iframe style="border: 0; width: 350px; height: 853px;" src="https://bandcamp.com/EmbeddedPlayer/album=3114072364/size=large/bgcol=ffffff/linkcol=0687f5/package=2830932194/transparent=true/" seamless><a href="https://landboy.bandcamp.com/album/upload-ii-thoughts">upload ii thoughts by LandBuoy</a></iframe>
         </div>
       </div>
-      <!-- new graphic -->
-      <div class="modalContainer modalContainer--newGraphic">
-        <!--<header class="modalHeader">
-          <div class="aquaButton aquaButton--newGraphic">X</div>
-        </header>-->
-        <img src="assets/img/button/land buoy modals/size.PNG" alt="new graphic">
-        <div class="playerContainerNewGraphic">
-            <audio id="audioPlayerNewGraphicLeft" autoplay="false" controls>
-            </audio>
-            <audio id="audioPlayerNewGraphicRight" autoplay="false" controls>
-            </audio>
-        </div>
+
+
+      <!-- individual piece toggleable modals: include video, sound and writing (composited marquee subtitles) -->
+
+      <!-- moss composites modals -->
+      <div class="modalContainer modalContainer--dancingTriangle">
+        <video autoplay loop>
+          <source src="assets/vid/20210300 March Composites/Happy Triangle web.mp4" type="video/mp4">
+        </video>        
+      </div>
+      <div class="modalContainer modalContainer--marchComp3-6">
+        <video autoplay loop muted>
+          <source src="assets/vid/20210300 March Composites/Comp3-6 web.mp4" type="video/mp4">
+        </video>        
+      </div>
+      <div class="modalContainer modalContainer--marchComp3-8">
+        <video autoplay loop muted>
+          <source src="assets/vid/20210300 March Composites/Comp3-8 web.mp4" type="video/mp4">
+        </video>        
+      </div>
+      <div class="modalContainer modalContainer--marchComp3-18">
+        <video autoplay loop muted>
+          <source src="assets/vid/20210300 March Composites/Comp3-18 web.mp4" type="video/mp4">
+        </video>        
+      </div>
+      <div class="modalContainer modalContainer--marchComp3-31">
+        <video autoplay loop muted>
+          <source src="assets/vid/20210300 March Composites/Comp3-31 web.mp4" type="video/mp4">
+        </video>        
+      </div>
+      <div class="modalContainer modalContainer--mossComposite">
+        <video autoplay loop muted>
+          <source src="assets/vid/20210300 March Composites/Moss Composite web.mp4" type="video/mp4">
+        </video>        
       </div>
 
-      <!-- big guys modal -->
-      <div class="paintShapesContainer">
-        
-      </div>
+      
 
         <script type="text/javascript" src="assets/js/scripts.js"></script>
   </body>
