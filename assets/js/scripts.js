@@ -1,5 +1,3 @@
-  // General layout functionality
-
 $(document).ready(function () {
 
   // Draggable modals
@@ -47,14 +45,7 @@ $(document).ready(function () {
   });  
 
     // glyphs in march composite landbuoy
-  $(".glyph--dancingTriangle").click(function () {
-    $(".modalContainer").css("zIndex", "0");
-    $(".modalContainer--dancingTriangle").fadeToggle().css("zIndex", "9999");
-  });
-  $(".glyph--marchComp3-6").click(function () {
-    $(".modalContainer").css("zIndex", "0");
-    $(".modalContainer--marchComp3-6").fadeToggle().css("zIndex", "9999");
-  });
+
   $(".glyph--marchComp3-8").click(function () {
     $(".modalContainer").css("zIndex", "0");
     $(".modalContainer--marchComp3-8").fadeToggle().css("zIndex", "9999");

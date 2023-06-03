@@ -100,6 +100,15 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   text-align: center; 
 }
 
+.back {
+  display: inline-block;
+  margin: 8px;
+  border: 1px solid lime;
+  color: lime;
+  background-color: black;   
+  text-align: center; 
+}
+
 .glyph--uploadIThought {
   display: inline-block;
   margin: 8px;
@@ -177,11 +186,12 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 .bandcampLinks {
 }
 
-.pre2021 {
+.pageGlyphs {
 
 }
 
 .mossComposites {
+
 }
 
 .landBuoyContainer--photonPlayground {
@@ -359,11 +369,23 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   background-color: transparent;
   box-shadow: 0px 0px 32px #ff6347;
 }
+
+.dancingTrianglePlayer{
+  visibility: hidden;
+  height: 0px;
+}
+
 .modalContainer--marchComp3-6 {
   display:none;
   background-color: transparent;
   box-shadow: 0px 0px 32px #ff6347;
 }
+
+.comp3-6Player{
+  visibility: hidden;
+  height: 0px;
+}
+
 .modalContainer--marchComp3-8 {
   display:none;
   background-color: transparent;

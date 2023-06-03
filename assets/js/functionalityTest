@@ -56,7 +56,6 @@ function initMusicNewGraphic() {
     if (audioL[0].paused == false) {
       audioL[0].pause();
       audioR[0].pause();
-      //$(".mainLogo").removeClass("mainLogo--active");
     } else {
       audioL[0].play();
       audioR[0].play();
