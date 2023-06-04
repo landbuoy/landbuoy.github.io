@@ -1,10 +1,10 @@
 //dancing triangle scripts
 
 var musicDT = [
-  "assets/audio/newGraphic001/fax.mp3",
-  "assets/audio/newGraphic001/fax2.mp3",
-  "assets/audio/newGraphic001/percussive.mp3",
-  "assets/audio/newGraphic001/shrillambient.mp3",
+  "../assets/audio/newGraphic001/fax.mp3",
+  "../assets/audio/newGraphic001/fax2.mp3",
+  "../assets/audio/newGraphic001/percussive.mp3",
+  "../assets/audio/newGraphic001/shrillambient.mp3",
 ];
 
 shuffleDT(musicDT);
@@ -71,10 +71,10 @@ function shuffleDT(array) {
 //march six composite audio visual modal window scripts
 
 var music36 = [
-  "assets/audio/newGraphic001/fax.mp3",
-  "assets/audio/newGraphic001/fax2.mp3",
-  "assets/audio/newGraphic001/percussive.mp3",
-  "assets/audio/newGraphic001/shrillambient.mp3",
+  "../assets/audio/newGraphic001/fax.mp3",
+  "../assets/audio/newGraphic001/fax2.mp3",
+  "../assets/audio/newGraphic001/percussive.mp3",
+  "../assets/audio/newGraphic001/shrillambient.mp3",
 ];
 
 shuffle36(music36);
