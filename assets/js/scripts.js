@@ -63,6 +63,20 @@ $(document).ready(function () {
     $(".modalContainer--mossComposite").fadeToggle().css("zIndex", "9999");
   });
 
+// photon playground scripts
+
+  var photonPlayground = document.getElementById("photonPlayground");
+  photonPlayground.pause();
+
+  $(".glyph--photonPlayground").click(function () {
+    $(".modalContainer").css("zIndex", "0");
+    $(".modalContainer--photonPlayground").fadeToggle().css("zIndex", "9999");
+    if (photonPlayground.paused == false) {
+      photonPlayground.pause();
+    } else {
+      photonPlayground.play();
+    }
+  });
 
   // color stuff
 
@@ -115,8 +129,9 @@ $(document).ready(function () {
     $(".modalContainer--marchComp3-8").css("box-shadow", "0px 0px 32px" + c2);
     $(".modalContainer--marchComp3-18").css("box-shadow", "0px 0px 32px" + c2);
     $(".modalContainer--marchComp3-31").css("box-shadow", "0px 0px 32px" + c2);
+    $(".modalContainer--photonPlayground").css("box-shadow", "0px 0px 32px" + c2);
     $(".bandcampLinks").css("background", "linear-gradient(to right, transparent, " + c2 );
-    $(".mossComposites").css("background", "linear-gradient(to right, transparent, " + c2 );
+    $(".landbuoyProjects").css("background", "linear-gradient(to right, transparent, " + c2 );
    // $(".landBuoyInnerContainer").css("border", "5px" + c2);
     $(".aquaButton--info").css("background", c2);
     $(".aquaButton--resume").css("background", c2);

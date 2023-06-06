@@ -121,6 +121,11 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 
 /* moss composites glyphs*/
 
+.glyph--mossComposites {
+  display: inline-block;
+  margin: 8px;
+}
+
 .glyph--dancingTriangle {
   display: inline-block;
   margin: 8px;
@@ -147,6 +152,13 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 }
 
 .glyph--mossComposite {
+  display: inline-block;
+  margin: 8px;
+}
+
+/* photon playground glyph */
+
+.glyph--photonPlayground {
   display: inline-block;
   margin: 8px;
 }
@@ -183,72 +195,6 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   display: inline-flex;
 }
 
-.bandcampLinks {
-}
-
-.pageGlyphs {
-
-}
-
-.mossComposites {
-
-}
-
-.landBuoyContainer--photonPlayground {
-
-}
-
-.landBuoyContainer--bees {
-
-}
-
-.landBuoyContainer--avPerformanceEngine {
-
-}
-
-.landBuoyContainer--ballet {
-
-}
-
-.landBuoyContainer--portraitAnimations {
-
-}
-
-.landBuoyContainer--videoCollage {
-
-}
-
-.landBuoyContainer--3dVisualWorkflow {
-
-}
-
-.landBuoyContainer--everwoodSystem {
-
-}
-
-.landBuoyContainer--mercuralia {
-
-}
-
-.landBuoyContainer--horseOpera {
-
-}
-
-.landBuoyContainer--softInstrument {
-
-}
-
-.landBuoyContainer--tbilisi {
-
-}
-
-.landBuoyContainer--peopleDoingMoves {
-
-}
-
-.landBuoyContainer--kalina {
-
-}
 
 /* Channel selection toggles */
 
@@ -279,7 +225,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 .modalContainer {
   position: fixed;
   min-width: 400px;
-  max-width: 400px;
+  max-width: 10000px;
   background-color: #eaeaea;
   display: flex;
   flex-direction: column;
@@ -408,6 +354,12 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 }
 
 /* photon playground modals*/
+
+.modalContainer--photonPlayground {
+  display:none;
+  background-color: transparent;
+  box-shadow: 0px 0px 32px #ff6347;
+}
 
 .modalHeader {
   display: flex;
