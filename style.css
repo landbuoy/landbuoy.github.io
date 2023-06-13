@@ -163,6 +163,11 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   margin: 8px;
 }
 
+.glyph--hausaufgabe {
+  display: inline-block;
+  margin: 8px;
+}
+
 /* land buoy containers */
 
 .landbuoyContainers{
