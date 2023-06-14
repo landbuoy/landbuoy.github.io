@@ -138,12 +138,12 @@ $(document).ready(function () {
     $(".modalContainer--marchComp3-18").css("box-shadow", "0px 0px 32px" + c2);
     $(".modalContainer--marchComp3-31").css("box-shadow", "0px 0px 32px" + c2);
     $(".modalContainer--photonPlayground").css("box-shadow", "0px 0px 32px" + c2);
-    $(".modalContainer--hausaufgabe").css("box-shadow", "0px 0px 32px" + c2);
+    //$(".modalContainer--hausaufgabe").css("box-shadow", "0px 0px 32px" + c2);
     $(".modalContainer--hausaufgabeInfo").css("box-shadow", "0px 0px 32px" + c2);
     $(".bandcampLinks").css("background", "linear-gradient(to right, transparent, " + c2 );
     $(".landbuoyProjects").css("background", "linear-gradient(to right, transparent, " + c2 );
     $(".hausaufgabe").css("background", "linear-gradient(to right, transparent, " + c2 );
-   // $(".landBuoyInnerContainer").css("border", "5px" + c2);
+    //$(".landBuoyInnerContainer").css("border", "5px" + c2);
     $(".aquaButton--info").css("background", c2);
     $(".aquaButton--resume").css("background", c2);
     $(".aquaButton--uploadIThought").css("background", c2);

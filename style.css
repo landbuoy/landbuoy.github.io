@@ -337,7 +337,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 
 .modalContainer--hausaufgabe {
   background-color: transparent;
-  box-shadow: 0px 0px 32px #ff6347;
+  /*box-shadow: 0px 0px 32px #ff6347;*/
 }
 
 .modalContainer--hausaufgabeInfo {
