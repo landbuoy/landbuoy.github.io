@@ -1,17 +1,10 @@
 /* Main page styling */
 
-* {
-  image-rendering: pixelated;
-  -webkit-font-smoothing: none;
-}
-
-
-
 .mainContainer {
   background-color: #e44644;
-  background-image: url(assets/img/background/grid.gif);
+  background-image: url(assets/img/background/grape.gif);
   background-repeat: repeat;
-  background-size: 16px 16px;
+  background-size: 50px 50px;
   /*background-blend-mode: difference;*/
   image-rendering: smooth;
   position: fixed;
@@ -24,6 +17,22 @@
   justify-content: center;
 }
 
+.beeesMainContainer {
+  background-color: #e44644;
+  background-image: url(/assets/img/gifs/bees.gif);
+  background-repeat: repeat;
+  background-size: 100px 100px;
+  /*background-blend-mode: difference;*/
+  image-rendering: smooth;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:700;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Courier New";font-style:normal}.c2{color:#0000ff;font-weight:400;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Courier New";font-style:normal}.c12{color:#000000;font-weight:400;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}.c3{-webkit-text-decoration-skip:none;color:#0000ff;font-weight:400;text-decoration:underline;text-decoration-skip-ink:none;font-family:"Courier New"}.c0{padding-top:0pt;padding-bottom:0pt;line-height:1.15;text-align:left}.c10{text-decoration:none;vertical-align:baseline;font-size:11pt;font-style:italic}.c6{padding-top:0pt;padding-bottom:0pt;line-height:1.0;text-align:left}.c13{background-color:#ffffff;max-width:576pt;padding:18pt 18pt 18pt 18pt}.c9{font-family:"Courier New";color:#0000ff;font-weight:700}.c7{font-family:"Courier New";color:#0000ff;font-weight:400}.c4{color:inherit;text-decoration:inherit}.c1{orphans:2;widows:2}.c8{height:11pt}.c11{font-style:italic}.title{padding-top:0pt;color:#000000;font-size:26pt;padding-bottom:3pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}.subtitle{padding-top:0pt;color:#666666;font-size:15pt;padding-bottom:16pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}li{color:#000000;font-size:11pt;font-family:"Arial"}p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}h1{padding-top:20pt;color:#000000;font-size:20pt;padding-bottom:6pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}h2{padding-top:18pt;color:#000000;font-size:16pt;padding-bottom:6pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}h3{padding-top:16pt;color:#434343;font-size:14pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}h4{padding-top:14pt;color:#666666;font-size:12pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}h5{padding-top:12pt;color:#666666;font-size:11pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}h6{padding-top:12pt;color:#666666;font-size:11pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;font-style:italic;orphans:2;widows:2;text-align:left}
 
 /* glyphs and buttons*/
@@ -75,6 +84,17 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   border: 5px outset yellowgreen;*/
   background-color: black;
   background-image: url(assets/img/background/wood.gif);
+  background-repeat: repeat;
+  position: fixed;
+  left: 0;
+  top: 32px;
+  width: 100%;
+}
+
+.beesNav {
+  border: 5px outset yellowgreen;*/
+  background-color: black;
+  background-image: url(assets/img/background/grape.gif);
   background-repeat: repeat;
   position: fixed;
   left: 0;
@@ -172,6 +192,11 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   margin: 8px;
 }
 
+.glyph--beees {
+  display: inline-block;
+  margin: 8px;
+}
+
 .glyph--hausaufgabe {
   display: inline-block;
   margin: 8px;
@@ -199,6 +224,23 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   display:inline-block;
   justify-content: center;
 }
+
+.landbuoyProjects{
+  background: blue;
+}
+
+.bandcampLinks{
+  background: blue;
+}
+
+.mossComposites{
+  background: blue;
+}
+
+.beees{
+  background: blue;
+}
+
 .label{
   border: 1px solid lime;
   color: lime;
