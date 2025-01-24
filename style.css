@@ -81,12 +81,13 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 /* Header and navigation */
 
 .nav {
-  border: 5px outset yellowgreen;*/
+  /*border: 5px outset yellowgreen;*/
   background-color: black;
   background-image: url(assets/img/background/wood.gif);
   background-repeat: repeat;
   position: fixed;
-  left: 0;
+  left: 2;
+  right: 2;
   top: 32px;
   width: 100%;
 }
@@ -112,6 +113,15 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 }
 
 .button--resume {
+  display: inline-block;
+  margin: 8px;
+  border: 1px solid lime;
+  color: lime;
+  background-color: black;   
+  text-align: center; 
+}
+
+.button--portal {
   display: inline-block;
   margin: 8px;
   border: 1px solid lime;
@@ -202,6 +212,11 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   margin: 8px;
 }
 
+.glyph--portalFinder {
+  display: inline-block;
+  margin: 8px;
+}
+
 /* land buoy containers */
 
 .landbuoyContainers{
@@ -231,6 +246,10 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 
 .bandcampLinks{
   background: blue;
+}
+
+.friendsLinks{
+  background: orange;
 }
 
 .mossComposites{

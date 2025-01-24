@@ -26,7 +26,7 @@ $(document).ready(function () {
   });
   $(".aquaButton--info").click(function () {
     $(".modalContainer--info").fadeOut();
-  });
+  }); 
     // hausaufgabe Info modal
   $(".button--hausaufgabeInfo").click(function () {
     $(".modalContainer").css("zIndex", "0");
@@ -135,6 +135,8 @@ $(document).ready(function () {
     //$(".modalContainer--hausaufgabe").css("box-shadow", "0px 0px 32px" + c2);
     $(".bandcampLinks").css("background", "linear-gradient(to right, transparent, " + c2 );
     $(".landbuoyProjects").css("background", "linear-gradient(to right, transparent, " + c2 );
+    $(".friendsLinks").css("background", "linear-gradient(to right, transparent, " + c2 );
+    
     
         //$(".landBuoyInnerContainer").css("border", "5px" + c2);
     $(".aquaButton--info").css("background", c2);
