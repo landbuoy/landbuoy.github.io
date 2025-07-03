@@ -46,6 +46,9 @@
       <div class="button button--newGame">
         New Game
       </div>
+      <div class="button button--trickHistory">
+        Trick History
+      </div>
       <div class="logoContainer">
         <div class="logoContainer__inner">
           42 - Domino Game
@@ -74,24 +77,50 @@
         </div>
       </div>
 
+      <!-- Team information -->
+      <div class="teamInfo">
+        <div class="teamSection">
+          <h3>Team Us</h3>
+          <div class="playerInfo" id="player0Info">
+            <span class="playerName">You (Human)</span>
+            <span class="playerRole">Partner</span>
+          </div>
+          <div class="playerInfo" id="player2Info">
+            <span class="playerName" id="player2Name">Player 2</span>
+            <span class="playerRole">Partner</span>
+          </div>
+        </div>
+        <div class="teamSection">
+          <h3>Team Them</h3>
+          <div class="playerInfo" id="player1Info">
+            <span class="playerName" id="player1Name">Player 1</span>
+            <span class="playerRole">Opponent</span>
+          </div>
+          <div class="playerInfo" id="player3Info">
+            <span class="playerName" id="player3Name">Player 3</span>
+            <span class="playerRole">Opponent</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Game area -->
       <div class="gameArea">
         <!-- AI players -->
         <div class="aiPlayers">
           <div class="aiPlayer" id="aiPlayer1">
-            <div class="playerName" id="player1Name">Player 1</div>
+            <div class="playerName" id="aiPlayer1Name">Player 1 (Opponent)</div>
             <div class="playerHand" id="player1Hand">
               <div class="dominoCount">7 dominoes</div>
             </div>
           </div>
           <div class="aiPlayer" id="aiPlayer2">
-            <div class="playerName" id="player2Name">Player 2</div>
+            <div class="playerName" id="aiPlayer2Name">Player 2 (Partner)</div>
             <div class="playerHand" id="player2Hand">
               <div class="dominoCount">7 dominoes</div>
             </div>
           </div>
           <div class="aiPlayer" id="aiPlayer3">
-            <div class="playerName" id="player3Name">Player 3</div>
+            <div class="playerName" id="aiPlayer3Name">Player 3 (Opponent)</div>
             <div class="playerHand" id="player3Hand">
               <div class="dominoCount">7 dominoes</div>
             </div>
@@ -109,7 +138,7 @@
 
         <!-- Human player -->
         <div class="humanPlayer">
-          <div class="playerName">Your Hand</div>
+          <div class="playerName">Your Hand (Human)</div>
           <div class="playerHand" id="humanHand">
             <!-- Human's dominoes will appear here -->
           </div>
@@ -151,6 +180,21 @@
           
           <h3>Winning</h3>
           <p>First team to reach 7 points wins the game.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trick History modal -->
+    <div class="modalContainer modalContainer--trickHistory">
+      <header class="modalHeader">
+        <div class="aquaButton aquaButton--trickHistory">X</div>
+        <h2 class="modalTitle">Trick History</h2>
+      </header>
+      <div class="modalInnerContainer">
+        <div class="trickHistoryContent">
+          <div class="trickHistoryTable" id="trickHistoryTable">
+            <!-- Trick history will be populated here -->
+          </div>
         </div>
       </div>
     </div>

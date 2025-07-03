@@ -11,7 +11,7 @@
   border: 2px solid lime;
   border-radius: 10px;
   padding: 20px;
-  color: lime;
+  color: #00ff00;
   font-family: "Courier New", monospace;
   overflow-y: auto;
 }
@@ -47,11 +47,13 @@
   font-weight: bold;
   font-size: 14px;
   margin-bottom: 5px;
+  color: #00ff00;
 }
 
 .score {
   font-size: 24px;
   font-weight: bold;
+  color: #00ff00;
 }
 
 .gameInfo {
@@ -63,6 +65,54 @@
 
 .currentBid, .trumpSuit, .currentLeader {
   font-size: 14px;
+  color: #00ff00;
+}
+
+/* Team information */
+.teamInfo {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: 1px solid lime;
+  border-radius: 5px;
+}
+
+.teamSection {
+  flex: 1;
+  margin: 0 10px;
+}
+
+.teamSection h3 {
+  color: #00ff00;
+  font-size: 16px;
+  margin-bottom: 10px;
+  text-align: center;
+  border-bottom: 1px solid lime;
+  padding-bottom: 5px;
+}
+
+.playerInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  margin: 5px 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid lime;
+  border-radius: 3px;
+}
+
+.playerInfo .playerName {
+  font-weight: bold;
+  color: #00ff00;
+}
+
+.playerInfo .playerRole {
+  font-size: 12px;
+  color: #00aa00;
+  font-style: italic;
 }
 
 /* Game area */
@@ -71,7 +121,7 @@
   grid-template-columns: 1fr 2fr 1fr;
   grid-template-rows: 1fr 2fr 1fr;
   gap: 20px;
-  height: calc(100vh - 300px);
+  height: calc(100vh - 400px);
   margin-bottom: 20px;
 }
 
@@ -96,7 +146,7 @@
   font-weight: bold;
   font-size: 14px;
   margin-bottom: 10px;
-  color: lime;
+  color: #00ff00;
 }
 
 .playerHand {
@@ -129,7 +179,7 @@
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 15px;
-  color: lime;
+  color: #00ff00;
 }
 
 .playedDominoes {
@@ -172,7 +222,7 @@
   padding: 10px 20px;
   background-color: black;
   border: 1px solid lime;
-  color: lime;
+  color: #00ff00;
   cursor: pointer;
   border-radius: 5px;
   font-family: "Courier New", monospace;
@@ -202,12 +252,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: bold;
-  color: black;
   cursor: pointer;
-  transition: all 0.2s ease;
   position: relative;
+  transition: all 0.2s ease;
 }
 
 .domino:hover {
@@ -226,61 +275,79 @@
 }
 
 .domino.invalid {
+  border-color: red;
   opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .domino.played {
-  opacity: 0.7;
+  background-color: #f0f0f0;
   cursor: default;
+  transform: none;
 }
 
-/* Domino dots */
 .domino::before {
-  content: attr(data-dots);
+  content: attr(data-left);
   position: absolute;
-  top: 2px;
   left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
   font-size: 8px;
-  color: black;
 }
 
 .domino::after {
-  content: attr(data-dots2);
+  content: attr(data-right);
   position: absolute;
-  bottom: 2px;
   right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
   font-size: 8px;
-  color: black;
 }
 
-/* Modal styling for 42 game */
+/* Modal styling */
 .modalContainer--rules,
 .modalContainer--bidding,
-.modalContainer--trump {
+.modalContainer--trump,
+.modalContainer--trickHistory {
   display: none;
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: black;
-  border: 2px solid lime;
-  border-radius: 10px;
-  padding: 20px;
-  max-width: 600px;
-  max-height: 80vh;
-  overflow-y: auto;
-  z-index: 10000;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
 }
 
 .modalContainer--bidding,
-.modalContainer--trump {
-  max-width: 500px;
+.modalContainer--trump,
+.modalContainer--trickHistory {
+  display: none;
 }
 
-/* Rules content */
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid lime;
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+.modalTitle {
+  color: #00ff00;
+  margin: 0;
+  font-size: 18px;
+}
+
+.modalInnerContainer {
+  padding: 20px;
+  max-height: 70vh;
+  overflow-y: auto;
+  color: #00ff00;
+}
+
 .rulesContent h3 {
-  color: lime;
+  color: #00ff00;
   margin-top: 20px;
   margin-bottom: 10px;
   font-size: 16px;
@@ -288,11 +355,10 @@
 
 .rulesContent p {
   margin-bottom: 15px;
-  line-height: 1.4;
-  font-size: 14px;
+  line-height: 1.5;
+  color: #00ff00;
 }
 
-/* Bidding content */
 .biddingContent {
   text-align: center;
 }
@@ -302,25 +368,27 @@
 }
 
 .currentBidInfo p {
-  margin-bottom: 10px;
-  font-size: 14px;
+  margin: 10px 0;
+  color: #00ff00;
 }
 
 .bidOptions {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
   gap: 10px;
+  max-width: 400px;
+  margin: 0 auto;
 }
 
 .bidOption {
   padding: 10px;
   background-color: black;
   border: 1px solid lime;
-  color: lime;
+  color: #00ff00;
   cursor: pointer;
   border-radius: 5px;
-  font-size: 14px;
-  transition: all 0.2s ease;
+  text-align: center;
+  transition: all 0.3s ease;
 }
 
 .bidOption:hover {
@@ -333,31 +401,32 @@
   cursor: not-allowed;
 }
 
-/* Trump selection */
 .trumpContent {
   text-align: center;
 }
 
 .trumpContent p {
   margin-bottom: 20px;
-  font-size: 14px;
+  color: #00ff00;
 }
 
 .trumpOptions {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: 10px;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 .trumpOption {
   padding: 15px;
   background-color: black;
   border: 1px solid lime;
-  color: lime;
+  color: #00ff00;
   cursor: pointer;
   border-radius: 5px;
-  font-size: 14px;
-  transition: all 0.2s ease;
+  text-align: center;
+  transition: all 0.3s ease;
 }
 
 .trumpOption:hover {
@@ -365,56 +434,134 @@
   color: black;
 }
 
-/* Button styling for modals */
+/* Trick History styling */
+.trickHistoryContent {
+  color: #00ff00;
+}
+
+.trickHistoryTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.trickHistoryTable th,
+.trickHistoryTable td {
+  border: 1px solid lime;
+  padding: 8px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.trickHistoryTable th {
+  background-color: rgba(0, 0, 0, 0.5);
+  font-weight: bold;
+  color: #00ff00;
+}
+
+.trickHistoryTable td {
+  background-color: rgba(0, 0, 0, 0.3);
+  color: #00ff00;
+}
+
+.trickHistoryTable .trickNumber {
+  font-weight: bold;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.trickHistoryTable .winner {
+  background-color: rgba(0, 255, 0, 0.2);
+  font-weight: bold;
+}
+
+.trickHistoryTable .dominoCell {
+  min-width: 60px;
+}
+
+.trickHistoryTable .dominoInHistory {
+  display: inline-block;
+  width: 30px;
+  height: 15px;
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 2px;
+  font-size: 8px;
+  line-height: 15px;
+  position: relative;
+}
+
+.trickHistoryTable .dominoInHistory::before {
+  content: attr(data-left);
+  position: absolute;
+  left: 1px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 6px;
+}
+
+.trickHistoryTable .dominoInHistory::after {
+  content: attr(data-right);
+  position: absolute;
+  right: 1px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 6px;
+}
+
+/* Navigation button styling */
 .button--back,
 .button--rules,
-.button--newGame {
-  display: inline-block;
-  margin: 8px;
+.button--newGame,
+.button--trickHistory {
+  background-color: black;
   border: 1px solid lime;
-  color: lime;
-  background-color: black;   
-  text-align: center;
-  padding: 8px 16px;
+  color: #00ff00;
+  cursor: pointer;
+  padding: 10px 15px;
+  border-radius: 5px;
+  transition: all 0.3s ease;
 }
 
 .button--back a {
-  color: lime;
+  color: #00ff00;
   text-decoration: none;
 }
 
 .aquaButton--rules,
 .aquaButton--bidding,
-.aquaButton--trump {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 30px;
-  height: 30px;
+.aquaButton--trump,
+.aquaButton--trickHistory {
+  background-color: black;
+  border: 1px solid lime;
+  color: #00ff00;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 3px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.aquaButton--rules:hover,
+.aquaButton--bidding:hover,
+.aquaButton--trump:hover,
+.aquaButton--trickHistory:hover {
   background-color: lime;
   color: black;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 /* Responsive design */
 @media only screen and (max-width: 768px) {
   .gameArea {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto auto;
-    gap: 10px;
+    grid-template-rows: auto auto auto;
+    height: auto;
   }
   
   .aiPlayers {
     grid-column: 1;
     grid-row: 1;
     flex-direction: row;
-    gap: 10px;
+    overflow-x: auto;
   }
   
   .trickArea {
@@ -428,20 +575,28 @@
   }
   
   .gameControls {
-    grid-column: 1;
-    grid-row: 4;
+    flex-direction: column;
+    align-items: center;
   }
   
   .bidOptions {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
   }
   
   .trumpOptions {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .teamInfo {
+    flex-direction: column;
+  }
+  
+  .teamSection {
+    margin: 5px 0;
   }
 }
 
-/* Animation for domino plays */
+/* Animations */
 @keyframes playDomino {
   0% {
     transform: scale(1);
@@ -460,18 +615,20 @@
 
 /* Game state indicators */
 .gameState {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  padding: 5px 10px;
-  background-color: rgba(0, 0, 0, 0.8);
-  border: 1px solid lime;
-  border-radius: 5px;
-  font-size: 12px;
-  color: lime;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.9);
+  border: 2px solid lime;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  color: #00ff00;
+  z-index: 2000;
+  display: none;
 }
 
-/* Loading indicator */
 .loading {
   display: inline-block;
   width: 20px;
@@ -480,6 +637,7 @@
   border-radius: 50%;
   border-top-color: transparent;
   animation: spin 1s linear infinite;
+  margin-left: 10px;
 }
 
 @keyframes spin {

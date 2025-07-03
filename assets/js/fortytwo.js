@@ -1,5 +1,36 @@
 // 42 Domino Game JavaScript Implementation
 
+// Songbird names from 7 biomes around the world (same as Python version)
+const SONGBIRD_NAMES = [
+    // Appalachian Mountains (Upstate New York)
+    "Wood Thrush", "Black-throated Blue Warbler", "Scarlet Tanager", "Rose-breasted Grosbeak", 
+    "Veery", "Hermit Thrush", "Black-capped Chickadee",
+    
+    // Amazon Rainforest (South America)
+    "Musician Wren", "Screaming Piha", "White-bellied Antbird", "Amazonian Umbrellabird",
+    "Spix's Guan", "Hoatzin", "Amazonian Royal Flycatcher",
+    
+    // Australian Outback (Australia)
+    "Superb Lyrebird", "Australian Magpie", "Pied Butcherbird", "Grey Shrike-thrush",
+    "Rufous Whistler", "Golden Whistler", "Eastern Whipbird",
+    
+    // African Savanna (East Africa)
+    "African Grey Hornbill", "Lilac-breasted Roller", "Red-billed Oxpecker", "Superb Starling",
+    "Fiscal Shrike", "Yellow-billed Hornbill", "Red-chested Cuckoo",
+    
+    // Siberian Taiga (Russia)
+    "Siberian Rubythroat", "Bluethroat", "Pallas's Leaf Warbler", "Siberian Accentor",
+    "Red-flanked Bluetail", "Siberian Jay", "Pine Grosbeak",
+    
+    // Mediterranean Scrub (Southern Europe)
+    "Common Nightingale", "European Robin", "Blackcap", "Sardinian Warbler",
+    "Subalpine Warbler", "Cirl Bunting", "Thekla Lark",
+    
+    // Himalayan Alpine (Nepal/India)
+    "Himalayan Monal", "Blood Pheasant", "Himalayan Bulbul", "Rufous-breasted Accentor",
+    "Himalayan Rubythroat", "White-browed Rosefinch", "Alpine Chough"
+];
+
 class Domino {
     constructor(a, b) {
         this.ends = [Math.max(a, b), Math.min(a, b)];
@@ -203,143 +234,167 @@ class TrickState {
             return ledSuitDominoes.reduce((best, current) => {
                 if (current.domino.isDouble()) return current;
                 if (best.domino.isDouble()) return best;
+                
+                // Get the degree of the led suit
                 const currentDegree = current.domino.ends[0] === this.currentSuit ? 
                     current.domino.ends[1] : current.domino.ends[0];
                 const bestDegree = best.domino.ends[0] === this.currentSuit ? 
                     best.domino.ends[1] : best.domino.ends[0];
+                
                 return currentDegree > bestDegree ? current : best;
             });
         }
         
+        // First domino wins (shouldn't happen in legal play)
         return this.playedDominoes[0];
     }
 }
 
 class Game42 {
     constructor() {
-        this.players = [
-            new Player("You", true),
-            new Player("Wood Thrush", false),
-            new Player("Musician Wren", false),
-            new Player("Superb Lyrebird", false)
-        ];
-        
-        this.scores = [0, 0]; // Us, Them
-        this.currentHand = 0;
-        this.gameState = 'waiting'; // waiting, bidding, playing, finished
-        this.currentBid = 0;
-        this.bidWinner = null;
+        this.players = [];
+        this.scores = [0, 0]; // [Us, Them]
+        this.currentTrick = null;
         this.trump = null;
+        this.bidWinner = null;
+        this.winningBid = null;
         this.currentLeader = 0;
-        this.trickState = null;
-        this.handPoints = [0, 0]; // Us, Them
-        this.tricksPlayed = 0;
+        this.gameState = 'waiting'; // waiting, bidding, playing, complete
+        this.selectedDomino = null;
+        this.trickHistory = []; // Store completed tricks
+        this.currentHandTricks = []; // Store current hand's tricks
         
+        this.initializePlayers();
         this.initializeUI();
         this.bindEvents();
     }
     
-    initializeUI() {
-        // Update player names
+    initializePlayers() {
+        // Shuffle songbird names and assign to players
+        const shuffledNames = [...SONGBIRD_NAMES].sort(() => Math.random() - 0.5);
+        
+        this.players = [
+            new Player(shuffledNames[0], true),  // Human player
+            new Player(shuffledNames[1], false), // AI opponent
+            new Player(shuffledNames[2], false), // AI partner
+            new Player(shuffledNames[3], false)  // AI opponent
+        ];
+        
+        // Update player names in UI
+        this.updatePlayerNames();
+    }
+    
+    updatePlayerNames() {
+        // Update team info section
+        document.getElementById('player0Info').querySelector('.playerName').textContent = 'You (Human)';
         document.getElementById('player1Name').textContent = this.players[1].name;
         document.getElementById('player2Name').textContent = this.players[2].name;
         document.getElementById('player3Name').textContent = this.players[3].name;
         
+        // Update AI player sections
+        document.getElementById('aiPlayer1Name').textContent = `${this.players[1].name} (Opponent)`;
+        document.getElementById('aiPlayer2Name').textContent = `${this.players[2].name} (Partner)`;
+        document.getElementById('aiPlayer3Name').textContent = `${this.players[3].name} (Opponent)`;
+    }
+    
+    initializeUI() {
         this.updateScores();
         this.updateGameInfo();
         this.updateControls();
     }
     
     bindEvents() {
-        // Modal events
-        $('.button--rules').click(() => {
-            $('.modalContainer--rules').fadeIn().css('zIndex', '9999');
+        // Control buttons
+        document.getElementById('startGame').addEventListener('click', () => this.startNewGame());
+        document.getElementById('dealHand').addEventListener('click', () => this.dealHand());
+        document.getElementById('makeBid').addEventListener('click', () => this.startBidding());
+        document.getElementById('playDomino').addEventListener('click', () => this.playSelectedDomino());
+        
+        // Modal buttons
+        document.querySelector('.button--rules').addEventListener('click', () => {
+            document.querySelector('.modalContainer--rules').style.display = 'block';
         });
         
-        $('.aquaButton--rules').click(() => {
-            $('.modalContainer--rules').fadeOut();
+        document.querySelector('.button--trickHistory').addEventListener('click', () => {
+            this.showTrickHistory();
         });
         
-        $('.button--newGame').click(() => {
-            this.startNewGame();
+        document.querySelector('.button--newGame').addEventListener('click', () => this.startNewGame());
+        
+        // Modal close buttons
+        document.querySelector('.aquaButton--rules').addEventListener('click', () => {
+            document.querySelector('.modalContainer--rules').style.display = 'none';
         });
         
-        // Game control events
-        $('#startGame').click(() => this.startNewGame());
-        $('#dealHand').click(() => this.dealHand());
-        $('#makeBid').click(() => this.startBidding());
-        $('#playDomino').click(() => this.playSelectedDomino());
-        
-        // Bidding events
-        $('.bidOption').click((e) => {
-            const bid = $(e.target).data('bid');
-            this.makeBid(bid);
+        document.querySelector('.aquaButton--trickHistory').addEventListener('click', () => {
+            document.querySelector('.modalContainer--trickHistory').style.display = 'none';
         });
         
-        // Trump selection events
-        $('.trumpOption').click((e) => {
-            const trump = parseInt($(e.target).data('trump'));
-            this.selectTrump(trump);
+        document.querySelector('.aquaButton--bidding').addEventListener('click', () => {
+            document.querySelector('.modalContainer--bidding').style.display = 'none';
         });
         
-        // Domino selection events
-        $(document).on('click', '.domino', (e) => {
-            this.selectDomino(e.target);
+        document.querySelector('.aquaButton--trump').addEventListener('click', () => {
+            document.querySelector('.modalContainer--trump').style.display = 'none';
+        });
+        
+        // Bid options
+        document.querySelectorAll('.bidOption').forEach(option => {
+            option.addEventListener('click', (e) => {
+                const bid = e.target.dataset.bid;
+                this.makeBid(bid === 'pass' ? 'pass' : parseInt(bid));
+            });
+        });
+        
+        // Trump options
+        document.querySelectorAll('.trumpOption').forEach(option => {
+            option.addEventListener('click', (e) => {
+                const trump = parseInt(e.target.dataset.trump);
+                this.selectTrump(trump);
+            });
         });
     }
     
     startNewGame() {
         this.scores = [0, 0];
-        this.currentHand = 0;
         this.gameState = 'waiting';
+        this.trickHistory = [];
+        this.currentHandTricks = [];
+        this.initializePlayers();
         this.updateScores();
         this.updateGameInfo();
         this.updateControls();
         this.clearTrickArea();
         this.clearHumanHand();
         this.updateAIHands();
-        
-        $('#dealHand').prop('disabled', false);
-        $('#makeBid').prop('disabled', true);
-        $('#playDomino').prop('disabled', true);
     }
     
     dealHand() {
         // Create all dominoes
-        const allDominoes = [];
+        const dominoes = [];
         for (let a = 0; a <= 6; a++) {
             for (let b = a; b <= 6; b++) {
-                allDominoes.push(new Domino(a, b));
+                dominoes.push(new Domino(a, b));
             }
         }
         
-        // Shuffle
-        for (let i = allDominoes.length - 1; i > 0; i--) {
+        // Shuffle and deal
+        for (let i = dominoes.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [allDominoes[i], allDominoes[j]] = [allDominoes[j], allDominoes[i]];
+            [dominoes[i], dominoes[j]] = [dominoes[j], dominoes[i]];
         }
         
-        // Deal 7 to each player
-        this.players.forEach((player, i) => {
-            player.hand = allDominoes.slice(i * 7, (i + 1) * 7);
+        // Deal 7 dominoes to each player
+        this.players.forEach((player, index) => {
+            player.hand = dominoes.slice(index * 7, (index + 1) * 7);
             player.sortHand();
         });
         
         this.gameState = 'bidding';
-        this.currentBid = 0;
-        this.bidWinner = null;
-        this.trump = null;
-        this.currentLeader = 0;
-        this.handPoints = [0, 0];
-        this.tricksPlayed = 0;
-        
-        this.displayHumanHand();
-        this.updateAIHands();
         this.updateGameInfo();
         this.updateControls();
-        
-        $('#dealHand').prop('disabled', true);
-        $('#makeBid').prop('disabled', false);
+        this.displayHumanHand();
+        this.updateAIHands();
     }
     
     startBidding() {
@@ -348,80 +403,87 @@ class Game42 {
     
     showBiddingModal() {
         const evalResult = this.players[0].evaluateBidConfidence();
-        $('#suggestedTrump').text(evalResult.trump);
-        $('#modalCurrentBid').text(this.currentBid);
-        
-        // Enable/disable bid options
-        $('.bidOption').each(function() {
-            const bid = $(this).data('bid');
-            if (bid === 'pass') {
-                $(this).removeClass('disabled');
-            } else {
-                const bidValue = parseInt(bid);
-                if (bidValue > evalResult.maxBid || bidValue <= this.currentBid) {
-                    $(this).addClass('disabled');
-                } else {
-                    $(this).removeClass('disabled');
-                }
-            }
-        });
-        
-        $('.modalContainer--bidding').fadeIn().css('zIndex', '9999');
+        document.getElementById('suggestedTrump').textContent = evalResult.trump;
+        document.getElementById('modalCurrentBid').textContent = '30';
+        document.querySelector('.modalContainer--bidding').style.display = 'block';
     }
     
     makeBid(bid) {
-        $('.modalContainer--bidding').fadeOut();
+        document.querySelector('.modalContainer--bidding').style.display = 'none';
         
-        if (bid === 'pass') {
-            this.processAIBidding();
-        } else {
-            this.currentBid = bid;
-            this.bidWinner = 0;
-            this.showTrumpModal();
-        }
+        // Process human bid
+        this.processBidding(0, bid);
+        
+        // Process AI bidding
+        this.processAIBidding();
+        
+        // Determine winner and continue
+        this.determineBidWinner();
+    }
+    
+    processBidding(playerIdx, bid) {
+        // Store bid information
+        if (!this.bidHistory) this.bidHistory = {};
+        this.bidHistory[playerIdx] = bid;
     }
     
     processAIBidding() {
-        // Simple AI bidding
+        let currentBid = 30;
+        let highestBidder = null;
+        
+        // Process AI players (1, 2, 3)
         for (let i = 1; i < 4; i++) {
-            const evalResult = this.players[i].evaluateBidConfidence();
-            if (evalResult.maxBid > this.currentBid) {
-                this.currentBid = evalResult.maxBid;
-                this.bidWinner = i;
+            const player = this.players[i];
+            const evalResult = player.evaluateBidConfidence();
+            
+            let bid = 'pass';
+            if (evalResult.maxBid > currentBid) {
+                bid = evalResult.maxBid;
+                currentBid = bid;
+                highestBidder = i;
             }
+            
+            this.processBidding(i, bid);
         }
         
-        if (this.bidWinner === null) {
-            // All passed, last player gets it for 30
-            this.currentBid = 30;
-            this.bidWinner = 3;
+        // If no one bid, last player gets it for 30
+        if (!highestBidder) {
+            highestBidder = 3;
+            this.bidHistory[3] = 30;
         }
         
+        this.bidWinner = highestBidder;
+        this.winningBid = this.bidHistory[highestBidder];
+    }
+    
+    determineBidWinner() {
         if (this.bidWinner === 0) {
+            // Human won the bid
             this.showTrumpModal();
         } else {
-            // AI selects trump
-            const evalResult = this.players[this.bidWinner].evaluateBidConfidence();
+            // AI won the bid
+            const aiPlayer = this.players[this.bidWinner];
+            const evalResult = aiPlayer.evaluateBidConfidence();
             this.selectTrump(evalResult.trump);
         }
     }
     
     showTrumpModal() {
-        $('.modalContainer--trump').fadeIn().css('zIndex', '9999');
+        document.querySelector('.modalContainer--trump').style.display = 'block';
     }
     
     selectTrump(trump) {
-        $('.modalContainer--trump').fadeOut();
-        
+        document.querySelector('.modalContainer--trump').style.display = 'none';
         this.trump = trump;
         this.currentLeader = this.bidWinner;
         this.gameState = 'playing';
-        this.trickState = new TrickState(this.currentLeader, this.trump);
+        this.currentTrick = new TrickState(this.currentLeader, this.trump);
         
         this.updateGameInfo();
         this.updateControls();
         this.updateValidPlays();
         
+        // Start the first trick
         if (this.currentLeader !== 0) {
             this.playAITurn();
         }
@@ -430,183 +492,214 @@ class Game42 {
     updateValidPlays() {
         if (this.gameState !== 'playing') return;
         
-        const validPlays = this.players[0].getValidPlays(this.trickState);
-        $('.domino').removeClass('valid invalid');
+        const validPlays = this.players[0].getValidPlays(this.currentTrick);
+        const humanHand = document.getElementById('humanHand');
         
-        this.players[0].hand.forEach((domino, index) => {
-            const dominoElement = $(`.domino[data-index="${index}"]`);
+        humanHand.querySelectorAll('.domino').forEach(dominoEl => {
+            const domino = this.players[0].hand.find(d => 
+                d.ends[0] === parseInt(dominoEl.dataset.left) && 
+                d.ends[1] === parseInt(dominoEl.dataset.right)
+            );
+            
             if (validPlays.includes(domino)) {
-                dominoElement.addClass('valid');
+                dominoEl.classList.add('valid');
+                dominoEl.classList.remove('invalid');
             } else {
-                dominoElement.addClass('invalid');
+                dominoEl.classList.add('invalid');
+                dominoEl.classList.remove('valid');
             }
         });
     }
     
     selectDomino(element) {
-        if (this.gameState !== 'playing') return;
+        if (element.classList.contains('invalid')) return;
         
-        $('.domino').removeClass('selected');
-        $(element).addClass('selected');
+        // Remove previous selection
+        document.querySelectorAll('.domino.selected').forEach(d => d.classList.remove('selected'));
         
-        $('#playDomino').prop('disabled', false);
+        // Select new domino
+        element.classList.add('selected');
+        this.selectedDomino = this.players[0].hand.find(d => 
+            d.ends[0] === parseInt(element.dataset.left) && 
+            d.ends[1] === parseInt(element.dataset.right)
+        );
     }
     
     playSelectedDomino() {
-        const selectedElement = $('.domino.selected');
-        if (selectedElement.length === 0) return;
+        if (!this.selectedDomino || this.gameState !== 'playing') return;
         
-        const index = parseInt(selectedElement.data('index'));
-        const domino = this.players[0].hand[index];
+        this.playDomino(0, this.selectedDomino);
+        this.selectedDomino = null;
         
-        this.playDomino(0, domino);
+        // Continue with AI turns
+        setTimeout(() => this.playAITurn(), 1000);
     }
     
     playDomino(playerIdx, domino) {
-        // Remove from hand
-        this.players[playerIdx].hand.splice(this.players[playerIdx].hand.indexOf(domino), 1);
+        // Remove domino from player's hand
+        const player = this.players[playerIdx];
+        const dominoIndex = player.hand.findIndex(d => 
+            d.ends[0] === domino.ends[0] && d.ends[1] === domino.ends[1]
+        );
+        player.hand.splice(dominoIndex, 1);
         
-        // Add to trick
-        this.trickState.addPlay(domino, playerIdx);
+        // Add to current trick
+        this.currentTrick.addPlay(domino, playerIdx);
         
         // Display in trick area
         this.displayDominoInTrick(domino, playerIdx);
         
-        // Update displays
-        this.updateHumanHand();
-        this.updateAIHands();
+        // Update player hands
+        if (playerIdx === 0) {
+            this.updateHumanHand();
+        } else {
+            this.updateAIHands();
+        }
         
         // Check if trick is complete
-        if (this.trickState.playedDominoes.length === 4) {
-            this.completeTrick();
-        } else {
-            // Next player's turn
-            const nextPlayer = (this.currentLeader + this.trickState.playedDominoes.length) % 4;
-            if (nextPlayer !== 0) {
-                setTimeout(() => this.playAITurn(), 1000);
-            } else {
-                this.updateValidPlays();
-            }
+        if (this.currentTrick.playedDominoes.length === 4) {
+            setTimeout(() => this.completeTrick(), 1000);
         }
     }
     
     playAITurn() {
-        const playerIdx = (this.currentLeader + this.trickState.playedDominoes.length) % 4;
-        const player = this.players[playerIdx];
+        if (this.gameState !== 'playing') return;
         
-        const domino = player.chooseDomino(this.trickState);
-        this.playDomino(playerIdx, domino);
-    }
-    
-    completeTrick() {
-        const winningPlay = this.trickState.getWinningPlay();
-        const winner = winningPlay.playerIdx;
-        const team = winner % 2 === 0 ? 0 : 1; // Us = 0,2; Them = 1,3
+        // Find next AI player to play
+        let nextPlayer = null;
+        for (let i = 1; i < 4; i++) {
+            const playerIdx = (this.currentLeader + i) % 4;
+            if (playerIdx !== 0 && this.players[playerIdx].hand.length > 0) {
+                const hasPlayed = this.currentTrick.playedDominoes.some(p => p.playerIdx === playerIdx);
+                if (!hasPlayed) {
+                    nextPlayer = playerIdx;
+                    break;
+                }
+            }
+        }
         
-        // Award points
-        this.handPoints[team] += this.trickState.pointsInTrick + 1; // +1 for winning trick
-        
-        // Display winner
-        $('#trickWinner').text(`${this.players[winner].name} wins the trick!`);
-        
-        // Update displays
-        this.updateGameInfo();
-        
-        // Check for hand end
-        const bidTeam = this.bidWinner % 2 === 0 ? 0 : 1;
-        const setTeam = 1 - bidTeam;
-        
-        if (this.handPoints[bidTeam] >= this.currentBid || 
-            this.handPoints[setTeam] > (42 - this.currentBid) ||
-            this.tricksPlayed >= 6) {
-            this.endHand();
-        } else {
-            // Start next trick
-            this.tricksPlayed++;
-            this.currentLeader = winner;
-            this.trickState = new TrickState(this.currentLeader, this.trump);
-            this.clearTrickArea();
+        if (nextPlayer !== null) {
+            const player = this.players[nextPlayer];
+            const chosenDomino = player.chooseDomino(this.currentTrick);
             
-            if (this.currentLeader !== 0) {
-                setTimeout(() => this.playAITurn(), 1000);
-            } else {
-                this.updateValidPlays();
+            if (chosenDomino) {
+                setTimeout(() => {
+                    this.playDomino(nextPlayer, chosenDomino);
+                }, 500);
             }
         }
     }
     
-    endHand() {
-        const bidTeam = this.bidWinner % 2 === 0 ? 0 : 1;
-        const setTeam = 1 - bidTeam;
+    completeTrick() {
+        const winningPlay = this.currentTrick.getWinningPlay();
+        const winner = this.players[winningPlay.playerIdx];
         
-        if (this.handPoints[bidTeam] >= this.currentBid) {
-            this.scores[bidTeam]++;
-        } else {
-            this.scores[setTeam]++;
-        }
+        // Add trick to history
+        this.currentHandTricks.push({
+            trick: this.currentTrick,
+            winner: winningPlay.playerIdx,
+            points: this.currentTrick.pointsInTrick + 1
+        });
+        
+        // Display winner
+        document.getElementById('trickWinner').textContent = `${winner.name} wins the trick!`;
+        
+        // Update scores
+        const team = winningPlay.playerIdx % 2 === 0 ? 0 : 1; // 0,2 = Us, 1,3 = Them
+        this.scores[team]++;
         
         this.updateScores();
+        
+        // Check if hand is over
+        if (this.players[0].hand.length === 0) {
+            setTimeout(() => this.endHand(), 2000);
+        } else {
+            // Start next trick
+            this.currentLeader = winningPlay.playerIdx;
+            this.currentTrick = new TrickState(this.currentLeader, this.trump);
+            this.updateGameInfo();
+            this.updateValidPlays();
+            
+            // Clear trick area
+            setTimeout(() => {
+                this.clearTrickArea();
+                if (this.currentLeader !== 0) {
+                    this.playAITurn();
+                }
+            }, 1500);
+        }
+    }
+    
+    endHand() {
+        // Add current hand tricks to overall history
+        this.trickHistory.push([...this.currentHandTricks]);
+        this.currentHandTricks = [];
         
         // Check for game end
         if (this.scores[0] >= 7 || this.scores[1] >= 7) {
             this.endGame();
         } else {
+            // Start new hand
             this.gameState = 'waiting';
             this.updateGameInfo();
             this.updateControls();
-            $('#dealHand').prop('disabled', false);
+            this.clearTrickArea();
+            this.clearHumanHand();
+            this.updateAIHands();
         }
     }
     
     endGame() {
         const winner = this.scores[0] >= 7 ? 'Us' : 'Them';
-        alert(`Game Over! ${winner} wins!`);
-        this.gameState = 'finished';
+        alert(`Game Over! Team ${winner} wins!`);
+        this.gameState = 'complete';
         this.updateControls();
     }
     
-    // UI Update Methods
     updateScores() {
-        $('#scoreUs').text(this.scores[0]);
-        $('#scoreThem').text(this.scores[1]);
+        document.getElementById('scoreUs').textContent = this.scores[0];
+        document.getElementById('scoreThem').textContent = this.scores[1];
     }
     
     updateGameInfo() {
-        if (this.gameState === 'waiting') {
-            $('#currentBid').text('No bid yet');
-            $('#trumpSuit').text('No trump');
-            $('#currentLeader').text('Waiting...');
-        } else if (this.gameState === 'bidding') {
-            $('#currentBid').text(`Current bid: ${this.currentBid}`);
-            $('#trumpSuit').text('No trump');
-            $('#currentLeader').text('Bidding...');
-        } else if (this.gameState === 'playing') {
-            $('#currentBid').text(`Bid: ${this.currentBid}`);
-            $('#trumpSuit').text(`Trump: ${this.trump}'s`);
-            $('#currentLeader').text(`Leader: ${this.players[this.currentLeader].name}`);
-        }
+        const bidInfo = this.bidWinner !== null ? 
+            `${this.players[this.bidWinner].name} won with ${this.winningBid}` : 
+            'No bid yet';
+        
+        const trumpInfo = this.trump !== null ? `${this.trump}'s` : 'No trump';
+        const leaderInfo = this.currentLeader !== null ? 
+            this.players[this.currentLeader].name : 'Waiting...';
+        
+        document.getElementById('currentBid').textContent = bidInfo;
+        document.getElementById('trumpSuit').textContent = trumpInfo;
+        document.getElementById('currentLeader').textContent = leaderInfo;
     }
     
     updateControls() {
-        $('#startGame').prop('disabled', this.gameState === 'playing');
-        $('#dealHand').prop('disabled', this.gameState !== 'waiting');
-        $('#makeBid').prop('disabled', this.gameState !== 'bidding');
-        $('#playDomino').prop('disabled', this.gameState !== 'playing');
+        const startBtn = document.getElementById('startGame');
+        const dealBtn = document.getElementById('dealHand');
+        const bidBtn = document.getElementById('makeBid');
+        const playBtn = document.getElementById('playDomino');
+        
+        startBtn.disabled = false;
+        dealBtn.disabled = this.gameState !== 'waiting';
+        bidBtn.disabled = this.gameState !== 'bidding';
+        playBtn.disabled = this.gameState !== 'playing' || !this.selectedDomino;
     }
     
     displayHumanHand() {
-        const handContainer = $('#humanHand');
-        handContainer.empty();
+        const humanHand = document.getElementById('humanHand');
+        humanHand.innerHTML = '';
         
-        this.players[0].hand.forEach((domino, index) => {
-            const dominoElement = $('<div>')
-                .addClass('domino')
-                .attr('data-index', index)
-                .text(domino.toString())
-                .attr('data-dots', domino.ends[0])
-                .attr('data-dots2', domino.ends[1]);
+        this.players[0].hand.forEach(domino => {
+            const dominoEl = document.createElement('div');
+            dominoEl.className = 'domino';
+            dominoEl.dataset.left = domino.ends[0];
+            dominoEl.dataset.right = domino.ends[1];
+            dominoEl.textContent = `${domino.ends[0]}-${domino.ends[1]}`;
             
-            handContainer.append(dominoElement);
+            dominoEl.addEventListener('click', () => this.selectDomino(dominoEl));
+            humanHand.appendChild(dominoEl);
         });
     }
     
@@ -616,56 +709,129 @@ class Game42 {
     }
     
     updateAIHands() {
-        [1, 2, 3].forEach(i => {
+        // Update domino counts for AI players
+        for (let i = 1; i < 4; i++) {
             const count = this.players[i].hand.length;
-            $(`#player${i}Hand .dominoCount`).text(`${count} dominoes`);
-        });
+            document.getElementById(`player${i}Hand`).querySelector('.dominoCount').textContent = 
+                `${count} dominoes`;
+        }
     }
     
     displayDominoInTrick(domino, playerIdx) {
-        const trickContainer = $('#playedDominoes');
-        const dominoElement = $('<div>')
-            .addClass('domino played')
-            .text(domino.toString())
-            .attr('data-dots', domino.ends[0])
-            .attr('data-dots2', domino.ends[1]);
+        const playedDominoes = document.getElementById('playedDominoes');
+        const dominoEl = document.createElement('div');
+        dominoEl.className = 'domino played';
+        dominoEl.dataset.left = domino.ends[0];
+        dominoEl.dataset.right = domino.ends[1];
+        dominoEl.textContent = `${domino.ends[0]}-${domino.ends[1]}`;
         
-        trickContainer.append(dominoElement);
+        // Add player name
+        const playerName = document.createElement('div');
+        playerName.textContent = this.players[playerIdx].name;
+        playerName.style.fontSize = '10px';
+        playerName.style.marginTop = '5px';
+        playerName.style.color = '#00ff00';
+        
+        const container = document.createElement('div');
+        container.style.textAlign = 'center';
+        container.appendChild(dominoEl);
+        container.appendChild(playerName);
+        
+        playedDominoes.appendChild(container);
     }
     
     clearTrickArea() {
-        $('#playedDominoes').empty();
-        $('#trickWinner').text('');
+        document.getElementById('playedDominoes').innerHTML = '';
+        document.getElementById('trickWinner').textContent = '';
     }
     
     clearHumanHand() {
-        $('#humanHand').empty();
+        document.getElementById('humanHand').innerHTML = '';
+    }
+    
+    showTrickHistory() {
+        const table = document.getElementById('trickHistoryTable');
+        table.innerHTML = '';
+        
+        if (this.trickHistory.length === 0) {
+            table.innerHTML = '<tr><td colspan="5">No tricks played yet</td></tr>';
+            document.querySelector('.modalContainer--trickHistory').style.display = 'block';
+            return;
+        }
+        
+        // Create header
+        const header = document.createElement('tr');
+        header.innerHTML = `
+            <th>Trick</th>
+            <th>${this.players[0].name} (You)</th>
+            <th>${this.players[1].name}</th>
+            <th>${this.players[2].name}</th>
+            <th>${this.players[3].name}</th>
+        `;
+        table.appendChild(header);
+        
+        // Add each hand's tricks
+        this.trickHistory.forEach((hand, handIndex) => {
+            hand.forEach((trickData, trickIndex) => {
+                const row = document.createElement('tr');
+                const trickNumber = handIndex * 7 + trickIndex + 1;
+                
+                // Create trick number cell
+                const trickCell = document.createElement('td');
+                trickCell.className = 'trickNumber';
+                trickCell.textContent = trickNumber;
+                row.appendChild(trickCell);
+                
+                // Create cells for each player
+                for (let playerIdx = 0; playerIdx < 4; playerIdx++) {
+                    const cell = document.createElement('td');
+                    cell.className = 'dominoCell';
+                    
+                    // Find this player's play in the trick
+                    const play = trickData.trick.playedDominoes.find(p => p.playerIdx === playerIdx);
+                    if (play) {
+                        const dominoEl = document.createElement('div');
+                        dominoEl.className = 'dominoInHistory';
+                        dominoEl.dataset.left = play.domino.ends[0];
+                        dominoEl.dataset.right = play.domino.ends[1];
+                        dominoEl.textContent = `${play.domino.ends[0]}-${play.domino.ends[1]}`;
+                        cell.appendChild(dominoEl);
+                        
+                        // Highlight winner
+                        if (playerIdx === trickData.winner) {
+                            cell.classList.add('winner');
+                        }
+                    }
+                    
+                    row.appendChild(cell);
+                }
+                
+                table.appendChild(row);
+            });
+        });
+        
+        document.querySelector('.modalContainer--trickHistory').style.display = 'block';
     }
 }
 
+// Utility functions
+function randomColor() {
+    return '#' + Math.floor(Math.random()*16777215).toString(16);
+}
+
+function invertColor(hexTripletColor) {
+    const color = hexTripletColor;
+    const colorNum = color.replace("#","");
+    const r = parseInt(colorNum.substr(0,2),16);
+    const g = parseInt(colorNum.substr(2,2),16);
+    const b = parseInt(colorNum.substr(4,2),16);
+    const rInv = 255 - r;
+    const gInv = 255 - g;
+    const bInv = 255 - b;
+    return "#" + rInv.toString(16).padStart(2, '0') + gInv.toString(16).padStart(2, '0') + bInv.toString(16).padStart(2, '0');
+}
+
 // Initialize game when page loads
-$(document).ready(function() {
-    // Apply the same color scheme as the main site
-    function randomColor() {
-        const color = Math.floor(Math.random() * 0x1000000).toString(16);
-        return "#" + ("000000" + color).slice(-6);
-    }
-    
-    function invertColor(hexTripletColor) {
-        const color = parseInt(hexTripletColor.substring(1), 16);
-        const inverted = (0xFFFFFF ^ color).toString(16);
-        return "#" + ("000000" + inverted).slice(-6);
-    }
-    
-    const c1 = randomColor();
-    const c2 = invertColor(c1);
-    
-    $('.mainContainer').css('background-color', c1);
-    $('.logoContainer').css('color', c2);
-    $('.modalContainer--rules').css('box-shadow', '0px 0px 32px' + c2);
-    $('.modalContainer--bidding').css('box-shadow', '0px 0px 32px' + c2);
-    $('.modalContainer--trump').css('box-shadow', '0px 0px 32px' + c2);
-    
-    // Initialize the game
+document.addEventListener('DOMContentLoaded', () => {
     window.game42 = new Game42();
 }); 
