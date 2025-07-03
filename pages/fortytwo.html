@@ -113,7 +113,7 @@
         }
         
         .modalContainer--scoreboard {
-            display: none;
+            position: fixed;
             top: 10%;
             bottom: 10%;
             right: 10%;
@@ -123,6 +123,28 @@
             animation: morph 180s infinite;
             background-color: #eaeaea;
             color: #0000ff;
+            z-index: 1000;
+        }
+        
+        .modalHeader {
+            background: #eaeaea;
+            padding: 10px;
+            border-bottom: 2px solid #0000ff;
+            display: flex;
+            align-items: center;
+            cursor: move;
+        }
+        
+        .modalTitle {
+            margin: 0;
+            color: #0000ff;
+            flex-grow: 1;
+        }
+        
+        .modalInnerContainer {
+            padding: 15px;
+            height: calc(100% - 60px);
+            overflow-y: auto;
         }
         
         .aquaButton--scoreboard {
@@ -376,6 +398,119 @@
         .back-link a:hover {
             background: lime;
             color: black;
+        }
+        
+        .hand-scoreboard {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border: 1px solid lime;
+            margin-bottom: 20px;
+            color: #0000ff;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .team-column {
+            flex: 1;
+            margin: 0 10px;
+        }
+        
+        .team-header {
+            color: lime;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .trick-group {
+            border: 1px solid #333;
+            margin: 5px 0;
+            padding: 5px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .trick-label {
+            color: lime;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .trick-dominoes {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .player-play {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2px 5px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .player-name {
+            font-size: 12px;
+            color: #0000ff;
+        }
+        
+        .domino-small {
+            background: black;
+            border: 1px solid lime;
+            border-radius: 2px;
+            padding: 2px 6px;
+            font-size: 10px;
+            color: lime;
+            font-weight: bold;
+        }
+        
+        .hand-display {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 10px;
+            background: rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            border: 1px solid #0000ff;
+        }
+        
+        .hand-display-header {
+            display: flex;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #0000ff;
+        }
+        
+        .hand-display-row {
+            display: flex;
+            margin-bottom: 3px;
+            color: #0000ff;
+        }
+        
+        .player-label {
+            width: 200px;
+            text-align: left;
+        }
+        
+        .player-name {
+            width: 200px;
+            text-align: left;
+        }
+        
+        .play-number {
+            width: 60px;
+            text-align: center;
+            color: lime;
+        }
+        
+        .domino-display {
+            width: 60px;
+            text-align: center;
+            background: black;
+            border: 1px solid lime;
+            border-radius: 2px;
+            margin: 0 1px;
+            color: lime;
+            font-weight: bold;
         }
     </style>
 </head>

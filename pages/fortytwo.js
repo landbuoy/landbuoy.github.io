@@ -1119,12 +1119,27 @@ class Game {
         });
         this.confirmTrump.addEventListener('click', () => this.confirmTrumpHandler());
         this.playDomino.addEventListener('click', () => this.playSelectedDomino());
+        this.startHandBtn.addEventListener('click', () => this.startHandAfterBidding());
+        this.showHistoryBtn.addEventListener('click', () => this.showScoreboardHistory());
+        
+        // Close modal button
+        document.querySelector('.aquaButton--scoreboard').addEventListener('click', () => {
+            this.hideElement(this.scoreboardHistoryModal);
+        });
         
         // Trump selection
         document.querySelectorAll('.trump-option').forEach(option => {
             option.addEventListener('click', (e) => {
                 document.querySelectorAll('.trump-option').forEach(o => o.classList.remove('selected'));
                 e.target.classList.add('selected');
+            });
+        });
+        
+        // Initialize draggable modal
+        $(document).ready(() => {
+            $('#scoreboard-history-modal').draggable({
+                handle: '.modalHeader',
+                containment: 'window'
             });
         });
     }
@@ -1227,32 +1242,21 @@ class Game {
             const trickDominoes = document.createElement('div');
             trickDominoes.className = 'trick-dominoes';
             
-            // Create player plays in order
-            const playerOrder = [0, 1, 2, 3]; // Human, OpponentL, Partner, OpponentR
-            playerOrder.forEach(playerIdx => {
+            // Display plays in the order they were made
+            trick.playerPlays.forEach((play, playIndex) => {
                 const playerPlay = document.createElement('div');
                 playerPlay.className = 'player-play';
                 
                 const playerName = document.createElement('div');
                 playerName.className = 'player-name';
-                playerName.textContent = this.getPlayerRelationship(playerIdx);
+                playerName.textContent = this.getPlayerRelationship(play.playerIdx);
                 playerPlay.appendChild(playerName);
                 
-                // Find this player's domino in the trick
-                const playerDomino = trick.playerPlays.find(p => p.playerIdx === playerIdx);
-                if (playerDomino) {
-                    const dominoElement = document.createElement('div');
-                    dominoElement.className = 'domino-small';
-                    const mod = playerDomino.domino.modulate(this.trump, trick.ledSuit);
-                    dominoElement.textContent = `${mod[0]}-${mod[1]}`;
-                    playerPlay.appendChild(dominoElement);
-                } else {
-                    // Empty space for player who hasn't played yet
-                    const emptyElement = document.createElement('div');
-                    emptyElement.className = 'domino-small';
-                    emptyElement.textContent = '--';
-                    playerPlay.appendChild(emptyElement);
-                }
+                const dominoElement = document.createElement('div');
+                dominoElement.className = 'domino-small';
+                const mod = play.domino.modulate(this.trump, trick.ledSuit);
+                dominoElement.textContent = `${mod[0]}-${mod[1]}`;
+                playerPlay.appendChild(dominoElement);
                 
                 trickDominoes.appendChild(playerPlay);
             });
@@ -1274,32 +1278,21 @@ class Game {
             const trickDominoes = document.createElement('div');
             trickDominoes.className = 'trick-dominoes';
             
-            // Create player plays in order
-            const playerOrder = [0, 1, 2, 3]; // Human, OpponentL, Partner, OpponentR
-            playerOrder.forEach(playerIdx => {
+            // Display plays in the order they were made
+            trick.playerPlays.forEach((play, playIndex) => {
                 const playerPlay = document.createElement('div');
                 playerPlay.className = 'player-play';
                 
                 const playerName = document.createElement('div');
                 playerName.className = 'player-name';
-                playerName.textContent = this.getPlayerRelationship(playerIdx);
+                playerName.textContent = this.getPlayerRelationship(play.playerIdx);
                 playerPlay.appendChild(playerName);
                 
-                // Find this player's domino in the trick
-                const playerDomino = trick.playerPlays.find(p => p.playerIdx === playerIdx);
-                if (playerDomino) {
-                    const dominoElement = document.createElement('div');
-                    dominoElement.className = 'domino-small';
-                    const mod = playerDomino.domino.modulate(this.trump, trick.ledSuit);
-                    dominoElement.textContent = `${mod[0]}-${mod[1]}`;
-                    playerPlay.appendChild(dominoElement);
-                } else {
-                    // Empty space for player who hasn't played yet
-                    const emptyElement = document.createElement('div');
-                    emptyElement.className = 'domino-small';
-                    emptyElement.textContent = '--';
-                    playerPlay.appendChild(emptyElement);
-                }
+                const dominoElement = document.createElement('div');
+                dominoElement.className = 'domino-small';
+                const mod = play.domino.modulate(this.trump, trick.ledSuit);
+                dominoElement.textContent = `${mod[0]}-${mod[1]}`;
+                playerPlay.appendChild(dominoElement);
                 
                 trickDominoes.appendChild(playerPlay);
             });
@@ -1319,6 +1312,7 @@ class Game {
         this.lastHandPlayerHands = null;
         this.lastHandBiddingInfo = null;
         this.playedDominoesThisHand = new Set();
+        this.handHistory = []; // Clear hand history for new game
         
         // Assign new random songbird names (only once per game)
         let availableNames = [...SONGBIRD_NAMES];
@@ -1467,6 +1461,10 @@ class Game {
         // Save bidding order for scoreboard display
         this.lastHandBidOrder = bidOrder;
         
+        // Initialize and show bidding board
+        this.initializeBiddingBoard(bidOrder);
+        this.showElement(this.biddingBoard);
+        
         this.updateStatus("Bidding phase in progress...");
         
         // Process bidding for each player
@@ -1496,6 +1494,9 @@ class Game {
                 maxBid: pdata.maxBid,
                 actualBid: bid
             };
+            
+            // Update bidding board
+            this.updateBiddingBoard(player, bid);
             
             if (bid !== 'pass') {
                 this.currentBid = bid;
@@ -1541,6 +1542,9 @@ class Game {
             maxBid: currentPlayer.evaluateBidConfidence().maxBid,
             actualBid: bid
         };
+        
+        // Update bidding board
+        this.updateBiddingBoard(playerName, bid);
         
         if (bid !== 'pass') {
             this.currentBid = bid;
@@ -1646,19 +1650,11 @@ class Game {
             this.highestBidder = lastBidder;
             this.currentBid = 30;
             this.bidHistory[lastBidder] = 30;
+            this.updateBiddingBoard(lastBidder, 30);
         }
         
-        // Set trump and winner info
-        const winnerPlayer = this.players.find(p => this.formatPlayerNameWithRelationship(p) === this.highestBidder);
-        const evalResult = winnerPlayer.evaluateBidConfidence();
-        let keySuit = evalResult.trump;
-        
-        // If user wins, let them pick trump suit now
-        if (winnerPlayer.isHuman) {
-            this.showTrumpSelection(keySuit);
-        } else {
-            this.setTrumpAndStartHand(keySuit);
-        }
+        // Show ready to start prompt
+        this.showReadyToStart();
     }
     
     showTrumpSelection(suggestedTrump) {
@@ -1939,6 +1935,9 @@ class Game {
     }
     
     finishHand() {
+        // Save hand history before determining winner
+        this.saveHandHistory();
+        
         // Determine hand winner
         const bidTeam = this.teams['Us'].some(p => this.formatPlayerNameWithRelationship(p) === this.bidWinner) ? 'Us' : 'Them';
         const setTeam = bidTeam === 'Us' ? 'Them' : 'Us';
@@ -2020,6 +2019,8 @@ class Game {
         this.hideElement(this.handScoreboard);
         this.hideElement(this.trickArea);
         this.hideElement(this.playerHand);
+        this.hideElement(this.biddingBoard);
+        this.hideElement(this.readyToStart);
         this.playedDominoes.innerHTML = '';
         
         // Clear scoreboard
@@ -2033,6 +2034,179 @@ class Game {
         
         this.updateStatus("New hand dealt! Click 'Ready for Bidding' to start bidding.");
         this.showElement(this.readyBidding);
+    }
+    
+    initializeBiddingBoard(bidOrder) {
+        this.biddingResults.innerHTML = '';
+        bidOrder.forEach(playerName => {
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'bidding-result';
+            resultDiv.innerHTML = `
+                <span class="player-name">${playerName}</span>
+                <span class="bid-amount">--</span>
+            `;
+            resultDiv.dataset.player = playerName;
+            this.biddingResults.appendChild(resultDiv);
+        });
+    }
+    
+    updateBiddingBoard(playerName, bid) {
+        const resultDiv = this.biddingResults.querySelector(`[data-player="${playerName}"]`);
+        if (resultDiv) {
+            const bidAmount = resultDiv.querySelector('.bid-amount');
+            bidAmount.textContent = bid === 'pass' ? 'Pass' : bid;
+            if (bid !== 'pass') {
+                bidAmount.style.color = 'lime';
+                bidAmount.style.fontWeight = 'bold';
+            }
+        }
+    }
+    
+    showReadyToStart() {
+        this.hideElement(this.bidInputArea);
+        this.showElement(this.readyToStart);
+        this.updateStatus("Bidding complete! Click 'Ready to Start' to begin the hand.");
+    }
+    
+    startHandAfterBidding() {
+        this.hideElement(this.readyToStart);
+        this.hideElement(this.biddingBoard);
+        
+        // Set trump and winner info
+        const winnerPlayer = this.players.find(p => this.formatPlayerNameWithRelationship(p) === this.highestBidder);
+        const evalResult = winnerPlayer.evaluateBidConfidence();
+        let keySuit = evalResult.trump;
+        
+        // If user wins, let them pick trump suit now
+        if (winnerPlayer.isHuman) {
+            this.showTrumpSelection(keySuit);
+        } else {
+            this.setTrumpAndStartHand(keySuit);
+        }
+    }
+    
+    saveHandHistory() {
+        const handData = {
+            handNumber: this.handHistory.length + 1,
+            bidWinner: this.bidWinner,
+            winningBid: this.winningBid,
+            trump: this.trump,
+            usHandPoints: this.usHandPoints,
+            themHandPoints: this.themHandPoints,
+            usTricks: this.currentHandTricks.filter(t => t.team === 'Us').length,
+            themTricks: this.currentHandTricks.filter(t => t.team === 'Them').length,
+            tricks: [...this.currentHandTricks],
+            biddingInfo: { ...this.lastHandBiddingInfo },
+            bidOrder: [...this.lastHandBidOrder]
+        };
+        this.handHistory.push(handData);
+    }
+    
+    showScoreboardHistory() {
+        console.log('Show scoreboard history called');
+        console.log('Hand history length:', this.handHistory.length);
+        
+        this.historyContent.innerHTML = '';
+        
+        if (this.handHistory.length === 0) {
+            this.historyContent.innerHTML = '<p>No hand history available yet.</p>';
+        } else {
+            this.handHistory.forEach((hand, index) => {
+                const handDiv = document.createElement('div');
+                handDiv.className = 'hand-history-item';
+                
+                const winner = hand.usHandPoints >= hand.winningBid ? 'Us' : 
+                              hand.themHandPoints >= hand.winningBid ? 'Them' : 
+                              hand.usHandPoints > (42 - hand.winningBid) ? 'Us' : 'Them';
+                
+                // Create hand display section
+                const handDisplay = this.createHandDisplay(hand);
+                
+                handDiv.innerHTML = `
+                    <div class="hand-history-header">
+                        Hand ${hand.handNumber}: ${hand.bidWinner} won bid with ${hand.winningBid} on ${hand.trump}'s
+                    </div>
+                    <div class="hand-history-details">
+                        <div>Final Score: Us ${hand.usHandPoints} - Them ${hand.themHandPoints}</div>
+                        <div>Tricks: Us ${hand.usTricks} - Them ${hand.themTricks}</div>
+                        <div>Winner: ${winner}</div>
+                        <div><strong>Bidding Results:</strong></div>
+                        <div style="margin-left: 10px;">
+                            ${hand.bidOrder.map(player => {
+                                const bid = hand.biddingInfo[player]?.actualBid || '--';
+                                return `${player}: ${bid}`;
+                            }).join('<br>')}
+                        </div>
+                        <div style="margin-top: 15px;"><strong>Hand Display:</strong></div>
+                        <div class="hand-display">
+                            ${handDisplay}
+                        </div>
+                    </div>
+                `;
+                
+                this.historyContent.appendChild(handDiv);
+            });
+        }
+        
+        console.log('Showing modal');
+        this.showElement(this.scoreboardHistoryModal);
+    }
+    
+    createHandDisplay(hand) {
+        // Create a map of player names to their relationship for display
+        const playerDisplayNames = {};
+        this.players.forEach((player, index) => {
+            const relationship = this.getPlayerRelationship(index);
+            playerDisplayNames[this.formatPlayerNameWithRelationship(player)] = `${player.name} (${relationship})`;
+        });
+        
+        // Create the header row with play numbers
+        let display = '<div class="hand-display-header">';
+        display += '<span class="player-label">Player</span>';
+        for (let i = 1; i <= 7; i++) {
+            display += `<span class="play-number">[   ${i}   ]</span>`;
+        }
+        display += '</div>';
+        
+        // Create a row for each player showing their dominoes in play order
+        this.players.forEach((player, playerIndex) => {
+            const playerName = this.formatPlayerNameWithRelationship(player);
+            const displayName = playerDisplayNames[playerName];
+            
+            display += '<div class="hand-display-row">';
+            display += `<span class="player-name">${displayName}:</span>`;
+            
+            // Find all plays by this player in this hand
+            const playerPlays = [];
+            hand.tricks.forEach(trick => {
+                trick.playerPlays.forEach(play => {
+                    if (play.playerIdx === playerIndex) {
+                        playerPlays.push({
+                            domino: play.domino,
+                            trickNum: trick.trickNum
+                        });
+                    }
+                });
+            });
+            
+            // Sort plays by trick number to get chronological order
+            playerPlays.sort((a, b) => a.trickNum - b.trickNum);
+            
+            // Display dominoes in play order
+            for (let i = 0; i < 7; i++) {
+                if (i < playerPlays.length) {
+                    const play = playerPlays[i];
+                    const mod = play.domino.modulate(hand.trump, null);
+                    display += `<span class="domino-display">[ ${mod[0]}-${mod[1]} ]</span>`;
+                } else {
+                    display += '<span class="domino-display">[     ]</span>';
+                }
+            }
+            
+            display += '</div>';
+        });
+        
+        return display;
     }
 }
 
