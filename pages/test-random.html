@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Randomization Test</title>
+</head>
+<body>
+    <h1>Randomization Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        // Copy the shuffleArray function from fortytwo.js
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            // Use a better random number generator
+            const crypto = window.crypto || window.msCrypto;
+            if (crypto && crypto.getRandomValues) {
+                // Use cryptographically secure random numbers
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const randomBytes = new Uint32Array(1);
+                    crypto.getRandomValues(randomBytes);
+                    const j = randomBytes[0] % (i + 1);
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+            } else {
+                // Fallback to Math.random with better implementation
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+            }
+            return shuffled;
+        }
+        
+        // Test names
+        const names = ["Alice", "Bob", "Charlie", "David", "Eve", "Frank", "Grace", "Henry"];
+        
+        // Test dominoes
+        const dominoes = [];
+        for (let a = 0; a < 7; a++) {
+            for (let b = a; b < 7; b++) {
+                dominoes.push(`${a}-${b}`);
+            }
+        }
+        
+        const results = document.getElementById('results');
+        
+        // Test name shuffling
+        results.innerHTML += '<h2>Name Shuffling Test</h2>';
+        for (let i = 0; i < 5; i++) {
+            const shuffled = shuffleArray([...names]);
+            results.innerHTML += `<p>Test ${i + 1}: ${shuffled.slice(0, 4).join(', ')}</p>`;
+        }
+        
+        // Test domino shuffling
+        results.innerHTML += '<h2>Domino Shuffling Test</h2>';
+        for (let i = 0; i < 5; i++) {
+            const shuffled = shuffleArray([...dominoes]);
+            results.innerHTML += `<p>Test ${i + 1}: ${shuffled.slice(0, 5).join(', ')}</p>`;
+        }
+    </script>
+</body>
+</html> 

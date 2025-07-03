@@ -1,0 +1,337 @@
+body {
+    background-color: #e44644;
+    background-image: url(../assets/img/background/grape.gif);
+    background-repeat: repeat;
+    background-size: 50px 50px;
+    image-rendering: smooth;
+    margin: 0;
+    padding: 0;
+    font-family: 'Courier New', monospace;
+    color: #0000ff;
+}
+
+.game-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.8);
+    border: 2px solid lime;
+    margin-top: 100px;
+    margin-bottom: 20px;
+}
+
+.game-header {
+    text-align: center;
+    margin-bottom: 30px;
+    color: lime;
+}
+
+.game-header h1 {
+    color: lime;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.game-header p {
+    color: #0000ff;
+    font-size: 14px;
+}
+
+.score-display {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: lime;
+    border: 1px solid lime;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.player-hand {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border: 1px solid lime;
+    margin-bottom: 20px;
+    color: #0000ff;
+}
+
+.player-hand h3 {
+    color: lime;
+    margin-top: 0;
+}
+
+.domino {
+    display: inline-block;
+    background: black;
+    border: 2px solid lime;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin: 2px;
+    cursor: pointer;
+    font-weight: bold;
+    min-width: 40px;
+    text-align: center;
+    color: lime;
+    transition: all 0.3s ease;
+}
+
+.domino:hover {
+    background: lime;
+    color: black;
+    transform: scale(1.1);
+}
+
+.domino.selected {
+    background: #ffeb3b;
+    border-color: #f57f17;
+    color: black;
+}
+
+.domino.invalid {
+    background: #ffcdd2;
+    border-color: #d32f2f;
+    cursor: not-allowed;
+    color: #d32f2f;
+}
+
+.game-status {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border: 1px solid lime;
+    margin-bottom: 20px;
+    color: #0000ff;
+}
+
+.game-status h3 {
+    color: lime;
+    margin-top: 0;
+}
+
+.trick-area {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border: 1px solid lime;
+    margin-bottom: 20px;
+    min-height: 100px;
+    color: #0000ff;
+}
+
+.trick-area h3 {
+    color: lime;
+    margin-top: 0;
+}
+
+.played-domino {
+    display: inline-block;
+    background: black;
+    border: 2px solid lime;
+    border-radius: 4px;
+    padding: 10px 15px;
+    margin: 5px;
+    font-weight: bold;
+    color: lime;
+}
+
+.controls {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.btn {
+    background: black;
+    color: lime;
+    border: 2px solid lime;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin: 5px;
+    font-family: 'Courier New', monospace;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background: lime;
+    color: black;
+    transform: scale(1.05);
+}
+
+.btn:disabled {
+    background: #333;
+    color: #666;
+    border-color: #666;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.bidding-area {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border: 1px solid lime;
+    margin-bottom: 20px;
+    color: #0000ff;
+}
+
+.bidding-area h3 {
+    color: lime;
+    margin-top: 0;
+}
+
+.bid-input {
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid lime;
+    border-radius: 4px;
+    margin-right: 10px;
+    background: black;
+    color: lime;
+    font-family: 'Courier New', monospace;
+}
+
+.bid-input:focus {
+    outline: none;
+    border-color: #ffeb3b;
+}
+
+.trump-selector {
+    margin: 10px 0;
+}
+
+.trump-option {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 2px;
+    border: 1px solid lime;
+    border-radius: 4px;
+    cursor: pointer;
+    background: black;
+    color: lime;
+    transition: all 0.3s ease;
+}
+
+.trump-option:hover {
+    background: lime;
+    color: black;
+}
+
+.trump-option.selected {
+    background: #4caf50;
+    color: white;
+    border-color: #4caf50;
+}
+
+.scoreboard {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border: 1px solid lime;
+    margin-bottom: 20px;
+    color: #0000ff;
+}
+
+.scoreboard h3 {
+    color: lime;
+    margin-top: 0;
+}
+
+.scoreboard-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 0;
+    color: #0000ff;
+}
+
+.hand-scoreboard {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid lime;
+    padding: 15px;
+}
+
+.team-column {
+    flex: 1;
+    margin: 0 10px;
+}
+
+.team-header {
+    color: lime;
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.trick-group {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #333;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.trick-label {
+    color: lime;
+    font-weight: bold;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+.trick-dominoes {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 50px;
+}
+
+.player-play {
+    flex: 1;
+    text-align: center;
+    margin: 0 2px;
+}
+
+.player-name {
+    font-size: 10px;
+    color: #666;
+    margin-bottom: 3px;
+}
+
+.domino-small {
+    display: inline-block;
+    background: black;
+    border: 1px solid lime;
+    border-radius: 2px;
+    padding: 4px 6px;
+    font-size: 12px;
+    color: lime;
+    min-width: 30px;
+    text-align: center;
+}
+
+.hidden {
+    display: none;
+}
+
+.back-link {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+}
+
+.back-link a {
+    display: inline-block;
+    padding: 8px 16px;
+    background: black;
+    color: lime;
+    border: 1px solid lime;
+    text-decoration: none;
+    font-family: 'Courier New', monospace;
+    transition: all 0.3s ease;
+}
+
+.back-link a:hover {
+    background: lime;
+    color: black;
+} 

@@ -1,259 +1,363 @@
 <!DOCTYPE html>
-
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>42 - Land Buoy Max Coker</title>
-  <!-- Scripts and assets -->
-  <script
-    type="text/javascript"
-    src="https://code.jquery.com/jquery-1.11.0.min.js"
-  ></script>
-  <script
-    type="text/javascript"
-    src="https://code.jquery.com/jquery-migrate-1.2.1.min.js"
-  ></script>
-  <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"
-    integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  ></script>
-  <link rel="stylesheet" type="text/css" href="../style.css" />
-  <link rel="stylesheet" type="text/css" href="../assets/css/fortytwo.css" />
-  <!--Favicon-->
-  <link
-    rel="icon"
-    type="image/png"
-    sizes="16x16"
-    href="../assets/img/favicon/icon 3.png"
-  />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>42 Domino Game - Land Buoy</title>
+    <link rel="stylesheet" type="text/css" href="fortytwo.css" />
+    <style>
+        body {
+            background-color: #e44644;
+            background-image: url(../assets/img/background/grape.gif);
+            background-repeat: repeat;
+            background-size: 50px 50px;
+            image-rendering: smooth;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', monospace;
+            color: #0000ff;
+        }
+        
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 2px solid lime;
+            margin-top: 100px;
+            margin-bottom: 20px;
+        }
+        
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: lime;
+        }
+        
+        .game-header h1 {
+            color: lime;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .game-header p {
+            color: #0000ff;
+            font-size: 14px;
+        }
+        
+        .score-display {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: lime;
+            border: 1px solid lime;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .player-hand {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border: 1px solid lime;
+            margin-bottom: 20px;
+            color: #0000ff;
+        }
+        
+        .player-hand h3 {
+            color: lime;
+            margin-top: 0;
+        }
+        
+        .domino {
+            display: inline-block;
+            background: black;
+            border: 2px solid lime;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin: 2px;
+            cursor: pointer;
+            font-weight: bold;
+            min-width: 40px;
+            text-align: center;
+            color: lime;
+            transition: all 0.3s ease;
+        }
+        
+        .domino:hover {
+            background: lime;
+            color: black;
+            transform: scale(1.1);
+        }
+        
+        .domino.selected {
+            background: #ffeb3b;
+            border-color: #f57f17;
+            color: black;
+        }
+        
+        .domino.invalid {
+            background: #ffcdd2;
+            border-color: #d32f2f;
+            cursor: not-allowed;
+            color: #d32f2f;
+        }
+        
+        .game-status {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border: 1px solid lime;
+            margin-bottom: 20px;
+            color: #0000ff;
+        }
+        
+        .game-status h3 {
+            color: lime;
+            margin-top: 0;
+        }
+        
+        .trick-area {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border: 1px solid lime;
+            margin-bottom: 20px;
+            min-height: 100px;
+            color: #0000ff;
+        }
+        
+        .trick-area h3 {
+            color: lime;
+            margin-top: 0;
+        }
+        
+        .played-domino {
+            display: inline-block;
+            background: black;
+            border: 2px solid lime;
+            border-radius: 4px;
+            padding: 10px 15px;
+            margin: 5px;
+            font-weight: bold;
+            color: lime;
+        }
+        
+        .controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            background: black;
+            color: lime;
+            border: 2px solid lime;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: lime;
+            color: black;
+            transform: scale(1.05);
+        }
+        
+        .btn:disabled {
+            background: #333;
+            color: #666;
+            border-color: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .bidding-area {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border: 1px solid lime;
+            margin-bottom: 20px;
+            color: #0000ff;
+        }
+        
+        .bidding-area h3 {
+            color: lime;
+            margin-top: 0;
+        }
+        
+        .bid-input {
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid lime;
+            border-radius: 4px;
+            margin-right: 10px;
+            background: black;
+            color: lime;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .bid-input:focus {
+            outline: none;
+            border-color: #ffeb3b;
+        }
+        
+        .trump-selector {
+            margin: 10px 0;
+        }
+        
+        .trump-option {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 2px;
+            border: 1px solid lime;
+            border-radius: 4px;
+            cursor: pointer;
+            background: black;
+            color: lime;
+            transition: all 0.3s ease;
+        }
+        
+        .trump-option:hover {
+            background: lime;
+            color: black;
+        }
+        
+        .trump-option.selected {
+            background: #4caf50;
+            color: white;
+            border-color: #4caf50;
+        }
+        
+        .scoreboard {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border: 1px solid lime;
+            margin-bottom: 20px;
+            color: #0000ff;
+        }
+        
+        .scoreboard h3 {
+            color: lime;
+            margin-top: 0;
+        }
+        
+        .scoreboard-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            color: #0000ff;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .back-link {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+        }
+        
+        .back-link a {
+            display: inline-block;
+            padding: 8px 16px;
+            background: black;
+            color: lime;
+            border: 1px solid lime;
+            text-decoration: none;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+        
+        .back-link a:hover {
+            background: lime;
+            color: black;
+        }
+    </style>
 </head>
-
 <body>
-  <!-- Main container -->
-  <div class="mainContainer">
-    <!-- Nav buttons -->
-    <nav class="nav">
-      <div class="button button--back">
-        <a href="../index.html">
-          Back to Main
-        </a>
-      </div>
-      <div class="button button--rules">
-        Rules
-      </div>
-      <div class="button button--newGame">
-        New Game
-      </div>
-      <div class="button button--trickHistory">
-        Trick History
-      </div>
-      <div class="logoContainer">
-        <div class="logoContainer__inner">
-          42 - Domino Game
+    <div class="back-link">
+        <a href="../index.html">← Back to Land Buoy</a>
+    </div>
+    
+    <div class="game-container">
+        <div class="game-header">
+            <h1>42 Domino Game</h1>
+            <p>A strategic domino game for 4 players</p>
         </div>
-      </div>
-    </nav>
-
-    <!-- Game container -->
-    <div class="gameContainer">
-      <!-- Game status -->
-      <div class="gameStatus">
-        <div class="scoreBoard">
-          <div class="teamScore" id="teamUs">
-            <span class="teamName">Us</span>
-            <span class="score" id="scoreUs">0</span>
-          </div>
-          <div class="teamScore" id="teamThem">
-            <span class="teamName">Them</span>
-            <span class="score" id="scoreThem">0</span>
-          </div>
+        
+        <div id="game-status" class="game-status">
+            <h3>Game Status</h3>
+            <div id="status-text">Welcome to 42! Click "Start New Game" to begin.</div>
         </div>
-        <div class="gameInfo">
-          <div class="currentBid" id="currentBid">No bid yet</div>
-          <div class="trumpSuit" id="trumpSuit">No trump</div>
-          <div class="currentLeader" id="currentLeader">Waiting...</div>
+        
+        <div id="score-display" class="score-display hidden">
+            <div>Us: <span id="us-score">0</span></div>
+            <div>Them: <span id="them-score">0</span></div>
         </div>
-      </div>
-
-      <!-- Team information -->
-      <div class="teamInfo">
-        <div class="teamSection">
-          <h3>Team Us</h3>
-          <div class="playerInfo" id="player0Info">
-            <span class="playerName">You (Human)</span>
-            <span class="playerRole">Partner</span>
-          </div>
-          <div class="playerInfo" id="player2Info">
-            <span class="playerName" id="player2Name">Player 2</span>
-            <span class="playerRole">Partner</span>
-          </div>
-        </div>
-        <div class="teamSection">
-          <h3>Team Them</h3>
-          <div class="playerInfo" id="player1Info">
-            <span class="playerName" id="player1Name">Player 1</span>
-            <span class="playerRole">Opponent</span>
-          </div>
-          <div class="playerInfo" id="player3Info">
-            <span class="playerName" id="player3Name">Player 3</span>
-            <span class="playerRole">Opponent</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Game area -->
-      <div class="gameArea">
-        <!-- AI players -->
-        <div class="aiPlayers">
-          <div class="aiPlayer" id="aiPlayer1">
-            <div class="playerName" id="aiPlayer1Name">Player 1 (Opponent)</div>
-            <div class="playerHand" id="player1Hand">
-              <div class="dominoCount">7 dominoes</div>
+        
+        <div id="bidding-area" class="bidding-area hidden">
+            <h3>Bidding Phase</h3>
+            <div id="bidding-status"></div>
+            <div id="bid-input-area" class="hidden">
+                <label for="bid-input">Enter your bid (or 'p' to pass):</label>
+                <input type="text" id="bid-input" class="bid-input" maxlength="3">
+                <button id="submit-bid" class="btn">Submit Bid</button>
             </div>
-          </div>
-          <div class="aiPlayer" id="aiPlayer2">
-            <div class="playerName" id="aiPlayer2Name">Player 2 (Partner)</div>
-            <div class="playerHand" id="player2Hand">
-              <div class="dominoCount">7 dominoes</div>
+        </div>
+        
+        <div id="trump-selection" class="bidding-area hidden">
+            <h3>Trump Selection</h3>
+            <div id="trump-suggested"></div>
+            <div class="trump-selector">
+                <div class="trump-option" data-trump="0">0 (Blanks)</div>
+                <div class="trump-option" data-trump="1">1</div>
+                <div class="trump-option" data-trump="2">2</div>
+                <div class="trump-option" data-trump="3">3</div>
+                <div class="trump-option" data-trump="4">4</div>
+                <div class="trump-option" data-trump="5">5</div>
+                <div class="trump-option" data-trump="6">6</div>
             </div>
-          </div>
-          <div class="aiPlayer" id="aiPlayer3">
-            <div class="playerName" id="aiPlayer3Name">Player 3 (Opponent)</div>
-            <div class="playerHand" id="player3Hand">
-              <div class="dominoCount">7 dominoes</div>
+            <button id="confirm-trump" class="btn">Confirm Trump</button>
+        </div>
+        
+        <div id="player-hand" class="player-hand hidden">
+            <h3>Your Hand</h3>
+            <div id="dominoes"></div>
+            <button id="play-domino" class="btn" disabled>Play Selected Domino</button>
+        </div>
+        
+        <div id="trick-area" class="trick-area hidden">
+            <h3>Current Trick</h3>
+            <div id="trick-info"></div>
+            <div id="played-dominoes"></div>
+        </div>
+        
+        <div id="hand-scoreboard" class="hand-scoreboard hidden">
+            <div class="team-column">
+                <div class="team-header">US - <span id="us-hand-points">0</span></div>
+                <div id="us-tricks"></div>
             </div>
-          </div>
+            <div class="team-column">
+                <div class="team-header">THEM - <span id="them-hand-points">0</span></div>
+                <div id="them-tricks"></div>
+            </div>
         </div>
-
-        <!-- Trick area -->
-        <div class="trickArea">
-          <div class="trickTitle">Current Trick</div>
-          <div class="playedDominoes" id="playedDominoes">
-            <!-- Played dominoes will appear here -->
-          </div>
-          <div class="trickWinner" id="trickWinner"></div>
+        
+        <div id="scoreboard" class="scoreboard hidden">
+            <h3>Scoreboard</h3>
+            <div id="scoreboard-content"></div>
         </div>
-
-        <!-- Human player -->
-        <div class="humanPlayer">
-          <div class="playerName">Your Hand (Human)</div>
-          <div class="playerHand" id="humanHand">
-            <!-- Human's dominoes will appear here -->
-          </div>
+        
+        <div class="controls">
+            <button id="start-game" class="btn">Start New Game</button>
+            <button id="ready-bidding" class="btn hidden">Ready for Bidding</button>
         </div>
-      </div>
-
-      <!-- Game controls -->
-      <div class="gameControls">
-        <div class="controlButton" id="startGame">Start New Game</div>
-        <div class="controlButton" id="dealHand">Deal Hand</div>
-        <div class="controlButton" id="makeBid">Make Bid</div>
-        <div class="controlButton" id="playDomino">Play Domino</div>
-      </div>
     </div>
 
-    <!-- Modals -->
-    <!-- Rules modal -->
-    <div class="modalContainer modalContainer--rules">
-      <header class="modalHeader">
-        <div class="aquaButton aquaButton--rules">X</div>
-        <h2 class="modalTitle">42 Rules</h2>
-      </header>
-      <div class="modalInnerContainer">
-        <div class="rulesContent">
-          <h3>Objective</h3>
-          <p>42 is a trick-taking domino game for 4 players in teams of 2. The goal is to be the first team to reach 7 points.</p>
-          
-          <h3>Setup</h3>
-          <p>Each player receives 7 dominoes. The game uses a standard double-six set (28 dominoes).</p>
-          
-          <h3>Bidding</h3>
-          <p>Players bid in turn, starting with 30 points. Each bid must be higher than the previous. The winning bidder chooses the trump suit (0-6).</p>
-          
-          <h3>Gameplay</h3>
-          <p>The winning bidder leads the first trick. Players must follow suit if possible. Trump dominoes can always be played. The highest trump wins, or highest of the led suit if no trumps.</p>
-          
-          <h3>Scoring</h3>
-          <p>Each trick is worth 1 point. Count dominoes (5-5, 4-6, 0-5, 1-4, 2-3) are worth additional points. The bidding team must make their bid to score a point.</p>
-          
-          <h3>Winning</h3>
-          <p>First team to reach 7 points wins the game.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Trick History modal -->
-    <div class="modalContainer modalContainer--trickHistory">
-      <header class="modalHeader">
-        <div class="aquaButton aquaButton--trickHistory">X</div>
-        <h2 class="modalTitle">Trick History</h2>
-      </header>
-      <div class="modalInnerContainer">
-        <div class="trickHistoryContent">
-          <div class="trickHistoryTable" id="trickHistoryTable">
-            <!-- Trick history will be populated here -->
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bidding modal -->
-    <div class="modalContainer modalContainer--bidding">
-      <header class="modalHeader">
-        <div class="aquaButton aquaButton--bidding">X</div>
-        <h2 class="modalTitle">Bidding</h2>
-      </header>
-      <div class="modalInnerContainer">
-        <div class="biddingContent">
-          <div class="currentBidInfo">
-            <p>Current bid: <span id="modalCurrentBid">30</span></p>
-            <p>Your suggested trump: <span id="suggestedTrump">-</span></p>
-          </div>
-          <div class="bidOptions">
-            <div class="bidOption" data-bid="pass">Pass</div>
-            <div class="bidOption" data-bid="30">30</div>
-            <div class="bidOption" data-bid="31">31</div>
-            <div class="bidOption" data-bid="32">32</div>
-            <div class="bidOption" data-bid="33">33</div>
-            <div class="bidOption" data-bid="34">34</div>
-            <div class="bidOption" data-bid="35">35</div>
-            <div class="bidOption" data-bid="36">36</div>
-            <div class="bidOption" data-bid="37">37</div>
-            <div class="bidOption" data-bid="38">38</div>
-            <div class="bidOption" data-bid="39">39</div>
-            <div class="bidOption" data-bid="40">40</div>
-            <div class="bidOption" data-bid="41">41</div>
-            <div class="bidOption" data-bid="42">42</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Trump selection modal -->
-    <div class="modalContainer modalContainer--trump">
-      <header class="modalHeader">
-        <div class="aquaButton aquaButton--trump">X</div>
-        <h2 class="modalTitle">Select Trump Suit</h2>
-      </header>
-      <div class="modalInnerContainer">
-        <div class="trumpContent">
-          <p>You won the bid! Select the trump suit:</p>
-          <div class="trumpOptions">
-            <div class="trumpOption" data-trump="0">Blanks (0)</div>
-            <div class="trumpOption" data-trump="1">Ones (1)</div>
-            <div class="trumpOption" data-trump="2">Twos (2)</div>
-            <div class="trumpOption" data-trump="3">Threes (3)</div>
-            <div class="trumpOption" data-trump="4">Fours (4)</div>
-            <div class="trumpOption" data-trump="5">Fives (5)</div>
-            <div class="trumpOption" data-trump="6">Sixes (6)</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script type="text/javascript" src="../assets/js/fortytwo.js"></script>
+    <script src="fortytwo.js"></script>
 </body>
 </html> 
