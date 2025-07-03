@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>42 Domino Game - Land Buoy</title>
     <link rel="stylesheet" type="text/css" href="fortytwo.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <style>
         body {
             background-color: #e44644;
@@ -55,6 +58,104 @@
             border: 1px solid lime;
             padding: 10px;
             background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .history-btn {
+            background: black;
+            color: lime;
+            border: 1px solid lime;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .history-btn:hover {
+            background: lime;
+            color: black;
+        }
+        
+        .bidding-board {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border: 1px solid lime;
+            margin: 10px 0;
+            color: #0000ff;
+        }
+        
+        .bidding-board h4 {
+            color: lime;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        
+        .bidding-result {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            padding: 5px;
+            border: 1px solid #333;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .ready-to-start {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border: 2px solid lime;
+            margin: 15px 0;
+            text-align: center;
+            color: #0000ff;
+        }
+        
+        .ready-to-start h4 {
+            color: lime;
+            margin-top: 0;
+        }
+        
+        .modalContainer--scoreboard {
+            display: none;
+            top: 10%;
+            bottom: 10%;
+            right: 10%;
+            width: 40%;
+            height: 80vh;
+            box-shadow: 0px 0px 32px #ff6347;
+            animation: morph 180s infinite;
+            background-color: #eaeaea;
+            color: #0000ff;
+        }
+        
+        .aquaButton--scoreboard {
+            background: #00ffff;
+            color: black;
+            border: 2px solid #0000ff;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .aquaButton--scoreboard:hover {
+            background: #0000ff;
+            color: #00ffff;
+        }
+        
+        .hand-history-item {
+            border: 1px solid #0000ff;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .hand-history-header {
+            font-weight: bold;
+            color: #0000ff;
+            margin-bottom: 5px;
+        }
+        
+        .hand-history-details {
+            font-size: 14px;
+            color: #0000ff;
         }
         
         .player-hand {
@@ -297,15 +398,36 @@
         <div id="score-display" class="score-display hidden">
             <div>Us: <span id="us-score">0</span></div>
             <div>Them: <span id="them-score">0</span></div>
+            <button id="show-history-btn" class="btn history-btn">View History</button>
+        </div>
+        
+        <!-- Scoreboard History Modal -->
+        <div id="scoreboard-history-modal" class="modalContainer modalContainer--scoreboard hidden">
+            <header class="modalHeader">
+                <div class="aquaButton aquaButton--scoreboard">X</div>
+                <h2 class="modalTitle">Hand History</h2>
+            </header>
+            <div class="modalInnerContainer">
+                <div id="history-content"></div>
+            </div>
         </div>
         
         <div id="bidding-area" class="bidding-area hidden">
             <h3>Bidding Phase</h3>
             <div id="bidding-status"></div>
+            <div id="bidding-board" class="bidding-board hidden">
+                <h4>Bidding Results</h4>
+                <div id="bidding-results"></div>
+            </div>
             <div id="bid-input-area" class="hidden">
                 <label for="bid-input">Enter your bid (or 'p' to pass):</label>
                 <input type="text" id="bid-input" class="bid-input" maxlength="3">
                 <button id="submit-bid" class="btn">Submit Bid</button>
+            </div>
+            <div id="ready-to-start" class="ready-to-start hidden">
+                <h4>Bidding Complete!</h4>
+                <p>Ready to start the hand?</p>
+                <button id="start-hand-btn" class="btn">Ready to Start</button>
             </div>
         </div>
         

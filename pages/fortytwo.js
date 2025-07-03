@@ -1021,21 +1021,17 @@ class Player {
 // Game class
 class Game {
     constructor() {
-        // Assign random songbird names to all players
-        let availableNames = [...SONGBIRD_NAMES];
-        availableNames = shuffleArray(availableNames);
-        
-        // Create players with songbird names
+        // Create players with placeholder names (will be assigned in startNewGame)
         this.players = [
-            new Player(availableNames[0], true, this),      // Player 0: Human
-            new Player(availableNames[1], false, this),     // Player 1: AI Opponent
-            new Player(availableNames[2], false, this),     // Player 2: AI Partner
-            new Player(availableNames[3], false, this)      // Player 3: AI Opponent
+            new Player("", true, this),      // Player 0: Human
+            new Player("", false, this),     // Player 1: AI Opponent
+            new Player("", false, this),     // Player 2: AI Partner
+            new Player("", false, this)      // Player 3: AI Opponent
         ];
         
         this.scores = [0, 0];
         this.startingBidderIndex = 0;
-        this.bidOrderNames = this.players.map(p => this.formatPlayerNameWithRelationship(p));
+        this.bidOrderNames = [];
         
         // Assign teams: 'Us' = Player 0 (Human) + Player 2 (Partner), 'Them' = Player 1 + Player 3
         this.teams = {
@@ -1098,8 +1094,8 @@ class Game {
         // Bind event listeners
         this.bindEventListeners();
         
-        // Display team introductions
-        this.displayTeamIntroductions();
+        // Display initial welcome message
+        this.updateStatus("Welcome to 42! Click 'Start New Game' to begin.");
     }
     
     bindEventListeners() {
@@ -1314,7 +1310,7 @@ class Game {
         this.lastHandBiddingInfo = null;
         this.playedDominoesThisHand = new Set();
         
-        // Assign new random songbird names
+        // Assign new random songbird names (only once per game)
         let availableNames = [...SONGBIRD_NAMES];
         availableNames = shuffleArray(availableNames);
         for (let i = 0; i < this.players.length; i++) {
@@ -1345,8 +1341,12 @@ class Game {
     
     startBidding() {
         this.currentPhase = 'bidding';
-        this.shuffleAndDeal();
-        this.handSortingPhase();
+        // Don't shuffle and deal here - it's already done in startNewHand or will be done for first hand
+        if (this.players[0].hand.length === 0) {
+            // Only shuffle and deal if hands are empty (first hand of the game)
+            this.shuffleAndDeal();
+            this.handSortingPhase();
+        }
         
         // Show overall score and user's hand
         this.updateScoreDisplay();
@@ -1372,8 +1372,6 @@ class Game {
         for (let i = 0; i < this.players.length; i++) {
             this.players[i].hand = dominoes.slice(i * 7, (i + 1) * 7);
         }
-        
-        console.log('Human hand:', this.players[0].hand.map(d => d.toString()));
     }
     
     handSortingPhase() {
@@ -1503,8 +1501,7 @@ class Game {
     
     showBiddingInterface(player, currentIndex, bidOrder, playerMap, playerData) {
         this.biddingStatus.innerHTML = `It's your turn to bid, ${player}.<br>
-            Current bid: ${this.currentBid === 0 ? 'pass' : this.currentBid}<br>
-            Your confidence: ${playerData[player].confidence}, Max bid: ${playerData[player].maxBid}`;
+            Current bid: ${this.currentBid === 0 ? 'pass' : this.currentBid}`;
         
         this.showElement(this.bidInputArea);
         this.bidInput.focus();
@@ -1656,7 +1653,7 @@ class Game {
     
     showTrumpSelection(suggestedTrump) {
         this.currentPhase = 'trump-selection';
-        this.trumpSuggested.innerHTML = `Suggested trump suit: ${suggestedTrump}`;
+        this.trumpSuggested.innerHTML = `Select a trump suit:`;
         this.showElement(this.trumpSelection);
         this.hideElement(this.biddingArea);
     }
@@ -1803,8 +1800,6 @@ class Game {
             }, 1000);
         }
     }
-    
-
     
     playSelectedDomino() {
         if (this.selectedDomino === null) {
