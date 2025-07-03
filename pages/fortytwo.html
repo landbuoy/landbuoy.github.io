@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>42 - Land Buoy Max Coker</title>
+  <!-- Scripts and assets -->
+  <script
+    type="text/javascript"
+    src="https://code.jquery.com/jquery-1.11.0.min.js"
+  ></script>
+  <script
+    type="text/javascript"
+    src="https://code.jquery.com/jquery-migrate-1.2.1.min.js"
+  ></script>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"
+    integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  ></script>
+  <link rel="stylesheet" type="text/css" href="../style.css" />
+  <link rel="stylesheet" type="text/css" href="../assets/css/fortytwo.css" />
+  <!--Favicon-->
+  <link
+    rel="icon"
+    type="image/png"
+    sizes="16x16"
+    href="../assets/img/favicon/icon 3.png"
+  />
+</head>
+
+<body>
+  <!-- Main container -->
+  <div class="mainContainer">
+    <!-- Nav buttons -->
+    <nav class="nav">
+      <div class="button button--back">
+        <a href="../index.html">
+          Back to Main
+        </a>
+      </div>
+      <div class="button button--rules">
+        Rules
+      </div>
+      <div class="button button--newGame">
+        New Game
+      </div>
+      <div class="logoContainer">
+        <div class="logoContainer__inner">
+          42 - Domino Game
+        </div>
+      </div>
+    </nav>
+
+    <!-- Game container -->
+    <div class="gameContainer">
+      <!-- Game status -->
+      <div class="gameStatus">
+        <div class="scoreBoard">
+          <div class="teamScore" id="teamUs">
+            <span class="teamName">Us</span>
+            <span class="score" id="scoreUs">0</span>
+          </div>
+          <div class="teamScore" id="teamThem">
+            <span class="teamName">Them</span>
+            <span class="score" id="scoreThem">0</span>
+          </div>
+        </div>
+        <div class="gameInfo">
+          <div class="currentBid" id="currentBid">No bid yet</div>
+          <div class="trumpSuit" id="trumpSuit">No trump</div>
+          <div class="currentLeader" id="currentLeader">Waiting...</div>
+        </div>
+      </div>
+
+      <!-- Game area -->
+      <div class="gameArea">
+        <!-- AI players -->
+        <div class="aiPlayers">
+          <div class="aiPlayer" id="aiPlayer1">
+            <div class="playerName" id="player1Name">Player 1</div>
+            <div class="playerHand" id="player1Hand">
+              <div class="dominoCount">7 dominoes</div>
+            </div>
+          </div>
+          <div class="aiPlayer" id="aiPlayer2">
+            <div class="playerName" id="player2Name">Player 2</div>
+            <div class="playerHand" id="player2Hand">
+              <div class="dominoCount">7 dominoes</div>
+            </div>
+          </div>
+          <div class="aiPlayer" id="aiPlayer3">
+            <div class="playerName" id="player3Name">Player 3</div>
+            <div class="playerHand" id="player3Hand">
+              <div class="dominoCount">7 dominoes</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trick area -->
+        <div class="trickArea">
+          <div class="trickTitle">Current Trick</div>
+          <div class="playedDominoes" id="playedDominoes">
+            <!-- Played dominoes will appear here -->
+          </div>
+          <div class="trickWinner" id="trickWinner"></div>
+        </div>
+
+        <!-- Human player -->
+        <div class="humanPlayer">
+          <div class="playerName">Your Hand</div>
+          <div class="playerHand" id="humanHand">
+            <!-- Human's dominoes will appear here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Game controls -->
+      <div class="gameControls">
+        <div class="controlButton" id="startGame">Start New Game</div>
+        <div class="controlButton" id="dealHand">Deal Hand</div>
+        <div class="controlButton" id="makeBid">Make Bid</div>
+        <div class="controlButton" id="playDomino">Play Domino</div>
+      </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Rules modal -->
+    <div class="modalContainer modalContainer--rules">
+      <header class="modalHeader">
+        <div class="aquaButton aquaButton--rules">X</div>
+        <h2 class="modalTitle">42 Rules</h2>
+      </header>
+      <div class="modalInnerContainer">
+        <div class="rulesContent">
+          <h3>Objective</h3>
+          <p>42 is a trick-taking domino game for 4 players in teams of 2. The goal is to be the first team to reach 7 points.</p>
+          
+          <h3>Setup</h3>
+          <p>Each player receives 7 dominoes. The game uses a standard double-six set (28 dominoes).</p>
+          
+          <h3>Bidding</h3>
+          <p>Players bid in turn, starting with 30 points. Each bid must be higher than the previous. The winning bidder chooses the trump suit (0-6).</p>
+          
+          <h3>Gameplay</h3>
+          <p>The winning bidder leads the first trick. Players must follow suit if possible. Trump dominoes can always be played. The highest trump wins, or highest of the led suit if no trumps.</p>
+          
+          <h3>Scoring</h3>
+          <p>Each trick is worth 1 point. Count dominoes (5-5, 4-6, 0-5, 1-4, 2-3) are worth additional points. The bidding team must make their bid to score a point.</p>
+          
+          <h3>Winning</h3>
+          <p>First team to reach 7 points wins the game.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bidding modal -->
+    <div class="modalContainer modalContainer--bidding">
+      <header class="modalHeader">
+        <div class="aquaButton aquaButton--bidding">X</div>
+        <h2 class="modalTitle">Bidding</h2>
+      </header>
+      <div class="modalInnerContainer">
+        <div class="biddingContent">
+          <div class="currentBidInfo">
+            <p>Current bid: <span id="modalCurrentBid">30</span></p>
+            <p>Your suggested trump: <span id="suggestedTrump">-</span></p>
+          </div>
+          <div class="bidOptions">
+            <div class="bidOption" data-bid="pass">Pass</div>
+            <div class="bidOption" data-bid="30">30</div>
+            <div class="bidOption" data-bid="31">31</div>
+            <div class="bidOption" data-bid="32">32</div>
+            <div class="bidOption" data-bid="33">33</div>
+            <div class="bidOption" data-bid="34">34</div>
+            <div class="bidOption" data-bid="35">35</div>
+            <div class="bidOption" data-bid="36">36</div>
+            <div class="bidOption" data-bid="37">37</div>
+            <div class="bidOption" data-bid="38">38</div>
+            <div class="bidOption" data-bid="39">39</div>
+            <div class="bidOption" data-bid="40">40</div>
+            <div class="bidOption" data-bid="41">41</div>
+            <div class="bidOption" data-bid="42">42</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trump selection modal -->
+    <div class="modalContainer modalContainer--trump">
+      <header class="modalHeader">
+        <div class="aquaButton aquaButton--trump">X</div>
+        <h2 class="modalTitle">Select Trump Suit</h2>
+      </header>
+      <div class="modalInnerContainer">
+        <div class="trumpContent">
+          <p>You won the bid! Select the trump suit:</p>
+          <div class="trumpOptions">
+            <div class="trumpOption" data-trump="0">Blanks (0)</div>
+            <div class="trumpOption" data-trump="1">Ones (1)</div>
+            <div class="trumpOption" data-trump="2">Twos (2)</div>
+            <div class="trumpOption" data-trump="3">Threes (3)</div>
+            <div class="trumpOption" data-trump="4">Fours (4)</div>
+            <div class="trumpOption" data-trump="5">Fives (5)</div>
+            <div class="trumpOption" data-trump="6">Sixes (6)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="../assets/js/fortytwo.js"></script>
+</body>
+</html> 

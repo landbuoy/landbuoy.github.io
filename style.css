@@ -93,7 +93,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 }
 
 .beesNav {
-  border: 5px outset yellowgreen;*/
+  border: 5px outset yellowgreen;
   background-color: black;
   background-image: url(assets/img/background/grape.gif);
   background-repeat: repeat;
@@ -212,6 +212,11 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   margin: 8px;
 }
 
+.glyph--fortytwo {
+  display: inline-block;
+  margin: 8px;
+}
+
 .glyph--portalFinder {
   display: inline-block;
   margin: 8px;
@@ -226,7 +231,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   left: 0;
   right: 0;
   bottom: 0;
-  display: ;
+  display: flex;
   position: fixed;
   justify-content: end;
 }
