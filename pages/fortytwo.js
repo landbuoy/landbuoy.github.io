@@ -1069,6 +1069,10 @@ class Game {
         this.themScore = document.getElementById('them-score');
         this.biddingArea = document.getElementById('bidding-area');
         this.biddingStatus = document.getElementById('bidding-status');
+        this.biddingBoard = document.getElementById('bidding-board');
+        this.biddingResults = document.getElementById('bidding-results');
+        this.readyToStart = document.getElementById('ready-to-start');
+        this.startHandBtn = document.getElementById('start-hand-btn');
         this.bidInputArea = document.getElementById('bid-input-area');
         this.bidInput = document.getElementById('bid-input');
         this.submitBid = document.getElementById('submit-bid');
@@ -1090,6 +1094,12 @@ class Game {
         this.startGame = document.getElementById('start-game');
         this.readyBidding = document.getElementById('ready-bidding');
         this.playDomino = document.getElementById('play-domino');
+        this.showHistoryBtn = document.getElementById('show-history-btn');
+        this.scoreboardHistoryModal = document.getElementById('scoreboard-history-modal');
+        this.historyContent = document.getElementById('history-content');
+        
+        // Hand history tracking
+        this.handHistory = []; // Array to store previous hand scoreboards
         
         // Bind event listeners
         this.bindEventListeners();
