@@ -698,7 +698,31 @@ class Player {
             }
         }
         
-        // Normal logic - try to win with highest valid play
+        // Normal logic - try to win with highest valid play, but avoid trump if higher trumps are out there
+        const trumpPlays = validPlays.filter(d => d.isTrump(trickState.trump));
+        if (trumpPlays.length > 0) {
+            // Find the highest trump we can play
+            const highestTrump = trumpPlays.reduce((max, d) => 
+                d.getDegree(trickState.trump) > max.getDegree(trickState.trump) ? d : max
+            );
+            const highestDegree = highestTrump.getDegree(trickState.trump);
+            
+            // Check if higher trumps are still out there
+            if (this.isHigherTrumpOutThere(trickState.trump, highestDegree)) {
+                // Higher trumps are out there - avoid using trump if possible
+                const nonTrumpPlays = validPlays.filter(d => !d.isTrump(trickState.trump));
+                if (nonTrumpPlays.length > 0) {
+                    // Use non-trump play instead
+                    return nonTrumpPlays.reduce((max, d) => 
+                        this.evaluateDominoStrength(d, trickState.trump) > this.evaluateDominoStrength(max, trickState.trump) ? d : max
+                    );
+                }
+            }
+            // No higher trumps out there or no non-trump options - use trump
+            return highestTrump;
+        }
+        
+        // No trump plays available - use highest non-trump
         return validPlays.reduce((max, d) => 
             this.evaluateDominoStrength(d, trickState.trump) > this.evaluateDominoStrength(max, trickState.trump) ? d : max
         );
@@ -722,7 +746,7 @@ class Player {
             const winningPlays = validPlays.filter(d => this.canWinTrick(trickState, d));
             if (winningPlays.length > 0) {
                 // Prefer non-count dominoes when trying to take the trick back
-                const nonCountWinners = winningPlays.filter(d => !this.isCountDomino(d));
+                const nonCountWinners = this.getNonCountDominoes(winningPlays);
                 if (nonCountWinners.length > 0) {
                     return nonCountWinners.reduce((max, d) => 
                         this.evaluateDominoStrength(d, trickState.trump) > this.evaluateDominoStrength(max, trickState.trump) ? d : max
@@ -734,40 +758,56 @@ class Player {
                 );
             } else {
                 // Cannot take the trick back - withhold count dominoes and preserve doubles
-                const nonCountNonDoublePlays = validPlays.filter(d => !this.isCountDomino(d) && !d.isDouble());
+                const nonCountNonDoublePlays = this.getNonCountDominoes(this.getNonDoubles(validPlays));
                 if (nonCountNonDoublePlays.length > 0) {
                     return nonCountNonDoublePlays.reduce((min, d) => 
-                        this.evaluateDominoStrength(d, trickState.trump) < this.evaluateDominoStrength(min, trickState.trump) ? d : min
+                        this.evaluateDominoValueForThrowing(d, trickState.trump) < this.evaluateDominoValueForThrowing(min, trickState.trump) ? d : min
                     );
                 }
                 
-                // Next, try non-count doubles
-                const nonCountDoubles = validPlays.filter(d => !this.isCountDomino(d) && d.isDouble());
+                // Next, try non-count doubles (preserve ALL doubles when possible)
+                const nonCountDoubles = this.getNonCountDominoes(this.getDoubles(validPlays));
                 if (nonCountDoubles.length > 0) {
-                    // Prefer lower doubles first
-                    nonCountDoubles.sort((a, b) => a.ends[0] - b.ends[0]);
-                    return nonCountDoubles[0];
+                    // Only throw very low doubles when absolutely necessary
+                    const veryLowDoubles = nonCountDoubles.filter(d => d.ends[0] <= 1); // Only 0-0, 1-1
+                    if (veryLowDoubles.length > 0) {
+                        return veryLowDoubles.reduce((min, d) => 
+                            d.ends[0] < min.ends[0] ? d : min
+                        );
+                    }
+                    // If no very low doubles, try to avoid throwing doubles entirely
+                    // Look for any other plays first
+                    const otherPlays = validPlays.filter(d => !d.isDouble());
+                    if (otherPlays.length > 0) {
+                        return otherPlays.reduce((min, d) => 
+                            this.evaluateDominoValueForThrowing(d, trickState.trump) < this.evaluateDominoValueForThrowing(min, trickState.trump) ? d : min
+                        );
+                    }
+                    // Forced to throw a double - prefer lowest
+                    return nonCountDoubles.reduce((min, d) => 
+                        d.ends[0] < min.ends[0] ? d : min
+                    );
                 }
                 
                 // Only count dominoes available - prefer non-double count over count doubles
-                const countNonDoublePlays = validPlays.filter(d => this.isCountDomino(d) && !d.isDouble());
+                const countNonDoublePlays = this.getCountDominoes(this.getNonDoubles(validPlays));
                 if (countNonDoublePlays.length > 0) {
                     return countNonDoublePlays.reduce((min, d) => 
-                        this.evaluateDominoStrength(d, trickState.trump) < this.evaluateDominoStrength(min, trickState.trump) ? d : min
+                        this.evaluateDominoValueForThrowing(d, trickState.trump) < this.evaluateDominoValueForThrowing(min, trickState.trump) ? d : min
                     );
                 }
                 
                 // Last resort - count doubles
-                const countDoubles = validPlays.filter(d => this.isCountDomino(d) && d.isDouble());
+                const countDoubles = this.getCountDominoes(this.getDoubles(validPlays));
                 if (countDoubles.length > 0) {
                     return countDoubles.reduce((min, d) => 
-                        this.evaluateDominoStrength(d, trickState.trump) < this.evaluateDominoStrength(min, trickState.trump) ? d : min
+                        this.evaluateDominoValueForThrowing(d, trickState.trump) < this.evaluateDominoValueForThrowing(min, trickState.trump) ? d : min
                     );
                 }
                 
                 // Fallback - any domino
                 return validPlays.reduce((min, d) => 
-                    this.evaluateDominoStrength(d, trickState.trump) < this.evaluateDominoStrength(min, trickState.trump) ? d : min
+                    this.evaluateDominoValueForThrowing(d, trickState.trump) < this.evaluateDominoValueForThrowing(min, trickState.trump) ? d : min
                 );
             }
         }
@@ -791,10 +831,10 @@ class Player {
                 // Partner not winning but no SETTER has beaten them - prioritize count dominoes
                 if (!this.mustFollowSuit(trickState)) {
                     // Playing off suit - prioritize count dominoes when LEADER hasn't been beaten
-                    const offPlays = validPlays.filter(d => !d.isTrump(trickState.trump));
+                    const offPlays = this.getOffSuitPlays(validPlays, trickState.trump);
                     if (offPlays.length > 0) {
                         // First priority: count dominoes (be more liberal about throwing count)
-                        const countPlays = offPlays.filter(d => this.isCountDomino(d));
+                        const countPlays = this.getCountDominoes(offPlays);
                         if (countPlays.length > 0) {
                             // Prefer 10-counts over 5-counts to maximize points
                             const tenCountPlays = countPlays.filter(d => 
@@ -812,25 +852,41 @@ class Player {
                             );
                         }
                         
-                        // Second priority: non-count, non-double offs
-                        const nonCountNonDoubleOffs = offPlays.filter(d => !this.isCountDomino(d) && !d.isDouble());
+                        // Second priority: non-count, non-double offs (preserve doubles)
+                        const nonCountNonDoubleOffs = this.getNonCountDominoes(this.getNonDoubles(offPlays));
                         if (nonCountNonDoubleOffs.length > 0) {
                             return nonCountNonDoubleOffs.reduce((min, d) => 
-                                this.evaluateDominoStrength(d, trickState.trump) < this.evaluateDominoStrength(min, trickState.trump) ? d : min
+                                this.evaluateDominoValueForThrowing(d, trickState.trump) < this.evaluateDominoValueForThrowing(min, trickState.trump) ? d : min
                             );
                         }
                         
-                        // Third priority: non-count doubles
-                        const nonCountDoubles = offPlays.filter(d => !this.isCountDomino(d) && d.isDouble());
-                        if (nonCountDoubles.length > 0) {
-                            // Prefer lower doubles first
-                            nonCountDoubles.sort((a, b) => a.ends[0] - b.ends[0]);
-                            return nonCountDoubles[0];
-                        }
+                                        // Third priority: non-count doubles (preserve ALL doubles when possible)
+                const nonCountDoubles = this.getNonCountDominoes(this.getDoubles(offPlays));
+                if (nonCountDoubles.length > 0) {
+                    // Only throw low doubles when absolutely necessary
+                    const lowDoubles = nonCountDoubles.filter(d => d.ends[0] <= 2); // Only 0-0, 1-1, 2-2
+                    if (lowDoubles.length > 0) {
+                        return lowDoubles.reduce((min, d) => 
+                            d.ends[0] < min.ends[0] ? d : min
+                        );
+                    }
+                    // If no low doubles, try to avoid throwing doubles entirely
+                    // Look for any other off plays first
+                    const otherOffPlays = offPlays.filter(d => !d.isDouble());
+                    if (otherOffPlays.length > 0) {
+                        return otherOffPlays.reduce((min, d) => 
+                            this.evaluateDominoValueForThrowing(d, trickState.trump) < this.evaluateDominoValueForThrowing(min, trickState.trump) ? d : min
+                        );
+                    }
+                    // Forced to throw a double - prefer lowest
+                    return nonCountDoubles.reduce((min, d) => 
+                        d.ends[0] < min.ends[0] ? d : min
+                    );
+                }
                         
                         // Fallback - any off
                         return offPlays.reduce((min, d) => 
-                            this.evaluateDominoStrength(d, trickState.trump) < this.evaluateDominoStrength(min, trickState.trump) ? d : min
+                            this.evaluateDominoValueForThrowing(d, trickState.trump) < this.evaluateDominoValueForThrowing(min, trickState.trump) ? d : min
                         );
                     }
                     // No offs available - must play trump
@@ -874,7 +930,7 @@ class Player {
                 return this.chooseSetterOffSuit(trickState, validPlays);
             } else {
                 // Other SETTER is still winning - reinforce the victory with count if possible
-                const countPlays = validPlays.filter(d => this.isCountDomino(d));
+                const countPlays = this.getCountDominoes(validPlays);
                 if (countPlays.length > 0) {
                     // Prefer 10-counts over 5-counts to maximize points
                     const tenCountPlays = countPlays.filter(d => 
@@ -951,19 +1007,286 @@ class Player {
         }
     }
     
+    // Helper method to evaluate domino value for throwing off suit
+    evaluateDominoValueForThrowing(domino, trump) {
+        // Higher value = more valuable to keep, lower value = better to throw
+        if (domino.isDouble()) {
+            // Doubles are very valuable - higher doubles are more valuable
+            return 100 + domino.ends[0]; // 6-6 = 106, 5-5 = 105, etc.
+        } else if (domino.isTrump(trump)) {
+            // Trump dominoes are valuable - higher degree = more valuable
+            const degree = domino.getDegree(trump);
+            return 80 + degree; // Trump 6 = 86, Trump 5 = 85, etc.
+        } else if (this.isCountDomino(domino)) {
+            // Count dominoes are valuable - 10-counts more than 5-counts
+            const [a, b] = domino.ends.slice().sort((x, y) => x - y);
+            if ((a === 5 && b === 5) || (a === 4 && b === 6)) {
+                return 70; // 10-count dominoes
+            } else {
+                return 60; // 5-count dominoes
+            }
+        } else {
+            // Regular off dominoes - higher values are slightly more valuable
+            const maxEnd = Math.max(...domino.ends);
+            return maxEnd; // 6-5 = 6, 4-3 = 4, etc.
+        }
+    }
+    
+    // Helper method to check if playing off suit
+    isPlayingOffSuit(trickState) {
+        if (trickState.currentSuit === null) {
+            return false; // Leading the trick
+        }
+        // Check if we have any dominoes that can follow the led suit
+        const canFollowSuit = this.hand.some(d => d.canFollowSuit(trickState.currentSuit, trickState.trump));
+        return !canFollowSuit;
+    }
+    
+    // Helper method to get off suit plays
+    getOffSuitPlays(validPlays, trump) {
+        return validPlays.filter(d => !d.isTrump(trump));
+    }
+    
+    // Helper method to get count dominoes from a list
+    getCountDominoes(dominoes) {
+        return dominoes.filter(d => this.isCountDomino(d));
+    }
+    
+    // Helper method to get non-count dominoes from a list
+    getNonCountDominoes(dominoes) {
+        return dominoes.filter(d => !this.isCountDomino(d));
+    }
+    
+    // Helper method to get doubles from a list
+    getDoubles(dominoes) {
+        return dominoes.filter(d => d.isDouble());
+    }
+    
+    // Helper method to get non-doubles from a list
+    getNonDoubles(dominoes) {
+        return dominoes.filter(d => !d.isDouble());
+    }
+    
+    // Helper method to check if a higher trump is still out there
+    isHigherTrumpOutThere(trump, degree) {
+        // Check if any domino with higher trump degree has been played
+        const higherTrumpDominoes = [
+            [trump, 6], [trump, 5], [trump, 4], [trump, 3], [trump, 2], [trump, 1], [trump, 0]
+        ];
+        
+        for (const [a, b] of higherTrumpDominoes) {
+            const dominoKey = JSON.stringify([a, b]);
+            if (!this.game.playedDominoesThisHand.has(dominoKey)) {
+                // This higher trump is still out there
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    // Helper method to check if trump double is still out there
+    isTrumpDoubleOutThere(trump) {
+        const trumpDoubleKey = JSON.stringify([trump, trump]);
+        return !this.game.playedDominoesThisHand.has(trumpDoubleKey);
+    }
+    
+    // Helper method to evaluate domino for leading (doubles are very strong for leading)
+    evaluateDominoForLeading(domino, trump) {
+        if (domino.isDouble()) {
+            // Doubles are excellent for leading - only trump doubles can beat them
+            if (domino.isTrump(trump)) {
+                return 200; // Trump double is best for leading
+            } else {
+                return 150 + domino.ends[0]; // Higher doubles are better for leading
+            }
+        } else if (domino.isTrump(trump)) {
+            // Trump dominoes - higher degree = better for leading
+            const degree = domino.getDegree(trump);
+            return 100 + degree; // Trump 6 = 106, Trump 5 = 105, etc.
+        } else {
+            // Off dominoes - these are risky to lead
+            const maxEnd = Math.max(...domino.ends);
+            return maxEnd; // 6-5 = 6, 4-3 = 4, etc.
+        }
+    }
+    
+    // Helper method to count remaining dominoes in hand by type
+    countRemainingDominoes() {
+        const counts = {
+            doubles: this.getDoubles(this.hand).length,
+            trumps: this.hand.filter(d => d.isTrump(this.game.trump)).length,
+            countDominoes: this.getCountDominoes(this.hand).length,
+            total: this.hand.length
+        };
+        return counts;
+    }
+    
     // Placeholder methods that will be implemented later
     getStrongestDominoLeader(trickState) {
-        // TODO: Implement
-        return this.hand[0];
+        // LEADER should prioritize doubles for leading and avoid throwing trumps when higher trumps are out there
+        
+        // First priority: doubles (excellent for leading)
+        const doubles = this.getDoubles(this.hand);
+        if (doubles.length > 0) {
+            // Prefer trump double first, then higher non-trump doubles
+            const trumpDoubles = doubles.filter(d => d.isTrump(trickState.trump));
+            if (trumpDoubles.length > 0) {
+                return trumpDoubles[0]; // Trump double is best
+            }
+            
+            // Sort non-trump doubles by value (higher is better for leading)
+            doubles.sort((a, b) => b.ends[0] - a.ends[0]);
+            return doubles[0]; // Highest double
+        }
+        
+        // Second priority: trump dominoes (but avoid if higher trumps are out there)
+        const trumpPlays = this.hand.filter(d => d.isTrump(trickState.trump));
+        if (trumpPlays.length > 0) {
+            // Find the highest trump we have
+            const highestTrump = trumpPlays.reduce((max, d) => 
+                d.getDegree(trickState.trump) > max.getDegree(trickState.trump) ? d : max
+            );
+            const highestDegree = highestTrump.getDegree(trickState.trump);
+            
+            // Check if higher trumps are still out there
+            if (!this.isHigherTrumpOutThere(trickState.trump, highestDegree)) {
+                // No higher trumps out there - safe to lead with this trump
+                return highestTrump;
+            } else {
+                // Higher trumps are out there - avoid leading with trump
+                // Look for strong off dominoes instead
+                const offPlays = this.hand.filter(d => !d.isTrump(trickState.trump));
+                if (offPlays.length > 0) {
+                    // Prefer count dominoes for leading
+                    const countPlays = this.getCountDominoes(offPlays);
+                    if (countPlays.length > 0) {
+                        return countPlays.reduce((max, d) => 
+                            this.evaluateDominoForLeading(d, trickState.trump) > this.evaluateDominoForLeading(max, trickState.trump) ? d : max
+                        );
+                    }
+                    // Otherwise, lead with highest off domino
+                    return offPlays.reduce((max, d) => 
+                        this.evaluateDominoForLeading(d, trickState.trump) > this.evaluateDominoForLeading(max, trickState.trump) ? d : max
+                    );
+                }
+                // No off plays available - forced to lead with trump
+                return highestTrump;
+            }
+        }
+        
+        // Third priority: count dominoes (good for leading)
+        const countPlays = this.getCountDominoes(this.hand);
+        if (countPlays.length > 0) {
+            return countPlays.reduce((max, d) => 
+                this.evaluateDominoForLeading(d, trickState.trump) > this.evaluateDominoForLeading(max, trickState.trump) ? d : max
+            );
+        }
+        
+        // Last resort: any domino
+        return this.hand.reduce((max, d) => 
+            this.evaluateDominoForLeading(d, trickState.trump) > this.evaluateDominoForLeading(max, trickState.trump) ? d : max
+        );
     }
     
     getStrongestDominoSupporter(trickState) {
-        // TODO: Implement
+        // SUPPORTER should preserve doubles for critical moments and lead with strong non-doubles
+        
+        // First priority: strong non-double trumps (preserve doubles)
+        const trumpPlays = this.hand.filter(d => d.isTrump(trickState.trump) && !d.isDouble());
+        if (trumpPlays.length > 0) {
+            // Find highest non-double trump
+            const highestTrump = trumpPlays.reduce((max, d) => 
+                d.getDegree(trickState.trump) > max.getDegree(trickState.trump) ? d : max
+            );
+            const highestDegree = highestTrump.getDegree(trickState.trump);
+            
+            // Check if higher trumps are still out there
+            if (!this.isHigherTrumpOutThere(trickState.trump, highestDegree)) {
+                // No higher trumps out there - safe to lead with this trump
+                return highestTrump;
+            }
+        }
+        
+        // Second priority: count dominoes (good for scoring)
+        const countPlays = this.getCountDominoes(this.hand);
+        if (countPlays.length > 0) {
+            return countPlays.reduce((max, d) => 
+                this.evaluateDominoForLeading(d, trickState.trump) > this.evaluateDominoForLeading(max, trickState.trump) ? d : max
+            );
+        }
+        
+        // Third priority: strong off dominoes (preserve doubles)
+        const offPlays = this.hand.filter(d => !d.isTrump(trickState.trump) && !d.isDouble());
+        if (offPlays.length > 0) {
+            return offPlays.reduce((max, d) => 
+                this.evaluateDominoForLeading(d, trickState.trump) > this.evaluateDominoForLeading(max, trickState.trump) ? d : max
+            );
+        }
+        
+        // Last resort: doubles (only if no other options)
+        const doubles = this.getDoubles(this.hand);
+        if (doubles.length > 0) {
+            // Prefer trump double first, then higher non-trump doubles
+            const trumpDoubles = doubles.filter(d => d.isTrump(trickState.trump));
+            if (trumpDoubles.length > 0) {
+                return trumpDoubles[0];
+            }
+            doubles.sort((a, b) => b.ends[0] - a.ends[0]);
+            return doubles[0];
+        }
+        
+        // Fallback
         return this.hand[0];
     }
     
     getStrongestDominoSetter(trickState) {
-        // TODO: Implement
+        // SETTER should preserve doubles for critical moments and lead with strong non-doubles
+        
+        // First priority: strong non-double trumps (preserve doubles)
+        const trumpPlays = this.hand.filter(d => d.isTrump(trickState.trump) && !d.isDouble());
+        if (trumpPlays.length > 0) {
+            // Find highest non-double trump
+            const highestTrump = trumpPlays.reduce((max, d) => 
+                d.getDegree(trickState.trump) > max.getDegree(trickState.trump) ? d : max
+            );
+            const highestDegree = highestTrump.getDegree(trickState.trump);
+            
+            // Check if higher trumps are still out there
+            if (!this.isHigherTrumpOutThere(trickState.trump, highestDegree)) {
+                // No higher trumps out there - safe to lead with this trump
+                return highestTrump;
+            }
+        }
+        
+        // Second priority: count dominoes (good for scoring)
+        const countPlays = this.getCountDominoes(this.hand);
+        if (countPlays.length > 0) {
+            return countPlays.reduce((max, d) => 
+                this.evaluateDominoForLeading(d, trickState.trump) > this.evaluateDominoForLeading(max, trickState.trump) ? d : max
+            );
+        }
+        
+        // Third priority: strong off dominoes (preserve doubles)
+        const offPlays = this.hand.filter(d => !d.isTrump(trickState.trump) && !d.isDouble());
+        if (offPlays.length > 0) {
+            return offPlays.reduce((max, d) => 
+                this.evaluateDominoForLeading(d, trickState.trump) > this.evaluateDominoForLeading(max, trickState.trump) ? d : max
+            );
+        }
+        
+        // Last resort: doubles (only if no other options)
+        const doubles = this.getDoubles(this.hand);
+        if (doubles.length > 0) {
+            // Prefer trump double first, then higher non-trump doubles
+            const trumpDoubles = doubles.filter(d => d.isTrump(trickState.trump));
+            if (trumpDoubles.length > 0) {
+                return trumpDoubles[0];
+            }
+            doubles.sort((a, b) => b.ends[0] - a.ends[0]);
+            return doubles[0];
+        }
+        
+        // Fallback
         return this.hand[0];
     }
     
@@ -993,28 +1316,256 @@ class Player {
     }
     
     chooseSupporterLeaderWinning(trickState, validPlays) {
-        // TODO: Implement
-        return validPlays[0];
+        // When LEADER is winning, SUPPORTER should optimize for count dominoes
+        // Priority: count dominoes > non-count non-doubles > non-count doubles
+        
+        // If playing off suit, prioritize count dominoes
+        if (this.isPlayingOffSuit(trickState)) {
+            const offPlays = this.getOffSuitPlays(validPlays, trickState.trump);
+            if (offPlays.length > 0) {
+                // First priority: count dominoes (be liberal about throwing count when leader is winning)
+                const countPlays = this.getCountDominoes(offPlays);
+                if (countPlays.length > 0) {
+                    // Prefer 10-counts over 5-counts to maximize points
+                    const tenCountPlays = countPlays.filter(d => 
+                        (d.ends[0] === 5 && d.ends[1] === 5) || 
+                        (d.ends[0] === 4 && d.ends[1] === 6) || 
+                        (d.ends[0] === 6 && d.ends[1] === 4)
+                    );
+                    if (tenCountPlays.length > 0) {
+                        return tenCountPlays.reduce((max, d) => 
+                            this.evaluateDominoStrength(d, trickState.trump) > this.evaluateDominoStrength(max, trickState.trump) ? d : max
+                        );
+                    }
+                    return countPlays.reduce((max, d) => 
+                        this.evaluateDominoStrength(d, trickState.trump) > this.evaluateDominoStrength(max, trickState.trump) ? d : max
+                    );
+                }
+                
+                // Second priority: non-count, non-double offs (preserve doubles)
+                const nonCountNonDoubleOffs = this.getNonCountDominoes(this.getNonDoubles(offPlays));
+                if (nonCountNonDoubleOffs.length > 0) {
+                    return nonCountNonDoubleOffs.reduce((min, d) => 
+                        this.evaluateDominoValueForThrowing(d, trickState.trump) < this.evaluateDominoValueForThrowing(min, trickState.trump) ? d : min
+                    );
+                }
+                
+                // Third priority: non-count doubles (preserve ALL doubles when possible)
+                const nonCountDoubles = this.getNonCountDominoes(this.getDoubles(offPlays));
+                if (nonCountDoubles.length > 0) {
+                    // Only throw doubles if we have no other options or if it's a very low double
+                    // Prefer to preserve all doubles for critical moments
+                    const lowDoubles = nonCountDoubles.filter(d => d.ends[0] <= 2); // Only 0-0, 1-1, 2-2
+                    if (lowDoubles.length > 0) {
+                        return lowDoubles.reduce((min, d) => 
+                            d.ends[0] < min.ends[0] ? d : min
+                        );
+                    }
+                    // If no low doubles, try to avoid throwing doubles entirely
+                    // Look for any other off plays first
+                    const otherOffPlays = offPlays.filter(d => !d.isDouble());
+                    if (otherOffPlays.length > 0) {
+                        return otherOffPlays.reduce((min, d) => 
+                            this.evaluateDominoValueForThrowing(d, trickState.trump) < this.evaluateDominoValueForThrowing(min, trickState.trump) ? d : min
+                        );
+                    }
+                    // Forced to throw a double - prefer lowest
+                    return nonCountDoubles.reduce((min, d) => 
+                        d.ends[0] < min.ends[0] ? d : min
+                    );
+                }
+                
+                // Fallback - any off
+                return offPlays.reduce((min, d) => 
+                    this.evaluateDominoValueForThrowing(d, trickState.trump) < this.evaluateDominoValueForThrowing(min, trickState.trump) ? d : min
+                );
+            }
+        }
+        
+        // Must follow suit - play highest valid domino to support leader
+        return validPlays.reduce((max, d) => 
+            this.evaluateDominoStrength(d, trickState.trump) > this.evaluateDominoStrength(max, trickState.trump) ? d : max
+        );
     }
     
     chooseSupporterTakeTrick(trickState, validPlays) {
-        // TODO: Implement
-        return validPlays[0];
+        // SUPPORTER trying to take the trick back from SETTER
+        // Priority: winning plays that preserve count > winning plays with count > highest valid play
+        
+        const winningPlays = validPlays.filter(d => this.canWinTrick(trickState, d));
+        
+        if (winningPlays.length > 0) {
+            // First priority: winning plays that don't use count dominoes
+            const nonCountWinners = this.getNonCountDominoes(winningPlays);
+            if (nonCountWinners.length > 0) {
+                return nonCountWinners.reduce((max, d) => 
+                    this.evaluateDominoStrength(d, trickState.trump) > this.evaluateDominoStrength(max, trickState.trump) ? d : max
+                );
+            }
+            
+            // Second priority: winning plays with count dominoes (forced to use count)
+            const countWinners = this.getCountDominoes(winningPlays);
+            if (countWinners.length > 0) {
+                // Prefer 5-counts over 10-counts when forced to use count
+                const fiveCountWinners = countWinners.filter(d => {
+                    const [a, b] = d.ends.slice().sort((x, y) => x - y);
+                    return (a === 0 && b === 5) || (a === 1 && b === 4) || (a === 2 && b === 3);
+                });
+                if (fiveCountWinners.length > 0) {
+                    return fiveCountWinners.reduce((max, d) => 
+                        this.evaluateDominoStrength(d, trickState.trump) > this.evaluateDominoStrength(max, trickState.trump) ? d : max
+                    );
+                }
+                return countWinners.reduce((max, d) => 
+                    this.evaluateDominoStrength(d, trickState.trump) > this.evaluateDominoStrength(max, trickState.trump) ? d : max
+                );
+            }
+            
+            // Fallback - any winning play
+            return winningPlays.reduce((max, d) => 
+                this.evaluateDominoStrength(d, trickState.trump) > this.evaluateDominoStrength(max, trickState.trump) ? d : max
+            );
+        }
+        
+        // Cannot win - play highest valid domino
+        return validPlays.reduce((max, d) => 
+            this.evaluateDominoStrength(d, trickState.trump) > this.evaluateDominoStrength(max, trickState.trump) ? d : max
+        );
     }
     
     chooseSupporterFollowSuit(trickState, validPlays) {
-        // TODO: Implement
-        return validPlays[0];
+        // SUPPORTER following suit - play optimally to support leader
+        // Priority: highest valid play that can win > highest valid play
+        
+        const winningPlays = validPlays.filter(d => this.canWinTrick(trickState, d));
+        
+        if (winningPlays.length > 0) {
+            // Can win - play highest winning play
+            return winningPlays.reduce((max, d) => 
+                this.evaluateDominoStrength(d, trickState.trump) > this.evaluateDominoStrength(max, trickState.trump) ? d : max
+            );
+        }
+        
+        // Cannot win - play lowest valid play to preserve higher dominoes
+        return validPlays.reduce((min, d) => 
+            this.evaluateDominoStrength(d, trickState.trump) < this.evaluateDominoStrength(min, trickState.trump) ? d : min
+        );
     }
     
     chooseSetterWinningPlay(trickState, winningPlays) {
-        // TODO: Implement
-        return winningPlays[0];
+        // SETTER trying to win the trick
+        // Priority: winning plays that preserve count > winning plays with count > highest winning play
+        
+        // First priority: winning plays that don't use count dominoes
+        const nonCountWinners = this.getNonCountDominoes(winningPlays);
+        if (nonCountWinners.length > 0) {
+            return nonCountWinners.reduce((max, d) => 
+                this.evaluateDominoStrength(d, trickState.trump) > this.evaluateDominoStrength(max, trickState.trump) ? d : max
+            );
+        }
+        
+        // Second priority: winning plays with count dominoes (forced to use count)
+        const countWinners = this.getCountDominoes(winningPlays);
+        if (countWinners.length > 0) {
+            // Prefer 5-counts over 10-counts when forced to use count
+            const fiveCountWinners = countWinners.filter(d => {
+                const [a, b] = d.ends.slice().sort((x, y) => x - y);
+                return (a === 0 && b === 5) || (a === 1 && b === 4) || (a === 2 && b === 3);
+            });
+            if (fiveCountWinners.length > 0) {
+                return fiveCountWinners.reduce((max, d) => 
+                    this.evaluateDominoStrength(d, trickState.trump) > this.evaluateDominoStrength(max, trickState.trump) ? d : max
+                );
+            }
+            return countWinners.reduce((max, d) => 
+                this.evaluateDominoStrength(d, trickState.trump) > this.evaluateDominoStrength(max, trickState.trump) ? d : max
+            );
+        }
+        
+        // Fallback - any winning play
+        return winningPlays.reduce((max, d) => 
+            this.evaluateDominoStrength(d, trickState.trump) > this.evaluateDominoStrength(max, trickState.trump) ? d : max
+        );
     }
     
     chooseSetterOffSuit(trickState, validPlays) {
-        // TODO: Implement
-        return validPlays[0];
+        // SETTER playing off suit - avoid count dominoes and preserve high doubles
+        // Priority: non-count non-doubles > non-count low doubles > non-count high doubles > count dominoes
+        
+        const offPlays = this.getOffSuitPlays(validPlays, trickState.trump);
+        
+        if (offPlays.length > 0) {
+            // First priority: non-count, non-double offs (safest to throw)
+            const nonCountNonDoubleOffs = this.getNonCountDominoes(this.getNonDoubles(offPlays));
+            if (nonCountNonDoubleOffs.length > 0) {
+                // Throw the least valuable non-count non-double
+                return nonCountNonDoubleOffs.reduce((min, d) => 
+                    this.evaluateDominoValueForThrowing(d, trickState.trump) < this.evaluateDominoValueForThrowing(min, trickState.trump) ? d : min
+                );
+            }
+            
+            // Second priority: non-count doubles (preserve ALL doubles when possible)
+            const nonCountDoubles = this.getNonCountDominoes(this.getDoubles(offPlays));
+            if (nonCountDoubles.length > 0) {
+                // SETTER should be very conservative about throwing doubles
+                // Only throw very low doubles (0-0, 1-1) when absolutely necessary
+                const veryLowDoubles = nonCountDoubles.filter(d => d.ends[0] <= 1); // Only 0-0, 1-1
+                if (veryLowDoubles.length > 0) {
+                    return veryLowDoubles.reduce((min, d) => 
+                        d.ends[0] < min.ends[0] ? d : min
+                    );
+                }
+                // If no very low doubles, try to avoid throwing doubles entirely
+                // Look for any other off plays first
+                const otherOffPlays = offPlays.filter(d => !d.isDouble());
+                if (otherOffPlays.length > 0) {
+                    return otherOffPlays.reduce((min, d) => 
+                        this.evaluateDominoValueForThrowing(d, trickState.trump) < this.evaluateDominoValueForThrowing(min, trickState.trump) ? d : min
+                    );
+                }
+                // Forced to throw a double - prefer lowest
+                return nonCountDoubles.reduce((min, d) => 
+                    d.ends[0] < min.ends[0] ? d : min
+                );
+            }
+            
+            // Third priority: count dominoes (only if no other options)
+            const countPlays = this.getCountDominoes(offPlays);
+            if (countPlays.length > 0) {
+                // Prefer 5-counts over 10-counts when forced to throw count
+                const fiveCountPlays = countPlays.filter(d => {
+                    const [a, b] = d.ends.slice().sort((x, y) => x - y);
+                    return (a === 0 && b === 5) || (a === 1 && b === 4) || (a === 2 && b === 3);
+                });
+                if (fiveCountPlays.length > 0) {
+                    return fiveCountPlays.reduce((min, d) => 
+                        this.evaluateDominoValueForThrowing(d, trickState.trump) < this.evaluateDominoValueForThrowing(min, trickState.trump) ? d : min
+                    );
+                }
+                return countPlays.reduce((min, d) => 
+                    this.evaluateDominoValueForThrowing(d, trickState.trump) < this.evaluateDominoValueForThrowing(min, trickState.trump) ? d : min
+                );
+            }
+            
+            // Fallback - any off play
+            return offPlays.reduce((min, d) => 
+                this.evaluateDominoValueForThrowing(d, trickState.trump) < this.evaluateDominoValueForThrowing(min, trickState.trump) ? d : min
+            );
+        }
+        
+        // No off plays available - must play trump
+        const trumpPlays = validPlays.filter(d => d.isTrump(trickState.trump));
+        if (trumpPlays.length > 0) {
+            // Play lowest trump to preserve higher trumps
+            return trumpPlays.reduce((min, d) => 
+                this.evaluateDominoStrength(d, trickState.trump) < this.evaluateDominoStrength(min, trickState.trump) ? d : min
+            );
+        }
+        
+        // Fallback - any valid play
+        return validPlays.reduce((min, d) => 
+            this.evaluateDominoValueForThrowing(d, trickState.trump) < this.evaluateDominoValueForThrowing(min, trickState.trump) ? d : min
+        );
     }
 }
 
