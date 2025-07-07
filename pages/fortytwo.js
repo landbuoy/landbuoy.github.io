@@ -1489,8 +1489,8 @@ class Player {
     }
     
     chooseSetterOffSuit(trickState, validPlays) {
-        // SETTER playing off suit - avoid count dominoes and preserve high doubles
-        // Priority: non-count non-doubles > non-count low doubles > non-count high doubles > count dominoes
+        // SETTER playing off suit - NEVER throw count dominoes if there are other options
+        // Priority: non-count non-doubles > non-count doubles > count dominoes (only if no other options)
         
         const offPlays = this.getOffSuitPlays(validPlays, trickState.trump);
         
@@ -1504,7 +1504,7 @@ class Player {
                 );
             }
             
-            // Second priority: non-count doubles (preserve ALL doubles when possible)
+            // Second priority: non-count doubles (preserve high doubles when possible)
             const nonCountDoubles = this.getNonCountDominoes(this.getDoubles(offPlays));
             if (nonCountDoubles.length > 0) {
                 // SETTER should be very conservative about throwing doubles
@@ -1516,7 +1516,7 @@ class Player {
                     );
                 }
                 // If no very low doubles, try to avoid throwing doubles entirely
-                // Look for any other off plays first
+                // Look for any other off plays first (including count dominoes)
                 const otherOffPlays = offPlays.filter(d => !d.isDouble());
                 if (otherOffPlays.length > 0) {
                     return otherOffPlays.reduce((min, d) => 
@@ -1529,9 +1529,20 @@ class Player {
                 );
             }
             
-            // Third priority: count dominoes (only if no other options)
+            // Third priority: count dominoes (ONLY if no non-count options available)
+            // This should NEVER be reached if there are non-count options available
             const countPlays = this.getCountDominoes(offPlays);
             if (countPlays.length > 0) {
+                // Double-check: if we have any non-count options, we should NOT be here
+                const allNonCountOffs = this.getNonCountDominoes(offPlays);
+                if (allNonCountOffs.length > 0) {
+                    // We have non-count options - use them instead of count dominoes
+                    return allNonCountOffs.reduce((min, d) => 
+                        this.evaluateDominoValueForThrowing(d, trickState.trump) < this.evaluateDominoValueForThrowing(min, trickState.trump) ? d : min
+                    );
+                }
+                
+                // Only reach here if we have NO non-count options available
                 // Prefer 5-counts over 10-counts when forced to throw count
                 const fiveCountPlays = countPlays.filter(d => {
                     const [a, b] = d.ends.slice().sort((x, y) => x - y);
