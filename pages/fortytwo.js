@@ -1127,7 +1127,10 @@ class Player {
         
         for (const [a, b] of higherTrumpDominoes) {
             const dominoKey = JSON.stringify([a, b]);
-            if (!this.game.playedDominoesThisHand.has(dominoKey)) {
+            const hasBeenPlayed = this.game.playedDominoesThisHand.some(entry => 
+                entry.domino.toString() === dominoKey
+            );
+            if (!hasBeenPlayed) {
                 // This higher trump is still out there
                 return true;
             }
@@ -1138,7 +1141,17 @@ class Player {
     // Helper method to check if trump double is still out there
     isTrumpDoubleOutThere(trump) {
         const trumpDoubleKey = JSON.stringify([trump, trump]);
-        return !this.game.playedDominoesThisHand.has(trumpDoubleKey);
+        const hasBeenPlayed = this.game.playedDominoesThisHand.some(entry => 
+            entry.domino.toString() === trumpDoubleKey
+        );
+        return !hasBeenPlayed;
+    }
+    
+    // Helper method to check if a specific domino has been played
+    hasDominoBeenPlayed(domino) {
+        return this.game.playedDominoesThisHand.some(entry => 
+            entry.domino.toString() === domino.toString()
+        );
     }
     
     // Helper method to evaluate domino for leading (doubles are very strong for leading)
@@ -1172,9 +1185,9 @@ class Player {
         return counts;
     }
     
-    // Placeholder methods that will be implemented later
     getStrongestDominoLeader(trickState) {
         // LEADER should prioritize doubles for leading and avoid throwing trumps when higher trumps are out there
+        // If no walkers are available, LEADER should still lead with the best available domino
         
         // First priority: doubles (excellent for leading)
         const doubles = this.getDoubles(this.hand);
@@ -1236,7 +1249,7 @@ class Player {
             );
         }
         
-        // Last resort: count dominoes
+        // Last resort: count dominoes (LEADER should avoid leading with count if possible)
         const countPlays = this.getCountDominoes(this.hand);
         if (countPlays.length > 0) {
             return countPlays.reduce((max, d) => 
@@ -1244,10 +1257,8 @@ class Player {
             );
         }
         
-        // Fallback: any domino
-        return this.hand.reduce((max, d) => 
-            this.evaluateDominoForLeading(d, trickState.trump) > this.evaluateDominoForLeading(max, trickState.trump) ? d : max
-        );
+        // Fallback: any domino (should never reach here, but just in case)
+        return this.hand[0];
     }
     
     getStrongestDominoSupporter(trickState) {
@@ -1611,7 +1622,7 @@ class Player {
     }
     
     chooseSetterOffSuit(trickState, validPlays) {
-        // SETTER playing off suit - NEVER throw count dominoes if there are other options
+        // SETTER playing off suit - preserve count dominoes over doubles except 6-6 unless 6-4 has been played
         // Priority: non-count non-doubles > non-count doubles > count dominoes (only if no other options)
         
         const offPlays = this.getOffSuitPlays(validPlays, trickState.trump);
@@ -1630,6 +1641,22 @@ class Player {
             // Second priority: non-count doubles (preserve high doubles when possible)
             const nonCountDoubles = this.getNonCountDominoes(this.getDoubles(offPlays));
             if (nonCountDoubles.length > 0) {
+                // Check for special case: 6-6 vs 6-4
+                const sixSix = nonCountDoubles.find(d => d.ends[0] === 6 && d.ends[1] === 6);
+                const sixFourDomino = new Domino(6, 4);
+                const sixFourPlayed = this.hasDominoBeenPlayed(sixFourDomino);
+                
+                if (sixSix && !sixFourPlayed) {
+                    // 6-6 is available but 6-4 has not been played - preserve 6-6
+                    const otherDoubles = nonCountDoubles.filter(d => !(d.ends[0] === 6 && d.ends[1] === 6));
+                    if (otherDoubles.length > 0) {
+                        // Throw other doubles first
+                        return otherDoubles.reduce((min, d) => 
+                            d.ends[0] < min.ends[0] ? d : min
+                        );
+                    }
+                }
+                
                 // SETTER should be very conservative about throwing doubles
                 // Only throw very low doubles (0-0, 1-1) when absolutely necessary
                 const veryLowDoubles = nonCountDoubles.filter(d => d.ends[0] <= 1); // Only 0-0, 1-1
