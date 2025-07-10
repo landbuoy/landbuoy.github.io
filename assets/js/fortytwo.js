@@ -85,13 +85,14 @@ class PlayerWindowManager {
                 "Red-flanked Bluetail": "../assets/img/songbirds/Red_flanked_Bluetail.jpg",
                 "Siberian Jay": "../assets/img/songbirds/Siberian_Jay.jpg",
                 "Pine Grosbeak": "../assets/img/songbirds/Pine_Grosbeak.jpg",
-                "Himalayan Monal": "../assets/img/songbirds/Himalayan_Monal.jpg",
+                "Himalayan Monal": "../assets/img/songbirds/Himalayan_Monal.png",
                 "Blood Pheasant": "../assets/img/songbirds/Blood_Pheasant.jpg",
                 "Himalayan Bulbul": "../assets/img/songbirds/Himalayan_Bulbul.jpg",
                 "Rufous-breasted Accentor": "../assets/img/songbirds/Rufous_breasted_Accentor.jpg",
                 "Himalayan Rubythroat": "../assets/img/songbirds/Himalayan_Rubythroat.jpg",
                 "White-browed Rosefinch": "../assets/img/songbirds/White_browed_Rosefinch.jpg",
-                "Alpine Chough": "../assets/img/songbirds/Alpine_Chough.jpg"
+                "Alpine Chough": "../assets/img/songbirds/Alpine_Chough.jpg",
+                "Fiscal Shrike": "../assets/img/songbirds/Fiscal_Shrike.jpg"
             };
         }
     }
@@ -104,8 +105,8 @@ class PlayerWindowManager {
         const window = document.createElement('div');
         window.className = 'player-window';
         window.id = `player-window-${playerIndex}`;
-        window.style.left = `${50 + (playerIndex * 320)}px`;
-        window.style.top = `${50 + (playerIndex * 220)}px`;
+        window.style.left = `${50 + (playerIndex * 480)}px`;
+        window.style.top = `${50 + (playerIndex * 320)}px`;
         
         // Get bird image path
         const imagePath = this.imagePaths[birdName] || '';
@@ -127,6 +128,13 @@ class PlayerWindowManager {
                 <div class="player-status-messages" id="player-status-${playerIndex}">
                     <div class="player-status-message info">Waiting for game to start...</div>
                 </div>
+                ${playerIndex === 0 ? `
+                <div class="player-bid-input-area" id="player-bid-input-${playerIndex}" style="display: none;">
+                    <label for="player-bid-input-field-${playerIndex}">Enter bid (or 'p' to pass):</label>
+                    <input type="text" id="player-bid-input-field-${playerIndex}" class="player-bid-input" maxlength="3">
+                    <button id="player-submit-bid-${playerIndex}" class="player-submit-bid-btn">Submit</button>
+                </div>
+                ` : ''}
             </div>
         `;
         
@@ -295,6 +303,89 @@ class PlayerWindowManager {
                 this.updatePlayerRole(index, 'Bidding...');
             }
         });
+    }
+    
+    showBidInput(playerIndex) {
+        const window = this.playerWindows.get(playerIndex);
+        if (!window) return;
+        
+        const bidInputArea = window.querySelector('.player-bid-input-area');
+        if (bidInputArea) {
+            bidInputArea.style.display = 'block';
+            const inputField = bidInputArea.querySelector('.player-bid-input');
+            if (inputField) {
+                inputField.focus();
+            }
+        }
+    }
+    
+    hideBidInput(playerIndex) {
+        const window = this.playerWindows.get(playerIndex);
+        if (!window) return;
+        
+        const bidInputArea = window.querySelector('.player-bid-input-area');
+        if (bidInputArea) {
+            bidInputArea.style.display = 'none';
+        }
+    }
+    
+    setupBidInputHandler(playerIndex, game) {
+        const window = this.playerWindows.get(playerIndex);
+        if (!window) return;
+        
+        const submitBtn = window.querySelector('.player-submit-bid-btn');
+        const inputField = window.querySelector('.player-bid-input');
+        
+        if (submitBtn && inputField) {
+            // Remove existing listeners
+            submitBtn.replaceWith(submitBtn.cloneNode(true));
+            inputField.replaceWith(inputField.cloneNode(true));
+            
+            // Get new references
+            const newSubmitBtn = window.querySelector('.player-submit-bid-btn');
+            const newInputField = window.querySelector('.player-bid-input');
+            
+            // Add new listeners
+            newSubmitBtn.addEventListener('click', () => {
+                this.handlePlayerBidSubmit(playerIndex, game);
+            });
+            
+            newInputField.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.handlePlayerBidSubmit(playerIndex, game);
+                }
+            });
+        }
+    }
+    
+    handlePlayerBidSubmit(playerIndex, game) {
+        const window = this.playerWindows.get(playerIndex);
+        if (!window) return;
+        
+        const inputField = window.querySelector('.player-bid-input');
+        if (!inputField) return;
+        
+        const input = inputField.value.trim().toLowerCase();
+        let bid;
+        
+        if (input === 'p') {
+            bid = 'pass';
+        } else {
+            bid = parseInt(input);
+            if (isNaN(bid) || bid <= game.currentBid) {
+                game.updateStatus("Invalid bid. Enter a number higher than current bid or 'p' to pass.");
+                return;
+            }
+        }
+        
+        // Clear input field
+        inputField.value = '';
+        
+        // Hide bid input
+        this.hideBidInput(playerIndex);
+        
+        // Process the bid through the game
+        game.processPlayerBid(bid);
     }
 }
 
@@ -2899,7 +2990,6 @@ class Game {
         this.displayPlayerHand();
         
         this.hideElement(this.readyBidding);
-        this.showElement(this.biddingArea);
         
         this.updateStatus("Bidding phase starting. You'll be prompted when it's your turn to bid.");
         
@@ -3003,9 +3093,8 @@ class Game {
         // Save bidding order for scoreboard display
         this.lastHandBidOrder = bidOrder;
         
-        // Initialize and show bidding board
-        this.initializeBiddingBoard(bidOrder);
-        this.showElement(this.biddingBoard);
+        // Initialize bidding board in player windows
+        this.initializeBiddingBoardInPlayerWindows(bidOrder);
         
         this.updateStatus("Bidding phase in progress...");
         
@@ -3056,11 +3145,17 @@ class Game {
     }
     
     showBiddingInterface(player, currentIndex, bidOrder, playerMap, playerData) {
-        this.biddingStatus.innerHTML = `It's your turn to bid, ${player}.<br>
-            Current bid: ${this.currentBid === 0 ? 'pass' : this.currentBid}`;
+        // Update main status
+        this.updateStatus(`Bidding phase in progress...`);
         
-        this.showElement(this.bidInputArea);
-        this.bidInput.focus();
+        // Show bidding interface in human player window
+        const humanPlayerIndex = 0;
+        this.playerWindowManager.addPlayerMessage(humanPlayerIndex, 
+            `It's your turn to bid! Current bid: ${this.currentBid === 0 ? 'pass' : this.currentBid}`, 'action');
+        
+        // Show bid input in player window
+        this.playerWindowManager.showBidInput(humanPlayerIndex);
+        this.playerWindowManager.setupBidInputHandler(humanPlayerIndex, this);
     }
     
     submitBidHandler() {
@@ -3077,6 +3172,10 @@ class Game {
             }
         }
         
+        this.processPlayerBid(bid);
+    }
+    
+    processPlayerBid(bid) {
         // Find current player
         const currentPlayer = this.players.find(p => p.isHuman);
         const playerName = this.formatPlayerNameWithRelationship(currentPlayer);
@@ -3257,6 +3356,19 @@ class Game {
             console.log('No winner, defaulting to last bidder:', lastBidder);
         }
         
+        // Show bidding results in all player windows
+        this.players.forEach((player, index) => {
+            const playerName = this.formatPlayerNameWithRelationship(player);
+            const bid = this.bidHistory[playerName] || 'pass';
+            const bidText = bid === 'pass' ? 'Passed' : `Bid: ${bid}`;
+            
+            if (playerName === this.highestBidder) {
+                this.playerWindowManager.addPlayerMessage(index, `WON BID with ${this.currentBid}!`, 'success');
+            } else {
+                this.playerWindowManager.addPlayerMessage(index, bidText, 'info');
+            }
+        });
+        
         // Show ready to start prompt
         this.showReadyToStart();
     }
@@ -3266,6 +3378,9 @@ class Game {
         this.trumpSuggested.innerHTML = `Select a trump suit:`;
         this.showElement(this.trumpSelection);
         this.hideElement(this.biddingArea);
+        
+        // Add trump selection prompt to human player window
+        this.playerWindowManager.addPlayerMessage(0, "Select a trump suit", 'action');
     }
     
     confirmTrumpHandler() {
@@ -3276,6 +3391,10 @@ class Game {
         }
         
         const trump = parseInt(selectedTrump.dataset.trump);
+        
+        // Show trump selection in human player window
+        this.playerWindowManager.addPlayerMessage(0, `Selected trump: ${trump}'s`, 'action');
+        
         this.setTrumpAndStartHand(trump);
     }
     
@@ -3289,6 +3408,16 @@ class Game {
         this.hideElement(this.biddingArea);
         
         this.updateStatus(`${this.bidWinner} wins the bid with ${this.winningBid} on ${this.trump} as trump.`);
+        
+        // Show trump selection in all player windows
+        this.players.forEach((player, index) => {
+            const playerName = this.formatPlayerNameWithRelationship(player);
+            if (playerName === this.bidWinner) {
+                this.playerWindowManager.addPlayerMessage(index, `Trump: ${this.trump}'s`, 'success');
+            } else {
+                this.playerWindowManager.addPlayerMessage(index, `Trump: ${this.trump}'s`, 'info');
+            }
+        });
         
         // Start playing the hand
         this.startHand();
@@ -3677,6 +3806,25 @@ class Game {
         });
     }
     
+    initializeBiddingBoardInPlayerWindows(bidOrder) {
+        // Clear all player messages and add bidding info
+        this.players.forEach((player, index) => {
+            this.playerWindowManager.clearPlayerMessages(index);
+            this.playerWindowManager.addPlayerMessage(index, 'Bidding phase starting...', 'info');
+        });
+        
+        // Add bidding order to each player's window
+        bidOrder.forEach((playerName, index) => {
+            const playerIndex = this.players.findIndex(p => 
+                this.formatPlayerNameWithRelationship(p) === playerName
+            );
+            if (playerIndex !== -1) {
+                this.playerWindowManager.addPlayerMessage(playerIndex, 
+                    `Bidding order: ${index + 1} of ${bidOrder.length}`, 'info');
+            }
+        });
+    }
+    
     updateBiddingBoard(playerName, bid) {
         const resultDiv = this.biddingResults.querySelector(`[data-player="${playerName}"]`);
         if (resultDiv) {
@@ -3687,17 +3835,35 @@ class Game {
                 bidAmount.style.fontWeight = 'bold';
             }
         }
+        
+        // Also update player window
+        const playerIndex = this.players.findIndex(p => 
+            this.formatPlayerNameWithRelationship(p) === playerName
+        );
+        if (playerIndex !== -1) {
+            const bidText = bid === 'pass' ? 'Pass' : `Bid: ${bid}`;
+            this.playerWindowManager.addPlayerMessage(playerIndex, bidText, 'action');
+        }
     }
     
     showReadyToStart() {
         this.hideElement(this.bidInputArea);
         this.showElement(this.readyToStart);
         this.updateStatus("Bidding complete! Click 'Ready to Start' to begin the hand.");
+        
+        // Add ready prompt to human player window
+        this.playerWindowManager.addPlayerMessage(0, "Click 'Ready to Start' to begin the hand", 'action');
     }
     
     startHandAfterBidding() {
         this.hideElement(this.readyToStart);
         this.hideElement(this.biddingBoard);
+        
+        // Clear bidding messages from all player windows and hide bid input
+        this.players.forEach((player, index) => {
+            this.playerWindowManager.clearPlayerMessages(index);
+            this.playerWindowManager.hideBidInput(index);
+        });
         
         // Set trump and winner info
         const winnerPlayer = this.players.find(p => this.formatPlayerNameWithRelationship(p) === this.highestBidder);

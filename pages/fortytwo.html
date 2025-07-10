@@ -298,6 +298,7 @@
         }
         
         .bidding-area {
+            display: none !important;
             background: rgba(0, 0, 0, 0.7);
             padding: 15px;
             border: 1px solid lime;
@@ -526,8 +527,8 @@
         
         .player-window {
             position: absolute;
-            width: 300px;
-            height: 200px;
+            width: 450px;
+            height: 300px;
             background: rgba(0, 0, 0, 0.9);
             border: 2px solid lime;
             border-radius: 8px;
@@ -551,7 +552,7 @@
         .player-window-title {
             color: lime;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 16px;
             flex-grow: 1;
             margin: 0;
         }
@@ -575,7 +576,7 @@
             padding: 12px;
             height: calc(100% - 40px);
             overflow-y: auto;
-            font-size: 12px;
+            font-size: 14px;
             line-height: 1.4;
         }
         
@@ -588,7 +589,7 @@
         .player-bird-image {
             width: 100%;
             height: auto;
-            max-height: 150px;
+            max-height: 200px;
             border-radius: 4px;
             border: 1px solid lime;
             object-fit: contain;
@@ -620,7 +621,7 @@
         .player-status-message {
             margin: 4px 0;
             padding: 2px 0;
-            font-size: 11px;
+            font-size: 13px;
         }
         
         .player-status-message.info {
@@ -640,12 +641,66 @@
             color: #ff4444;
         }
         
+        .player-status-message.success {
+            color: #4caf50;
+            font-weight: bold;
+        }
+        
         .player-window.minimized {
             height: 40px;
         }
         
         .player-window.minimized .player-window-content {
             display: none;
+        }
+        
+        .player-bid-input-area {
+            margin-top: 10px;
+            padding: 8px;
+            border: 1px solid lime;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .player-bid-input-area label {
+            display: block;
+            color: lime;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+        
+        .player-bid-input {
+            width: 80px;
+            padding: 6px;
+            font-size: 14px;
+            border: 1px solid lime;
+            border-radius: 3px;
+            background: black;
+            color: lime;
+            font-family: 'Courier New', monospace;
+            margin-right: 5px;
+        }
+        
+        .player-bid-input:focus {
+            outline: none;
+            border-color: #ffeb3b;
+        }
+        
+        .player-submit-bid-btn {
+            background: black;
+            color: lime;
+            border: 1px solid lime;
+            padding: 6px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+        
+        .player-submit-bid-btn:hover {
+            background: lime;
+            color: black;
         }
     </style>
 </head>
@@ -708,7 +763,7 @@
             </div>
         </div>
         
-        <div id="trump-selection" class="bidding-area hidden">
+        <div id="trump-selection" class="bidding-area hidden" style="display: none !important;">
             <h3>Trump Selection</h3>
             <div id="trump-suggested"></div>
             <div class="trump-selector">
