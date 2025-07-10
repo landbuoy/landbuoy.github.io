@@ -1770,112 +1770,6 @@ class Player {
     }
 }
 
-// Global draggable window creation function
-function makeDraggableWindow(id, title, content, openBtnId, openBtnLabel, position) {
-    // Remove existing window if present
-    $('#' + id).remove();
-    
-    const $window = $(`
-        <div id="${id}" class="draggable-window">
-            <div class="window-header">
-                <span class="window-title">${title}</span>
-                <div class="window-controls">
-                    <button class="minimize-btn">−</button>
-                    <button class="close-btn">×</button>
-                </div>
-            </div>
-            <div class="window-content">
-                ${content}
-            </div>
-        </div>
-    `);
-    
-    $window.css({
-        position: 'absolute',
-        top: position.top || '100px',
-        left: position.left || '100px',
-        width: '300px',
-        minHeight: '200px',
-        background: '#fff',
-        border: '2px solid #333',
-        borderRadius: '8px',
-        boxShadow: '4px 4px 12px rgba(0,0,0,0.3)',
-        zIndex: 100,
-        display: 'none'
-    });
-    
-    $window.find('.window-header').css({
-        background: '#0074D9',
-        color: '#fff',
-        padding: '8px 12px',
-        borderTopLeftRadius: '6px',
-        borderTopRightRadius: '6px',
-        cursor: 'move',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-    });
-    
-    $window.find('.window-title').css({
-        fontWeight: 'bold',
-        fontSize: '14px'
-    });
-    
-    $window.find('.window-controls').css({
-        display: 'flex',
-        gap: '4px'
-    });
-    
-    $window.find('.minimize-btn, .close-btn').css({
-        background: 'none',
-        border: 'none',
-        color: '#fff',
-        cursor: 'pointer',
-        fontSize: '16px',
-        width: '20px',
-        height: '20px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: '3px'
-    });
-    
-    $window.find('.minimize-btn:hover, .close-btn:hover').css({
-        background: 'rgba(255,255,255,0.2)'
-    });
-    
-    $window.find('.window-content').css({
-        padding: '12px',
-        maxHeight: '300px',
-        overflowY: 'auto'
-    });
-    
-    // Make window draggable
-    $window.draggable({
-        handle: '.window-header',
-        containment: 'window'
-    });
-    
-    // Window controls
-    $window.find('.minimize-btn').on('click', function() {
-        $window.hide();
-        $('#' + openBtnId).show();
-    });
-    
-    $window.find('.close-btn').on('click', function() {
-        $window.hide();
-        $('#' + openBtnId).show();
-    });
-    
-    $('body').append($window);
-    $window.show();
-    
-    // Hide the open button
-    $('#' + openBtnId).hide();
-    
-    return $window;
-}
-
 // Game class
 class Game {
     constructor() {
@@ -1921,41 +1815,41 @@ class Game {
         this.winningBid = null;
         this.handModes = {};
         
-        // UI elements (safe access for new UI)
-        this.statusText = document.getElementById('status-text') || { innerHTML: '' };
-        this.scoreDisplay = document.getElementById('score-display') || { innerHTML: '' };
-        this.usScore = document.getElementById('us-score') || { innerHTML: '' };
-        this.themScore = document.getElementById('them-score') || { innerHTML: '' };
-        this.biddingArea = document.getElementById('bidding-area') || { classList: { remove: () => {}, add: () => {} } };
-        this.biddingStatus = document.getElementById('bidding-status') || { innerHTML: '' };
-        this.biddingBoard = document.getElementById('bidding-board') || { classList: { remove: () => {}, add: () => {} } };
-        this.biddingResults = document.getElementById('bidding-results') || { innerHTML: '' };
-        this.readyToStart = document.getElementById('ready-to-start') || { classList: { remove: () => {}, add: () => {} } };
-        this.startHandBtn = document.getElementById('start-hand-btn') || { addEventListener: () => {} };
-        this.bidInputArea = document.getElementById('bid-input-area') || { classList: { remove: () => {}, add: () => {} } };
-        this.bidInput = document.getElementById('bid-input') || { value: '', addEventListener: () => {} };
-        this.submitBid = document.getElementById('submit-bid') || { addEventListener: () => {} };
-        this.trumpSelection = document.getElementById('trump-selection') || { classList: { remove: () => {}, add: () => {} } };
-        this.trumpSuggested = document.getElementById('trump-suggested') || { innerHTML: '' };
-        this.confirmTrump = document.getElementById('confirm-trump') || { addEventListener: () => {} };
-        this.playerHand = document.getElementById('player-hand') || { classList: { remove: () => {}, add: () => {} } };
-        this.dominoes = document.getElementById('dominoes') || { innerHTML: '' };
-        this.trickArea = document.getElementById('trick-area') || { classList: { remove: () => {}, add: () => {} } };
-        this.trickInfo = document.getElementById('trick-info') || { innerHTML: '' };
-        this.playedDominoes = document.getElementById('played-dominoes') || { innerHTML: '' };
-        this.handScoreboard = document.getElementById('hand-scoreboard') || { classList: { remove: () => {}, add: () => {} } };
-        this.usHandPointsElement = document.getElementById('us-hand-points') || { innerHTML: '' };
-        this.themHandPointsElement = document.getElementById('them-hand-points') || { innerHTML: '' };
-        this.usTricks = document.getElementById('us-tricks') || { innerHTML: '' };
-        this.themTricks = document.getElementById('them-tricks') || { innerHTML: '' };
-        this.scoreboard = document.getElementById('scoreboard') || { classList: { remove: () => {}, add: () => {} } };
-        this.scoreboardContent = document.getElementById('scoreboard-content') || { innerHTML: '' };
-        this.startGame = document.getElementById('start-game') || { addEventListener: () => {} };
-        this.readyBidding = document.getElementById('ready-bidding') || { addEventListener: () => {} };
-        this.playDomino = document.getElementById('play-domino') || { addEventListener: () => {}, disabled: false };
-        this.showHistoryBtn = document.getElementById('show-history-btn') || { addEventListener: () => {} };
-        this.scoreboardHistoryModal = document.getElementById('scoreboard-history-modal') || { classList: { remove: () => {}, add: () => {} } };
-        this.historyContent = document.getElementById('history-content') || { innerHTML: '' };
+        // UI elements
+        this.statusText = document.getElementById('status-text');
+        this.scoreDisplay = document.getElementById('score-display');
+        this.usScore = document.getElementById('us-score');
+        this.themScore = document.getElementById('them-score');
+        this.biddingArea = document.getElementById('bidding-area');
+        this.biddingStatus = document.getElementById('bidding-status');
+        this.biddingBoard = document.getElementById('bidding-board');
+        this.biddingResults = document.getElementById('bidding-results');
+        this.readyToStart = document.getElementById('ready-to-start');
+        this.startHandBtn = document.getElementById('start-hand-btn');
+        this.bidInputArea = document.getElementById('bid-input-area');
+        this.bidInput = document.getElementById('bid-input');
+        this.submitBid = document.getElementById('submit-bid');
+        this.trumpSelection = document.getElementById('trump-selection');
+        this.trumpSuggested = document.getElementById('trump-suggested');
+        this.confirmTrump = document.getElementById('confirm-trump');
+        this.playerHand = document.getElementById('player-hand');
+        this.dominoes = document.getElementById('dominoes');
+        this.trickArea = document.getElementById('trick-area');
+        this.trickInfo = document.getElementById('trick-info');
+        this.playedDominoes = document.getElementById('played-dominoes');
+        this.handScoreboard = document.getElementById('hand-scoreboard');
+        this.usHandPointsElement = document.getElementById('us-hand-points');
+        this.themHandPointsElement = document.getElementById('them-hand-points');
+        this.usTricks = document.getElementById('us-tricks');
+        this.themTricks = document.getElementById('them-tricks');
+        this.scoreboard = document.getElementById('scoreboard');
+        this.scoreboardContent = document.getElementById('scoreboard-content');
+        this.startGame = document.getElementById('start-game');
+        this.readyBidding = document.getElementById('ready-bidding');
+        this.playDomino = document.getElementById('play-domino');
+        this.showHistoryBtn = document.getElementById('show-history-btn');
+        this.scoreboardHistoryModal = document.getElementById('scoreboard-history-modal');
+        this.historyContent = document.getElementById('history-content');
         
         // Hand history tracking
         this.handHistory = []; // Array to store previous hand scoreboards
@@ -1970,64 +1864,38 @@ class Game {
     }
     
     bindEventListeners() {
-        // Only bind event listeners if elements exist (for new UI compatibility)
-        if (this.startGame && this.startGame.addEventListener) {
-            this.startGame.addEventListener('click', () => this.startNewGame());
-        }
-        if (this.readyBidding && this.readyBidding.addEventListener) {
-            this.readyBidding.addEventListener('click', () => this.startBidding());
-        }
-        if (this.submitBid && this.submitBid.addEventListener) {
-            this.submitBid.addEventListener('click', () => this.submitBidHandler());
-        }
-        if (this.bidInput && this.bidInput.addEventListener) {
-            this.bidInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.submitBidHandler();
-                }
-            });
-        }
-        if (this.confirmTrump && this.confirmTrump.addEventListener) {
-            this.confirmTrump.addEventListener('click', () => this.confirmTrumpHandler());
-        }
-        if (this.playDomino && this.playDomino.addEventListener) {
-            this.playDomino.addEventListener('click', () => this.playSelectedDomino());
-        }
-        if (this.startHandBtn && this.startHandBtn.addEventListener) {
-            this.startHandBtn.addEventListener('click', () => this.startHandAfterBidding());
-        }
-        if (this.showHistoryBtn && this.showHistoryBtn.addEventListener) {
-            this.showHistoryBtn.addEventListener('click', () => this.showScoreboardHistory());
-        }
-        
-        // Close modal button (safe access)
-        const closeBtn = document.querySelector('.aquaButton--scoreboard');
-        if (closeBtn && closeBtn.addEventListener) {
-            closeBtn.addEventListener('click', () => {
-                this.hideElement(this.scoreboardHistoryModal);
-            });
-        }
-        
-        // Trump selection (safe access)
-        const trumpOptions = document.querySelectorAll('.trump-option');
-        if (trumpOptions.length > 0) {
-            trumpOptions.forEach(option => {
-                option.addEventListener('click', (e) => {
-                    document.querySelectorAll('.trump-option').forEach(o => o.classList.remove('selected'));
-                    e.target.classList.add('selected');
-                });
-            });
-        }
-        
-        // Initialize draggable modal (safe access)
-        $(document).ready(() => {
-            const modal = $('#scoreboard-history-modal');
-            if (modal.length > 0) {
-                modal.draggable({
-                    handle: '.modalHeader',
-                    containment: 'window'
-                });
+        this.startGame.addEventListener('click', () => this.startNewGame());
+        this.readyBidding.addEventListener('click', () => this.startBidding());
+        this.submitBid.addEventListener('click', () => this.submitBidHandler());
+        this.bidInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.submitBidHandler();
             }
+        });
+        this.confirmTrump.addEventListener('click', () => this.confirmTrumpHandler());
+        this.playDomino.addEventListener('click', () => this.playSelectedDomino());
+        this.startHandBtn.addEventListener('click', () => this.startHandAfterBidding());
+        this.showHistoryBtn.addEventListener('click', () => this.showScoreboardHistory());
+        
+        // Close modal button
+        document.querySelector('.aquaButton--scoreboard').addEventListener('click', () => {
+            this.hideElement(this.scoreboardHistoryModal);
+        });
+        
+        // Trump selection
+        document.querySelectorAll('.trump-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                document.querySelectorAll('.trump-option').forEach(o => o.classList.remove('selected'));
+                e.target.classList.add('selected');
+            });
+        });
+        
+        // Initialize draggable modal
+        $(document).ready(() => {
+            $('#scoreboard-history-modal').draggable({
+                handle: '.modalHeader',
+                containment: 'window'
+            });
         });
     }
     
@@ -2091,10 +1959,7 @@ class Game {
     }
     
     updateStatus(text) {
-        if (this.statusText && this.statusText.innerHTML !== undefined) {
-            this.statusText.innerHTML = text;
-        }
-        console.log('Status:', text);
+        this.statusText.innerHTML = text;
     }
     
     showElement(element) {
@@ -2369,12 +2234,9 @@ class Game {
         // Save bidding order for scoreboard display
         this.lastHandBidOrder = bidOrder;
         
-        // Store for new UI access
-        this.playerMap = playerMap;
-        this.playerData = playerData;
-        
-        // Initialize bidding board for new UI
-        this.initializeBiddingBoardNewUI(bidOrder);
+        // Initialize and show bidding board
+        this.initializeBiddingBoard(bidOrder);
+        this.showElement(this.biddingBoard);
         
         this.updateStatus("Bidding phase in progress...");
         
@@ -2383,13 +2245,9 @@ class Game {
     }
     
     processBidding(bidOrder, playerMap, playerData, currentIndex) {
-        console.log('processBidding called with currentIndex:', currentIndex, 'bidOrder length:', bidOrder.length);
-        console.log('bidOrder:', bidOrder);
-        
         if (currentIndex >= bidOrder.length) {
             // Bidding complete
-            console.log('Bidding complete, calling finishBidding');
-            this.finishBidding();
+            this.finishBidding(bidOrder, playerMap, playerData);
             return;
         }
         
@@ -2397,18 +2255,12 @@ class Game {
         const pdata = playerData[player];
         const currentPlayer = playerMap[player];
         
-        console.log('Processing player:', player);
-        console.log('Current player is human:', currentPlayer.isHuman);
-        
         if (currentPlayer.isHuman) {
-            // Human player - show bidding interface for new UI
-            this.showBiddingInterfaceNewUI(player, currentIndex, bidOrder, playerMap, playerData);
+            // Human player - show bidding interface
+            this.showBiddingInterface(player, currentIndex, bidOrder, playerMap, playerData);
         } else {
             // AI player - make bid automatically
-            console.log('AI player making bid:', player);
             const bid = this.makeAIBid(currentPlayer, pdata, currentIndex, bidOrder, playerData);
-            console.log('AI bid result:', bid);
-            
             this.bidHistory[player] = bid;
             this.lastHandBiddingInfo[player] = {
                 confidence: pdata.confidence,
@@ -2416,17 +2268,15 @@ class Game {
                 actualBid: bid
             };
             
-            // Update bidding board for new UI
-            this.updateBiddingBoardNewUI(player, bid);
+            // Update bidding board
+            this.updateBiddingBoard(player, bid);
             
             if (bid !== 'pass') {
                 this.currentBid = bid;
                 this.highestBidder = player;
-                console.log('New highest bidder:', player, 'with bid:', bid);
             }
             
             // Continue with next player
-            console.log('Continuing to next player, currentIndex + 1:', currentIndex + 1);
             setTimeout(() => {
                 this.processBidding(bidOrder, playerMap, playerData, currentIndex + 1);
             }, 1000);
@@ -2567,29 +2417,17 @@ class Game {
     }
     
     finishBidding() {
-        console.log('finishBidding called');
-        console.log('highestBidder:', this.highestBidder);
-        console.log('currentBid:', this.currentBid);
-        
         // Ensure someone wins: if all pass except last bidder, they get it for 30
         if (this.highestBidder === null) {
             const lastBidder = this.lastHandBidOrder[this.lastHandBidOrder.length - 1];
             this.highestBidder = lastBidder;
             this.currentBid = 30;
             this.bidHistory[lastBidder] = 30;
-            this.updateBiddingBoardNewUI(lastBidder, 30);
-            console.log('No winner, defaulting to last bidder:', lastBidder);
+            this.updateBiddingBoard(lastBidder, 30);
         }
         
-        console.log('About to show trump selection');
-        
-        // Update the table window to show bid winner and start hand button
-        if (typeof updateTableWindow === 'function') {
-            updateTableWindow();
-        }
-        
-        // Show trump selection for new UI
-        this.showTrumpSelectionNewUI();
+        // Show ready to start prompt
+        this.showReadyToStart();
     }
     
     showTrumpSelection(suggestedTrump) {
@@ -3196,384 +3034,6 @@ class Game {
     playerHasNoSuit(playerIdx, suit) {
         return this.playerHasNo[playerIdx].has(suit);
     }
-    
-    // New UI methods for bidding
-    initializeBiddingBoardNewUI(bidOrder) {
-        // This will be handled by the new UI
-        console.log('Bidding board initialized for new UI:', bidOrder);
-    }
-    
-    showBiddingInterfaceNewUI(player, currentIndex, bidOrder, playerMap, playerData) {
-        console.log('showBiddingInterfaceNewUI called for player:', player);
-        console.log('currentIndex:', currentIndex);
-        console.log('currentBid:', this.currentBid);
-        
-        // Show bidding interface in new UI
-        const $biddingStatus = $('#bidding-status');
-        const $bidInputArea = $('#bid-input-area');
-        const $bidInput = $('#bid-input');
-        
-        if ($biddingStatus.length > 0) {
-            $biddingStatus.text(`It's your turn to bid, ${player}. Current bid: ${this.currentBid === 0 ? 'pass' : this.currentBid}`);
-        }
-        
-        if ($bidInputArea.length > 0) {
-            $bidInputArea.show();
-        }
-        
-        if ($bidInput.length > 0) {
-            $bidInput.focus();
-        }
-        
-        console.log('Bidding interface elements found:', {
-            status: $biddingStatus.length,
-            inputArea: $bidInputArea.length,
-            input: $bidInput.length
-        });
-    }
-    
-    updateBiddingBoardNewUI(playerName, bid) {
-        // Update bidding board in new UI
-        const $board = $('#bidding-board');
-        if ($board.length === 0) return;
-        
-        const existingRow = $board.find(`[data-player="${playerName}"]`);
-        if (existingRow.length > 0) {
-            existingRow.find('.bid-value').text(bid);
-        } else {
-            const newRow = $(`
-                <div data-player="${playerName}" style="margin: 5px 0; padding: 5px; border: 1px solid #ccc;">
-                    <strong>${playerName}:</strong> <span class="bid-value">${bid}</span>
-                </div>
-            `);
-            $board.append(newRow);
-        }
-    }
-    
-    // New UI method for finishing bidding
-    finishBiddingNewUI(bidOrder, playerMap, playerData) {
-        // Ensure someone wins: if all pass except last bidder, they get it for 30
-        if (this.highestBidder === null) {
-            const lastBidder = this.lastHandBidOrder[this.lastHandBidOrder.length - 1];
-            this.highestBidder = lastBidder;
-            this.currentBid = 30;
-            this.bidHistory[lastBidder] = 30;
-            this.updateBiddingBoardNewUI(lastBidder, 30);
-        }
-        
-        // Show trump selection for new UI
-        this.showTrumpSelectionNewUI();
-    }
-    
-    // New UI method for showing trump selection
-    showTrumpSelectionNewUI() {
-        console.log('showTrumpSelectionNewUI called');
-        this.currentPhase = 'trump-selection';
-        
-        // Find the bid winner
-        const bidWinner = this.players.find(p => this.formatPlayerNameWithRelationship(p) === this.highestBidder);
-        const suggestedTrump = bidWinner ? bidWinner.evaluateBidConfidence().trump : 0;
-        
-        console.log('bidWinner:', bidWinner);
-        console.log('suggestedTrump:', suggestedTrump);
-        console.log('bidWinner.isHuman:', bidWinner ? bidWinner.isHuman : 'unknown');
-        
-        // If AI player won the bid, automatically select trump and start hand
-        if (bidWinner && !bidWinner.isHuman) {
-            console.log('AI player won bid, automatically selecting trump:', suggestedTrump);
-            this.setTrumpAndStartHandNewUI(suggestedTrump);
-            return;
-        }
-        
-        // Human player won the bid - show trump selection window
-        const content = `
-            <div>
-                <h3>Trump Selection</h3>
-                <p><strong>Bid Winner:</strong> ${this.highestBidder}</p>
-                <p><strong>Winning Bid:</strong> ${this.currentBid}</p>
-                <p><strong>Suggested Trump:</strong> ${suggestedTrump}</p>
-                <div style="margin: 10px 0;">
-                    <label>Select trump suit:</label>
-                    <select id="trump-select" style="margin-left: 10px;">
-                        <option value="0">0 (Blanks)</option>
-                        <option value="1">1 (Aces)</option>
-                        <option value="2">2 (Deuces)</option>
-                        <option value="3">3 (Treys)</option>
-                        <option value="4">4 (Fours)</option>
-                        <option value="5">5 (Fives)</option>
-                        <option value="6">6 (Sixes)</option>
-                    </select>
-                </div>
-                <button id="confirm-trump-btn">Confirm Trump & Start Hand</button>
-            </div>
-        `;
-        
-        makeDraggableWindow('trump-window', 'Trump Selection', content, 'open-trump-btn', 'Select Trump', {top: '300px', left: '50vw'});
-        
-        // Set suggested trump as default
-        $('#trump-select').val(suggestedTrump);
-        
-        // Bind trump selection events
-        $('#confirm-trump-btn').on('click', () => this.confirmTrumpNewUI());
-    }
-    
-    // New UI method for confirming trump selection
-    confirmTrumpNewUI() {
-        const trump = parseInt($('#trump-select').val());
-        this.setTrumpAndStartHandNewUI(trump);
-    }
-    
-    // New UI method for setting trump and starting hand
-    setTrumpAndStartHandNewUI(trump) {
-        this.trump = trump;
-        this.bidWinner = this.highestBidder;
-        this.winningBid = this.currentBid;
-        this.handModes = this.profileHandModes(trump);
-        
-        this.currentPhase = 'playing';
-        
-        // Find bid winner's position
-        const bidWinnerIdx = this.players.findIndex(p => this.formatPlayerNameWithRelationship(p) === this.bidWinner);
-        this.currentLeaderIdx = bidWinnerIdx;
-        
-        // Assign roles for this hand
-        this.assignRoles(bidWinnerIdx);
-        
-        console.log('Bid winner:', this.bidWinner);
-        console.log('Bid winner index:', bidWinnerIdx);
-        console.log('Trump:', this.trump);
-        console.log('Winning bid:', this.winningBid);
-        
-        // Close trump window
-        $('#trump-window').find('.close-btn').click();
-        
-        // Update the table window to show hand in progress
-        if (typeof updateTableWindow === 'function') {
-            updateTableWindow();
-        }
-        
-        // Start the hand
-        this.startHandNewUI();
-    }
-    
-    // New UI method for starting hand
-    startHandNewUI() {
-        this.resetHandTracking();
-        
-        // Reset hand points
-        this.usHandPoints = 0;
-        this.themHandPoints = 0;
-        this.currentHandTricks = [];
-        
-        // Show playing interface
-        this.showPlayingInterface();
-        
-        // Start the first trick
-        this.playTrickNewUI();
-    }
-    
-    // New UI method for showing playing interface
-    showPlayingInterface() {
-        const content = `
-            <div>
-                <h3>Playing Phase</h3>
-                <p><strong>Trump:</strong> ${this.trump}</p>
-                <p><strong>Bid Winner:</strong> ${this.bidWinner}</p>
-                <p><strong>Winning Bid:</strong> ${this.winningBid}</p>
-                <hr>
-                <div id="trick-info">
-                    <p><strong>Current Trick:</strong></p>
-                    <p>Leader: ${this.formatPlayerNameWithRelationship(this.players[this.currentLeaderIdx])}</p>
-                </div>
-                <div id="played-dominoes" style="margin-top: 10px;"></div>
-                <button id="play-trick-btn">Play Trick</button>
-            </div>
-        `;
-        
-        makeDraggableWindow('playing-window', 'Playing Phase', content, 'open-playing-btn', 'Playing Phase', {top: '400px', left: '50vw'});
-        
-        // Bind playing events
-        $('#play-trick-btn').on('click', () => this.playTrickNewUI());
-    }
-    
-    // New UI method for playing trick
-    playTrickNewUI() {
-        // Clear the current trick display for the new trick
-        $('#played-dominoes').empty();
-        
-        console.log('Starting new trick!');
-        console.log('Current leader index:', this.currentLeaderIdx);
-        console.log('Leader will be:', this.formatPlayerNameWithRelationship(this.players[this.currentLeaderIdx]));
-        
-        // Initialize new trick
-        this.currentTrick = new TrickState(this.currentLeaderIdx, this.trump, this.handModes);
-        
-        // Determine play order for this trick - start with leader, then go in order 0,1,2,3
-        const trickOrder = [this.currentLeaderIdx];
-        for (let i = 1; i < 4; i++) {
-            const nextPlayer = (this.currentLeaderIdx + i) % 4;
-            trickOrder.push(nextPlayer);
-        }
-        
-        console.log('Trick order:', trickOrder.map(idx => this.formatPlayerNameWithRelationship(this.players[idx])));
-        
-        this.currentPlayerIndex = 0;
-        this.playNextPlayerNewUI(trickOrder);
-        this.playedDominoesThisTrick = []; // Reset playedDominoesThisTrick at the start of each trick
-    }
-    
-    // New UI method for playing next player
-    playNextPlayerNewUI(trickOrder) {
-        if (this.currentPlayerIndex >= trickOrder.length) {
-            // Trick complete
-            this.finishTrickNewUI();
-            return;
-        }
-        
-        const playerIdx = trickOrder[this.currentPlayerIndex];
-        const player = this.players[playerIdx];
-        
-        if (player.isHuman) {
-            // Human player - wait for input
-            $('#trick-info').html(`
-                <p><strong>Your turn to play!</strong></p>
-                <p>Select a domino from your hand to play.</p>
-            `);
-        } else {
-            // AI player - make play automatically
-            const chosenDomino = player.chooseDomino(this.currentTrick);
-            if (chosenDomino) {
-                const index = player.hand.indexOf(chosenDomino);
-                player.hand.splice(index, 1);
-                this.currentTrick.addPlay(chosenDomino, playerIdx);
-                this.addPlayedDomino(chosenDomino, playerIdx);
-                
-                // Show modulated representation
-                const mod = chosenDomino.modulate(this.trump, this.currentTrick.currentSuit);
-                const roleName = player.role || "None";
-                console.log(`${roleName}: ${this.formatPlayerNameWithRelationship(player)} plays ${mod[0]}-${mod[1]}`);
-                
-                // Update display
-                $('#played-dominoes').append(`
-                    <div style="margin: 5px 0; padding: 5px; border: 1px solid #ccc;">
-                        <strong>${this.formatPlayerNameWithRelationship(player)}:</strong> ${mod[0]}-${mod[1]}
-                    </div>
-                `);
-            }
-            
-            this.currentPlayerIndex++;
-            setTimeout(() => {
-                this.playNextPlayerNewUI(trickOrder);
-            }, 1000);
-        }
-    }
-    
-    // New UI method for finishing trick
-    finishTrickNewUI() {
-        const [winningDomino, winnerIdx] = this.currentTrick.getWinningPlay();
-        const winner = this.players[winnerIdx];
-        const mod = winningDomino.modulate(this.trump, this.currentTrick.currentSuit);
-        
-        console.log(`Trick won by ${this.formatPlayerNameWithRelationship(winner)} with ${mod[0]}-${mod[1]}`);
-        
-        // Update trick info
-        $('#trick-info').html(`
-            <p><strong>Trick Complete!</strong></p>
-            <p>Winner: ${this.formatPlayerNameWithRelationship(winner)}</p>
-            <p>Points: ${this.currentTrick.pointsInTrick}</p>
-        `);
-        
-        // Add trick to scoreboard
-        const trickData = {
-            trickNum: this.currentHandTricks.length + 1,
-            winner: winner,
-            winnerIdx: winnerIdx,
-            points: this.currentTrick.pointsInTrick,
-            playerPlays: this.playedDominoesThisTrick
-        };
-        
-        this.currentHandTricks.push(trickData);
-        
-        // Update points
-        if (this.teams['Us'].includes(winner)) {
-            this.usHandPoints += this.currentTrick.pointsInTrick;
-        } else {
-            this.themHandPoints += this.currentTrick.pointsInTrick;
-        }
-        
-        // Update leader for next trick
-        this.currentLeaderIdx = winnerIdx;
-        
-        // Update all windows
-        updateTableWindow();
-        updateScorecardWindow();
-        updateOverallScoreWindow();
-        
-        // Check if hand is over
-        if (this.isHandOver()) {
-            this.finishHandNewUI();
-        } else {
-            // Continue to next trick
-            setTimeout(() => {
-                this.playTrickNewUI();
-            }, 2000);
-        }
-    }
-    
-    // New UI method for finishing hand
-    finishHandNewUI() {
-        console.log('Hand complete!');
-        console.log('Us points:', this.usHandPoints);
-        console.log('Them points:', this.themHandPoints);
-        
-        // Determine winner
-        let winner;
-        if (this.usHandPoints >= this.winningBid) {
-            winner = 'Us';
-            this.scores[0] += this.winningBid;
-        } else if (this.themHandPoints >= this.winningBid) {
-            winner = 'Them';
-            this.scores[1] += this.winningBid;
-        } else {
-            // Set
-            if (this.usHandPoints > this.themHandPoints) {
-                winner = 'Us';
-                this.scores[0] += this.usHandPoints;
-            } else {
-                winner = 'Them';
-                this.scores[1] += this.themHandPoints;
-            }
-        }
-        
-        // Show hand results
-        const content = `
-            <div>
-                <h3>Hand Complete!</h3>
-                <p><strong>Winner:</strong> ${winner}</p>
-                <p><strong>Us Points:</strong> ${this.usHandPoints}</p>
-                <p><strong>Them Points:</strong> ${this.themHandPoints}</p>
-                <p><strong>Winning Bid:</strong> ${this.winningBid}</p>
-                <hr>
-                <p><strong>Overall Score:</strong></p>
-                <p>Us: ${this.scores[0]}</p>
-                <p>Them: ${this.scores[1]}</p>
-                <button id="new-hand-btn">Start New Hand</button>
-            </div>
-        `;
-        
-        makeDraggableWindow('hand-results', 'Hand Results', content, 'open-hand-results', 'View Results', {top: '300px', left: '50vw'});
-        
-        // Bind new hand button
-        $('#new-hand-btn').on('click', () => {
-            this.startNewHand();
-            $('#hand-results').find('.close-btn').click();
-        });
-        
-        // Update all windows
-        updateTableWindow();
-        updateScorecardWindow();
-        updateOverallScoreWindow();
-    }
 }
 
 // Initialize the game when the page loads
@@ -3592,7 +3052,111 @@ $(function() {
     game.players[2].name = SONGBIRD_NAMES[2];
     game.players[3].name = SONGBIRD_NAMES[3];
     
-
+    // Draggable window creation function
+    function makeDraggableWindow(id, title, content, openBtnId, openBtnLabel, position) {
+        // Remove existing window if present
+        $('#' + id).remove();
+        
+        const $window = $(`
+            <div id="${id}" class="draggable-window">
+                <div class="window-header">
+                    <span class="window-title">${title}</span>
+                    <div class="window-controls">
+                        <button class="minimize-btn">−</button>
+                        <button class="close-btn">×</button>
+                    </div>
+                </div>
+                <div class="window-content">
+                    ${content}
+                </div>
+            </div>
+        `);
+        
+        $window.css({
+            position: 'absolute',
+            top: position.top || '100px',
+            left: position.left || '100px',
+            width: '300px',
+            minHeight: '200px',
+            background: '#fff',
+            border: '2px solid #333',
+            borderRadius: '8px',
+            boxShadow: '4px 4px 12px rgba(0,0,0,0.3)',
+            zIndex: 100,
+            display: 'none'
+        });
+        
+        $window.find('.window-header').css({
+            background: '#0074D9',
+            color: '#fff',
+            padding: '8px 12px',
+            borderTopLeftRadius: '6px',
+            borderTopRightRadius: '6px',
+            cursor: 'move',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+        });
+        
+        $window.find('.window-title').css({
+            fontWeight: 'bold',
+            fontSize: '14px'
+        });
+        
+        $window.find('.window-controls').css({
+            display: 'flex',
+            gap: '4px'
+        });
+        
+        $window.find('.minimize-btn, .close-btn').css({
+            background: 'none',
+            border: 'none',
+            color: '#fff',
+            cursor: 'pointer',
+            fontSize: '16px',
+            width: '20px',
+            height: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '3px'
+        });
+        
+        $window.find('.minimize-btn:hover, .close-btn:hover').css({
+            background: 'rgba(255,255,255,0.2)'
+        });
+        
+        $window.find('.window-content').css({
+            padding: '12px',
+            maxHeight: '300px',
+            overflowY: 'auto'
+        });
+        
+        // Make window draggable
+        $window.draggable({
+            handle: '.window-header',
+            containment: 'window'
+        });
+        
+        // Window controls
+        $window.find('.minimize-btn').on('click', function() {
+            $window.hide();
+            $('#' + openBtnId).show();
+        });
+        
+        $window.find('.close-btn').on('click', function() {
+            $window.hide();
+            $('#' + openBtnId).show();
+        });
+        
+        $('body').append($window);
+        $window.show();
+        
+        // Hide the open button
+        $('#' + openBtnId).hide();
+        
+        return $window;
+    }
     
     // Add buttons to reopen windows if not present
     function ensureOpenBtn(openBtnId, openBtnLabel, showFn) {
@@ -3671,135 +3235,8 @@ $(function() {
     
     // Game control functions
     function startBidding() {
-        // Check if dominoes have been dealt
-        if (game.players[0].hand.length === 0) {
-            alert('Please shuffle and deal dominoes first!');
-            return;
-        }
-        
-        // Start bidding phase
-        game.currentPhase = 'bidding';
+        game.startBidding();
         updateGameStatus();
-        
-        // Create bidding interface for new UI
-        showBiddingInterface();
-        
-        // Start the bidding process
-        game.resolveBidding();
-    }
-    
-    // New UI bidding interface
-    function showBiddingInterface() {
-        const content = `
-            <div>
-                <h3>Bidding Phase</h3>
-                <div id="bidding-status">Starting bidding process...</div>
-                <div id="bid-input-area" style="margin-top: 10px; display: none;">
-                    <label>Your bid (30-42 or 'pass'):</label>
-                    <input type="text" id="bid-input" placeholder="Enter bid or 'pass'" style="width: 100px; margin: 0 10px;">
-                    <button id="submit-bid-btn">Submit Bid</button>
-                </div>
-                <div id="bidding-results" style="margin-top: 10px;"></div>
-                <div id="bidding-board" style="margin-top: 10px;"></div>
-            </div>
-        `;
-        
-        makeDraggableWindow('bidding-window', 'Bidding', content, 'open-bidding-btn', 'Open Bidding', {top: '200px', left: '50vw'});
-        
-        // Bind bidding events
-        $('#submit-bid-btn').on('click', submitBidHandler);
-        $('#bid-input').on('keypress', function(e) {
-            if (e.key === 'Enter') submitBidHandler();
-        });
-        
-        // Update bidding status
-        $('#bidding-status').text('Bidding started! Waiting for your turn...');
-        
-        // Update all windows
-        updateTableWindow();
-        updateScorecardWindow();
-        updateOverallScoreWindow();
-    }
-    
-    // New UI bid submission handler
-    function submitBidHandler() {
-        const input = $('#bid-input').val().trim().toLowerCase();
-        let bid;
-        
-        if (input === 'pass' || input === 'p') {
-            bid = 'pass';
-        } else {
-            bid = parseInt(input);
-            if (isNaN(bid) || bid <= game.currentBid) {
-                alert('Invalid bid. Enter a number higher than current bid or "pass" to pass.');
-                return;
-            }
-        }
-        
-        // Find current player
-        const currentPlayer = game.players.find(p => p.isHuman);
-        const playerName = game.formatPlayerNameWithRelationship(currentPlayer);
-        
-        game.bidHistory[playerName] = bid;
-        game.lastHandBiddingInfo[playerName] = {
-            confidence: currentPlayer.evaluateBidConfidence().confidence,
-            maxBid: currentPlayer.evaluateBidConfidence().maxBid,
-            actualBid: bid
-        };
-        
-        // Update bidding board
-        updateBiddingBoard(playerName, bid);
-        
-        if (bid !== 'pass') {
-            game.currentBid = bid;
-            game.highestBidder = playerName;
-        }
-        
-        $('#bid-input-area').hide();
-        $('#bid-input').val('');
-        
-        // Continue bidding process
-        continueBiddingAfterHuman();
-    }
-    
-    // Continue bidding after human player
-    function continueBiddingAfterHuman() {
-        // Find the current player index in the bidding order
-        const currentPlayer = game.players.find(p => p.isHuman);
-        const playerName = game.formatPlayerNameWithRelationship(currentPlayer);
-        
-        // Find the current index in the bidding order
-        const bidOrder = [];
-        for (let i = 0; i < game.players.length; i++) {
-            const idx = (game.startingBidderIndex + i) % game.players.length;
-            const player = game.players[idx];
-            bidOrder.push(game.formatPlayerNameWithRelationship(player));
-        }
-        
-        const currentIndex = bidOrder.indexOf(playerName);
-        
-        // Continue with next player
-        setTimeout(() => {
-            game.processBidding(bidOrder, game.playerMap, game.playerData, currentIndex + 1);
-        }, 1000);
-    }
-    
-    // Update bidding board for new UI
-    function updateBiddingBoard(playerName, bid) {
-        const $board = $('#bidding-board');
-        if ($board.length === 0) return;
-        
-        const existingRow = $board.find(`[data-player="${playerName}"]`);
-        if (existingRow.length > 0) {
-            existingRow.find('.bid-value').text(bid);
-        } else {
-            const newRow = $(`
-                <div data-player="${playerName}" style="margin: 5px 0; padding: 5px; border: 1px solid #ccc;">
-                    <strong>${playerName}:</strong> <span class="bid-value">${bid}</span>
-                </div>
-            `);
-            $board.append(newRow);
-        }
     }
     
     function playTrick() {
@@ -3825,48 +3262,6 @@ $(function() {
     
     // Function to update table window with real game data
     function updateTableWindow() {
-        let bidInfo = '';
-        let startHandButton = '';
-        
-        // Show bid winner information if bidding is complete
-        if (game.highestBidder && game.currentPhase === 'trump-selection') {
-            bidInfo = `
-                <div style="background: #e8f5e8; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                    <h4>Bidding Complete!</h4>
-                    <p><strong>Bid Winner:</strong> ${game.highestBidder}</p>
-                    <p><strong>Winning Bid:</strong> ${game.currentBid}</p>
-                    <p><strong>Status:</strong> Waiting for trump selection...</p>
-                </div>
-            `;
-        } else if (game.bidWinner && game.winningBid && game.currentPhase === 'playing') {
-            bidInfo = `
-                <div style="background: #e8f5e8; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                    <h4>Hand in Progress</h4>
-                    <p><strong>Bid Winner:</strong> ${game.bidWinner}</p>
-                    <p><strong>Winning Bid:</strong> ${game.winningBid}</p>
-                    <p><strong>Trump:</strong> ${game.trump}</p>
-                </div>
-            `;
-        }
-        
-        // Add start hand button if bidding is complete but hand hasn't started
-        if (game.highestBidder && game.currentPhase === 'trump-selection') {
-            startHandButton = `
-                <div style="margin: 15px 0;">
-                    <button id="start-hand-btn" style="
-                        background: #28a745; 
-                        color: white; 
-                        border: none; 
-                        padding: 10px 20px; 
-                        border-radius: 5px; 
-                        cursor: pointer; 
-                        font-size: 14px; 
-                        font-weight: bold;
-                    ">Start Hand</button>
-                </div>
-            `;
-        }
-        
         const content = `
             <div style="padding: 10px;">
                 <h3>Game State</h3>
@@ -3880,8 +3275,7 @@ $(function() {
                 <p><strong>AI 1:</strong> ${game.players[1].hand.length} dominoes</p>
                 <p><strong>AI 2:</strong> ${game.players[2].hand.length} dominoes</p>
                 <p><strong>AI 3:</strong> ${game.players[3].hand.length} dominoes</p>
-                ${bidInfo}
-                ${startHandButton}
+                ${game.winningBid ? `<p><strong>Winning Bid:</strong> ${game.winningBid} by ${game.bidWinner === 0 ? 'You' : game.players[game.bidWinner].name}</p>` : ''}
             </div>
         `;
         
@@ -3889,22 +3283,6 @@ $(function() {
         const $tableWindow = $('#table-window');
         if ($tableWindow.length > 0) {
             $tableWindow.find('.window-content').html(content);
-            
-            // Bind the start hand button if it exists
-            if (game.highestBidder && game.currentPhase === 'trump-selection') {
-                $('#start-hand-btn').off('click').on('click', function() {
-                    // Find the bid winner
-                    const bidWinner = game.players.find(p => game.formatPlayerNameWithRelationship(p) === game.highestBidder);
-                    if (bidWinner && bidWinner.isHuman) {
-                        // Human won the bid - show trump selection
-                        game.showTrumpSelectionNewUI();
-                    } else if (bidWinner && !bidWinner.isHuman) {
-                        // AI won the bid - automatically start hand
-                        const suggestedTrump = bidWinner.evaluateBidConfidence().trump;
-                        game.setTrumpAndStartHandNewUI(suggestedTrump);
-                    }
-                });
-            }
         }
     }
     
@@ -3960,13 +3338,8 @@ $(function() {
         // Use the original game logic to shuffle and deal
         game.shuffleAndDeal();
         
-        // Call hand sorting phase (this sorts the dominoes in each player's hand)
-        game.handSortingPhase();
-        
         // Get the human player's hand (7 dominoes)
         const humanHand = game.players[0].hand;
-        
-        console.log('Shuffled and dealt dominoes:', humanHand.map(d => d.toString()));
         
         // Create domino windows for each domino in the hand
         for (let i = 0; i < humanHand.length; i++) {
@@ -4136,8 +3509,6 @@ $(function() {
         updateScorecardWindow();
         updateOverallScoreWindow();
         updateGameStatus();
-        
-        console.log('Shuffle complete! Human hand has', humanHand.length, 'dominoes');
     });
     
     // Function to play a selected domino
@@ -4153,65 +3524,15 @@ $(function() {
             return;
         }
         
-        // Check if it's the human player's turn
-        const currentPlayerIdx = game.currentTrick ? game.currentTrick.playedDominoes.length : 0;
-        if (currentPlayerIdx >= 4) {
-            alert('Trick is complete, cannot play more dominoes');
-            return;
-        }
+        // Use the original game logic to play the domino
+        game.selectedDomino = domino;
+        game.playSelectedDomino();
         
-        // Find the current player in the trick order
-        const trickOrder = [game.currentLeaderIdx];
-        for (let i = 1; i < 4; i++) {
-            const nextPlayer = (game.currentLeaderIdx + i) % 4;
-            trickOrder.push(nextPlayer);
-        }
+        // Remove played domino from UI
+        $dominoElement.remove();
         
-        const expectedPlayerIdx = trickOrder[currentPlayerIdx];
-        if (expectedPlayerIdx !== 0) { // 0 is the human player
-            alert('It\'s not your turn to play');
-            return;
-        }
-        
-        // Check if this is a valid play
-        const humanPlayer = game.players[0];
-        const validPlays = humanPlayer.getValidPlays(game.currentTrick);
-        const isValidPlay = validPlays.some(validDomino => 
-            validDomino.ends[0] === domino.ends[0] && validDomino.ends[1] === domino.ends[1]
-        );
-        
-        if (!isValidPlay) {
-            alert('That domino is not a valid play. You must follow suit if possible.');
-            return;
-        }
-        
-        // Play the domino
-        const index = humanPlayer.hand.indexOf(domino);
-        if (index !== -1) {
-            humanPlayer.hand.splice(index, 1);
-            game.currentTrick.addPlay(domino, 0);
-            game.addPlayedDomino(domino, 0);
-            
-            // Update display
-            const mod = domino.modulate(game.trump, game.currentTrick.currentSuit);
-            $('#played-dominoes').append(`
-                <div style="margin: 5px 0; padding: 5px; border: 1px solid #ccc;">
-                    <strong>You:</strong> ${mod[0]}-${mod[1]}
-                </div>
-            `);
-            
-            // Remove played domino from UI
-            $dominoElement.remove();
-            
-            // Continue with next player
-            game.currentPlayerIndex++;
-            setTimeout(() => {
-                game.playNextPlayerNewUI(trickOrder);
-            }, 1000);
-            
-            updateTableWindow();
-            updateScorecardWindow();
-        }
+        updateTableWindow();
+        updateScorecardWindow();
     }
     
     // Add enhanced styling
