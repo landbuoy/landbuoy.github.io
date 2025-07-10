@@ -1154,6 +1154,48 @@ class Player {
         );
     }
     
+    // Helper method to check if it's safe to lead with a specific domino
+    isSafeToLeadWith(domino, trump) {
+        // If it's a double or trump, it's generally safe
+        if (domino.isDouble() || domino.isTrump(trump)) {
+            return true;
+        }
+        
+        // For off dominoes, check if higher dominoes of the same suit are still out there
+        const suit = domino.getSuit(trump);
+        const degree = domino.getDegree(trump);
+        
+        // Check all possible dominoes of this suit with higher degree
+        for (let d = 6; d > degree; d--) {
+            if (d === suit) continue; // skip double
+            const higherDomino = new Domino(suit, d);
+            if (!this.hasDominoBeenPlayed(higherDomino)) {
+                // Higher domino is still out there - not safe to lead
+                return false;
+            }
+        }
+        
+        // No higher dominoes of this suit are out there - safe to lead
+        return true;
+    }
+    
+    // Helper method to check if opponents have played off-suit on a specific suit
+    haveOpponentsPlayedOffSuitOnSuit(suit) {
+        const opponentIndices = this.game.teams['Us'].includes(this) ? [1, 3] : [0, 2];
+        
+        for (const opponentIdx of opponentIndices) {
+            const opponent = this.game.players[opponentIdx];
+            const hasPlayedOffSuit = this.game.playerHasNo[opponentIdx].has(suit);
+            if (!hasPlayedOffSuit) {
+                // This opponent hasn't played off-suit on this suit yet
+                return false;
+            }
+        }
+        
+        // Both opponents have played off-suit on this suit
+        return true;
+    }
+    
     // Helper method to evaluate domino for leading (doubles are very strong for leading)
     evaluateDominoForLeading(domino, trump) {
         if (domino.isDouble()) {
@@ -1168,9 +1210,12 @@ class Player {
             const degree = domino.getDegree(trump);
             return 100 + degree; // Trump 6 = 106, Trump 5 = 105, etc.
         } else {
-            // Off dominoes - these are risky to lead
+            // Off dominoes - for leading, we want the highest possible value
+            // Higher dominoes are more likely to win when no trumps are played
             const maxEnd = Math.max(...domino.ends);
-            return maxEnd; // 6-5 = 6, 4-3 = 4, etc.
+            const minEnd = Math.min(...domino.ends);
+            // Prefer dominoes with higher values, and among equal max values, prefer higher min values
+            return maxEnd * 10 + minEnd; // 6-5 = 65, 6-4 = 64, 5-4 = 54, etc.
         }
     }
     
@@ -1189,54 +1234,108 @@ class Player {
         // LEADER should prioritize doubles for leading and avoid throwing trumps when higher trumps are out there
         // If no walkers are available, LEADER should still lead with the best available domino
         
+        console.log(`LEADER ${this.name} choosing domino to lead with. Hand:`, this.hand.map(d => d.toString()));
+        
         // First priority: doubles (excellent for leading)
         const doubles = this.getDoubles(this.hand);
         if (doubles.length > 0) {
+            console.log(`LEADER: Found doubles:`, doubles.map(d => d.toString()));
             // Prefer trump double first, then higher non-trump doubles
             const trumpDoubles = doubles.filter(d => d.isTrump(trickState.trump));
             if (trumpDoubles.length > 0) {
+                console.log(`LEADER: Using trump double:`, trumpDoubles[0].toString());
                 return trumpDoubles[0]; // Trump double is best
             }
             
             // Sort non-trump doubles by value (higher is better for leading)
             doubles.sort((a, b) => b.ends[0] - a.ends[0]);
+            console.log(`LEADER: Using highest non-trump double:`, doubles[0].toString());
             return doubles[0]; // Highest double
         }
         
         // Second priority: trump dominoes (but avoid if higher trumps are out there)
         const trumpPlays = this.hand.filter(d => d.isTrump(trickState.trump));
         if (trumpPlays.length > 0) {
+            console.log(`LEADER: Found trumps:`, trumpPlays.map(d => d.toString()));
             // Find the highest trump we have
             const highestTrump = trumpPlays.reduce((max, d) => 
                 d.getDegree(trickState.trump) > max.getDegree(trickState.trump) ? d : max
             );
             const highestDegree = highestTrump.getDegree(trickState.trump);
+            console.log(`LEADER: Highest trump degree:`, highestDegree);
             
             // Check if higher trumps are still out there
             if (!this.isHigherTrumpOutThere(trickState.trump, highestDegree)) {
                 // No higher trumps out there - safe to lead with this trump
+                console.log(`LEADER: No higher trumps out there, using trump:`, highestTrump.toString());
                 return highestTrump;
             } else {
                 // Higher trumps are out there - avoid leading with trump
+                console.log(`LEADER: Higher trumps out there, looking for off plays`);
                 // Look for strong off dominoes instead
                 const offPlays = this.hand.filter(d => !d.isTrump(trickState.trump));
                 if (offPlays.length > 0) {
+                    console.log(`LEADER: Found off plays:`, offPlays.map(d => d.toString()));
                     // Prefer non-count dominoes for leading (preserve count for later)
                     const nonCountPlays = this.getNonCountDominoes(offPlays);
                     if (nonCountPlays.length > 0) {
-                        return nonCountPlays.reduce((max, d) => 
-                            this.evaluateDominoForLeading(d, trickState.trump) > this.evaluateDominoForLeading(max, trickState.trump) ? d : max
-                        );
+                        console.log(`LEADER: Found non-count off plays:`, nonCountPlays.map(d => d.toString()));
+                        
+                        // Filter for safe dominoes to lead with
+                        const safeNonCountPlays = nonCountPlays.filter(d => {
+                            const isSafe = this.isSafeToLeadWith(d, trickState.trump);
+                            const suit = d.getSuit(trickState.trump);
+                            const opponentsPlayedOffSuit = this.haveOpponentsPlayedOffSuitOnSuit(suit);
+                            const isLastDomino = this.hand.length === 1;
+                            
+                            // Special case for 6-4: only lead if safe, opponents played off-suit, or last domino
+                            if ((d.ends[0] === 6 && d.ends[1] === 4) || (d.ends[0] === 4 && d.ends[1] === 6)) {
+                                const sixFivePlayed = this.hasDominoBeenPlayed(new Domino(6, 5));
+                                const sixSixPlayed = this.hasDominoBeenPlayed(new Domino(6, 6));
+                                const isSafeForSixFour = sixFivePlayed && sixSixPlayed;
+                                
+                                if (!isSafeForSixFour && !opponentsPlayedOffSuit && !isLastDomino) {
+                                    console.log(`LEADER: Avoiding 6-4 because higher 6's are still out there`);
+                                    return false;
+                                }
+                            }
+                            
+                            if (!isSafe && !opponentsPlayedOffSuit && !isLastDomino) {
+                                console.log(`LEADER: Avoiding ${d.toString()} because higher ${suit}'s are still out there`);
+                                return false;
+                            }
+                            
+                            return true;
+                        });
+                        
+                        if (safeNonCountPlays.length > 0) {
+                            const bestNonCount = safeNonCountPlays.reduce((max, d) => 
+                                this.evaluateDominoForLeading(d, trickState.trump) > this.evaluateDominoForLeading(max, trickState.trump) ? d : max
+                            );
+                            console.log(`LEADER: Best safe non-count off play:`, bestNonCount.toString(), `(score: ${this.evaluateDominoForLeading(bestNonCount, trickState.trump)})`);
+                            return bestNonCount;
+                        } else {
+                            console.log(`LEADER: No safe non-count plays, using best available`);
+                            const bestNonCount = nonCountPlays.reduce((max, d) => 
+                                this.evaluateDominoForLeading(d, trickState.trump) > this.evaluateDominoForLeading(max, trickState.trump) ? d : max
+                            );
+                            console.log(`LEADER: Best non-count off play (unsafe):`, bestNonCount.toString(), `(score: ${this.evaluateDominoForLeading(bestNonCount, trickState.trump)})`);
+                            return bestNonCount;
+                        }
                     }
                     // Only use count dominoes if no other options
                     const countPlays = this.getCountDominoes(offPlays);
                     if (countPlays.length > 0) {
-                        return countPlays.reduce((max, d) => 
+                        console.log(`LEADER: Found count off plays:`, countPlays.map(d => d.toString()));
+                        const bestCount = countPlays.reduce((max, d) => 
                             this.evaluateDominoForLeading(d, trickState.trump) > this.evaluateDominoForLeading(max, trickState.trump) ? d : max
                         );
+                        console.log(`LEADER: Best count off play:`, bestCount.toString(), `(score: ${this.evaluateDominoForLeading(bestCount, trickState.trump)})`);
+                        return bestCount;
                     }
                 }
                 // No off plays available - forced to lead with trump
+                console.log(`LEADER: No off plays available, forced to use trump:`, highestTrump.toString());
                 return highestTrump;
             }
         }
@@ -1244,20 +1343,64 @@ class Player {
         // Third priority: non-count dominoes (preserve count for later)
         const nonCountPlays = this.getNonCountDominoes(this.hand);
         if (nonCountPlays.length > 0) {
-            return nonCountPlays.reduce((max, d) => 
-                this.evaluateDominoForLeading(d, trickState.trump) > this.evaluateDominoForLeading(max, trickState.trump) ? d : max
-            );
+            console.log(`LEADER: No trumps available, using non-count dominoes:`, nonCountPlays.map(d => d.toString()));
+            
+            // Filter for safe dominoes to lead with
+            const safeNonCountPlays = nonCountPlays.filter(d => {
+                const isSafe = this.isSafeToLeadWith(d, trickState.trump);
+                const suit = d.getSuit(trickState.trump);
+                const opponentsPlayedOffSuit = this.haveOpponentsPlayedOffSuitOnSuit(suit);
+                const isLastDomino = this.hand.length === 1;
+                
+                // Special case for 6-4: only lead if safe, opponents played off-suit, or last domino
+                if ((d.ends[0] === 6 && d.ends[1] === 4) || (d.ends[0] === 4 && d.ends[1] === 6)) {
+                    const sixFivePlayed = this.hasDominoBeenPlayed(new Domino(6, 5));
+                    const sixSixPlayed = this.hasDominoBeenPlayed(new Domino(6, 6));
+                    const isSafeForSixFour = sixFivePlayed && sixSixPlayed;
+                    
+                    if (!isSafeForSixFour && !opponentsPlayedOffSuit && !isLastDomino) {
+                        console.log(`LEADER: Avoiding 6-4 because higher 6's are still out there`);
+                        return false;
+                    }
+                }
+                
+                if (!isSafe && !opponentsPlayedOffSuit && !isLastDomino) {
+                    console.log(`LEADER: Avoiding ${d.toString()} because higher ${suit}'s are still out there`);
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            if (safeNonCountPlays.length > 0) {
+                const bestNonCount = safeNonCountPlays.reduce((max, d) => 
+                    this.evaluateDominoForLeading(d, trickState.trump) > this.evaluateDominoForLeading(max, trickState.trump) ? d : max
+                );
+                console.log(`LEADER: Best safe non-count play:`, bestNonCount.toString(), `(score: ${this.evaluateDominoForLeading(bestNonCount, trickState.trump)})`);
+                return bestNonCount;
+            } else {
+                console.log(`LEADER: No safe non-count plays, using best available`);
+                const bestNonCount = nonCountPlays.reduce((max, d) => 
+                    this.evaluateDominoForLeading(d, trickState.trump) > this.evaluateDominoForLeading(max, trickState.trump) ? d : max
+                );
+                console.log(`LEADER: Best non-count play (unsafe):`, bestNonCount.toString(), `(score: ${this.evaluateDominoForLeading(bestNonCount, trickState.trump)})`);
+                return bestNonCount;
+            }
         }
         
         // Last resort: count dominoes (LEADER should avoid leading with count if possible)
         const countPlays = this.getCountDominoes(this.hand);
         if (countPlays.length > 0) {
-            return countPlays.reduce((max, d) => 
+            console.log(`LEADER: Only count dominoes available:`, countPlays.map(d => d.toString()));
+            const bestCount = countPlays.reduce((max, d) => 
                 this.evaluateDominoForLeading(d, trickState.trump) > this.evaluateDominoForLeading(max, trickState.trump) ? d : max
             );
+            console.log(`LEADER: Best count play:`, bestCount.toString(), `(score: ${this.evaluateDominoForLeading(bestCount, trickState.trump)})`);
+            return bestCount;
         }
         
         // Fallback: any domino (should never reach here, but just in case)
+        console.log(`LEADER: Fallback to first domino:`, this.hand[0].toString());
         return this.hand[0];
     }
     
