@@ -29,6 +29,275 @@ const SONGBIRD_NAMES = [
     "Himalayan Rubythroat", "White-browed Rosefinch", "Alpine Chough"
 ];
 
+// Player Window Management
+class PlayerWindowManager {
+    constructor(game) {
+        this.game = game;
+        this.playerWindows = new Map();
+        this.imagePaths = null;
+        this.loadImagePaths();
+    }
+    
+    async loadImagePaths() {
+        try {
+            const response = await fetch('../assets/js/songbird_image_paths.json');
+            this.imagePaths = await response.json();
+        } catch (error) {
+            console.warn('Could not load songbird image paths:', error);
+            // Provide fallback image paths for local development
+            this.imagePaths = {
+                "Wood Thrush": "../assets/img/songbirds/Wood_Thrush.jpg",
+                "Black-throated Blue Warbler": "../assets/img/songbirds/Black_throated_Blue_Warbler.jpg",
+                "Scarlet Tanager": "../assets/img/songbirds/Scarlet_Tanager.jpg",
+                "Rose-breasted Grosbeak": "../assets/img/songbirds/Rose_breasted_Grosbeak.jpg",
+                "Veery": "../assets/img/songbirds/Veery.jpg",
+                "Hermit Thrush": "../assets/img/songbirds/Hermit_Thrush.jpg",
+                "Black-capped Chickadee": "../assets/img/songbirds/Black_capped_Chickadee.jpg",
+                "Musician Wren": "../assets/img/songbirds/Musician_Wren.jpg",
+                "Screaming Piha": "../assets/img/songbirds/Screaming_Piha.jpg",
+                "White-bellied Antbird": "../assets/img/songbirds/White_bellied_Antbird.jpg",
+                "Amazonian Umbrellabird": "../assets/img/songbirds/Amazonian_Umbrellabird.jpg",
+                "Spix's Guan": "../assets/img/songbirds/Spixs_Guan.jpg",
+                "Hoatzin": "../assets/img/songbirds/Hoatzin.jpg",
+                "Amazonian Royal Flycatcher": "../assets/img/songbirds/Amazonian_Royal_Flycatcher.jpg",
+                "Superb Lyrebird": "../assets/img/songbirds/Superb_Lyrebird.jpg",
+                "Australian Magpie": "../assets/img/songbirds/Australian_Magpie.jpg",
+                "Pied Butcherbird": "../assets/img/songbirds/Pied_Butcherbird.jpg",
+                "Grey Shrike-thrush": "../assets/img/songbirds/Grey_Shrike_thrush.jpg",
+                "Rufous Whistler": "../assets/img/songbirds/Rufous_Whistler.jpg",
+                "Golden Whistler": "../assets/img/songbirds/Golden_Whistler.jpg",
+                "Eastern Whipbird": "../assets/img/songbirds/Eastern_Whipbird.jpg",
+                "African Grey Hornbill": "../assets/img/songbirds/African_Grey_Hornbill.jpg",
+                "Lilac-breasted Roller": "../assets/img/songbirds/Lilac_breasted_Roller.jpg",
+                "Superb Starling": "../assets/img/songbirds/Superb_Starling.jpg",
+                "Red-chested Cuckoo": "../assets/img/songbirds/Red_chested_Cuckoo.jpg",
+                "Red-billed Oxpecker": "../assets/img/songbirds/Red_billed_Oxpecker.jpg",
+                "European Robin": "../assets/img/songbirds/European_Robin.jpg",
+                "Common Nightingale": "../assets/img/songbirds/Common_Nightingale.jpg",
+                "Blackcap": "../assets/img/songbirds/Blackcap.jpg",
+                "Sardinian Warbler": "../assets/img/songbirds/Sardinian_Warbler.jpg",
+                "Cirl Bunting": "../assets/img/songbirds/Cirl_Bunting.jpg",
+                "Thekla Lark": "../assets/img/songbirds/Thekla_Lark.jpg",
+                "Siberian Rubythroat": "../assets/img/songbirds/Siberian_Rubythroat.jpg",
+                "Bluethroat": "../assets/img/songbirds/Bluethroat.jpg",
+                "Pallas's Leaf Warbler": "../assets/img/songbirds/Pallass_Leaf_Warbler.jpg",
+                "Siberian Accentor": "../assets/img/songbirds/Siberian_Accentor.jpg",
+                "Red-flanked Bluetail": "../assets/img/songbirds/Red_flanked_Bluetail.jpg",
+                "Siberian Jay": "../assets/img/songbirds/Siberian_Jay.jpg",
+                "Pine Grosbeak": "../assets/img/songbirds/Pine_Grosbeak.jpg",
+                "Himalayan Monal": "../assets/img/songbirds/Himalayan_Monal.jpg",
+                "Blood Pheasant": "../assets/img/songbirds/Blood_Pheasant.jpg",
+                "Himalayan Bulbul": "../assets/img/songbirds/Himalayan_Bulbul.jpg",
+                "Rufous-breasted Accentor": "../assets/img/songbirds/Rufous_breasted_Accentor.jpg",
+                "Himalayan Rubythroat": "../assets/img/songbirds/Himalayan_Rubythroat.jpg",
+                "White-browed Rosefinch": "../assets/img/songbirds/White_browed_Rosefinch.jpg",
+                "Alpine Chough": "../assets/img/songbirds/Alpine_Chough.jpg"
+            };
+        }
+    }
+    
+    createPlayerWindow(playerIndex, playerName, birdName) {
+        const container = document.getElementById('player-windows-container');
+        if (!container) return;
+        
+        // Create window element
+        const window = document.createElement('div');
+        window.className = 'player-window';
+        window.id = `player-window-${playerIndex}`;
+        window.style.left = `${50 + (playerIndex * 320)}px`;
+        window.style.top = `${50 + (playerIndex * 220)}px`;
+        
+        // Get bird image path
+        const imagePath = this.imagePaths[birdName] || '';
+        
+        // Get player relationship and initial role
+        const relationship = this.game.getPlayerRelationship(playerIndex);
+        const initialRole = 'Bidding...';
+        
+        // Create window content
+        window.innerHTML = `
+            <div class="player-window-header">
+                <h3 class="player-window-title">${birdName} (${relationship}) - ${initialRole}</h3>
+                <button class="player-window-close" data-player-index="${playerIndex}">×</button>
+            </div>
+            <div class="player-window-content">
+                <div class="player-bird-info">
+                    <img src="${imagePath}" alt="${birdName}" class="player-bird-image" onerror="this.style.display='none'">
+                </div>
+                <div class="player-status-messages" id="player-status-${playerIndex}">
+                    <div class="player-status-message info">Waiting for game to start...</div>
+                </div>
+            </div>
+        `;
+        
+        // Add close button event listener
+        const closeBtn = window.querySelector('.player-window-close');
+        closeBtn.addEventListener('click', () => {
+            this.closePlayerWindow(playerIndex);
+        });
+        
+        // Make window draggable
+        this.makeDraggable(window);
+        
+        // Add to container and store reference
+        container.appendChild(window);
+        this.playerWindows.set(playerIndex, window);
+        
+        return window;
+    }
+    
+    makeDraggable(window) {
+        const header = window.querySelector('.player-window-header');
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+        let xOffset = 0;
+        let yOffset = 0;
+        
+        header.addEventListener('mousedown', (e) => {
+            initialX = e.clientX - xOffset;
+            initialY = e.clientY - yOffset;
+            
+            if (e.target === header || header.contains(e.target)) {
+                isDragging = true;
+            }
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                e.preventDefault();
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+                xOffset = currentX;
+                yOffset = currentY;
+                
+                window.style.transform = `translate(${currentX}px, ${currentY}px)`;
+            }
+        });
+        
+        document.addEventListener('mouseup', () => {
+            initialX = currentX;
+            initialY = currentY;
+            isDragging = false;
+        });
+    }
+    
+    closePlayerWindow(playerIndex) {
+        const window = this.playerWindows.get(playerIndex);
+        if (window) {
+            window.remove();
+            this.playerWindows.delete(playerIndex);
+            
+            // Add reopen button if it doesn't exist
+            this.addReopenButton(playerIndex);
+        }
+    }
+    
+    addReopenButton(playerIndex) {
+        const buttonContainer = document.querySelector('.button-container');
+        if (!buttonContainer) return;
+        
+        // Check if reopen button already exists
+        const existingButton = document.getElementById(`reopen-player-${playerIndex}`);
+        if (existingButton) return;
+        
+        const reopenBtn = document.createElement('button');
+        reopenBtn.id = `reopen-player-${playerIndex}`;
+        reopenBtn.className = 'reopen-player-btn';
+        reopenBtn.textContent = `Reopen Player ${playerIndex + 1}`;
+        reopenBtn.addEventListener('click', () => {
+            this.reopenPlayerWindow(playerIndex);
+        });
+        
+        buttonContainer.appendChild(reopenBtn);
+    }
+    
+    reopenPlayerWindow(playerIndex) {
+        // Remove reopen button
+        const reopenBtn = document.getElementById(`reopen-player-${playerIndex}`);
+        if (reopenBtn) {
+            reopenBtn.remove();
+        }
+        
+        // Recreate the player window
+        const player = this.game.players[playerIndex];
+        if (player) {
+            this.createPlayerWindow(playerIndex, player.name, player.name);
+            
+            // Update role if game is in progress
+            if (player.role) {
+                this.updatePlayerRole(playerIndex, player.role);
+            }
+        }
+    }
+    
+    addPlayerMessage(playerIndex, message, type = 'info') {
+        const window = this.playerWindows.get(playerIndex);
+        if (!window) return;
+        
+        const messagesContainer = window.querySelector('.player-status-messages');
+        if (!messagesContainer) return;
+        
+        const messageElement = document.createElement('div');
+        messageElement.className = `player-status-message ${type}`;
+        messageElement.textContent = message;
+        
+        messagesContainer.appendChild(messageElement);
+        
+        // Keep only last 10 messages
+        const messages = messagesContainer.querySelectorAll('.player-status-message');
+        if (messages.length > 10) {
+            messages[0].remove();
+        }
+        
+        // Auto-scroll to bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    
+    clearPlayerMessages(playerIndex) {
+        const window = this.playerWindows.get(playerIndex);
+        if (!window) return;
+        
+        const messagesContainer = window.querySelector('.player-status-messages');
+        if (messagesContainer) {
+            messagesContainer.innerHTML = '<div class="player-status-message info">Waiting for game to start...</div>';
+        }
+    }
+    
+    updatePlayerRole(playerIndex, role) {
+        const window = this.playerWindows.get(playerIndex);
+        if (!window) return;
+        
+        const titleElement = window.querySelector('.player-window-title');
+        if (titleElement) {
+            const currentText = titleElement.textContent;
+            const parts = currentText.split(' - ');
+            if (parts.length >= 2) {
+                const playerInfo = parts[0]; // "BirdName (Relationship)"
+                titleElement.textContent = `${playerInfo} - ${role}`;
+            }
+        }
+    }
+    
+    createAllPlayerWindows(players) {
+        players.forEach((player, index) => {
+            this.createPlayerWindow(index, player.name, player.name);
+        });
+    }
+    
+    updateAllPlayerRoles() {
+        this.game.players.forEach((player, index) => {
+            if (player.role) {
+                this.updatePlayerRole(index, player.role);
+            } else {
+                this.updatePlayerRole(index, 'Bidding...');
+            }
+        });
+    }
+}
+
 // PlayerRole enum equivalent
 const PlayerRole = {
     LEADER: 'LEADER',      // Won bid or took lead, trying to make bid
@@ -573,7 +842,7 @@ class Player {
             }
             
             // Count count dominoes in trump suit
-            const trumpCountDominoes = actualTrumps.filter(d => this.isCountDomino(d));
+            const trumpCountDominoes = potentialTrumps.filter(d => this.isCountDomino(d));
             const trumpCountValue = trumpCountDominoes.reduce((total, d) => {
                 const [a, b] = d.ends.slice().sort((x, y) => x - y);
                 if ((a === 5 && b === 5) || (a === 4 && b === 6)) {
@@ -2348,6 +2617,9 @@ class Game {
         // Hand history tracking
         this.handHistory = []; // Array to store previous hand scoreboards
         
+        // Initialize player window manager
+        this.playerWindowManager = new PlayerWindowManager(this);
+        
         // Bind event listeners
         this.bindEventListeners();
         
@@ -2603,6 +2875,9 @@ class Game {
         // Display new team introductions
         this.displayTeamIntroductions();
         
+        // Create player windows
+        this.playerWindowManager.createAllPlayerWindows(this.players);
+        
         // Show ready button
         this.showElement(this.readyBidding);
         this.hideElement(this.startGame);
@@ -2739,8 +3014,11 @@ class Game {
     }
     
     processBidding(bidOrder, playerMap, playerData, currentIndex) {
+        console.log(`processBidding: currentIndex=${currentIndex}, bidOrder.length=${bidOrder.length}`);
+        
         if (currentIndex >= bidOrder.length) {
             // Bidding complete
+            console.log('Bidding complete, finishing...');
             this.finishBidding(bidOrder, playerMap, playerData);
             return;
         }
@@ -2820,6 +3098,9 @@ class Game {
         
         this.hideElement(this.bidInputArea);
         this.bidInput.value = '';
+        
+        // Add player-specific message for human player
+        this.playerWindowManager.addPlayerMessage(0, `Bids ${bid}`, 'action');
         
         // Continue bidding process
         this.continueBiddingAfterHuman();
@@ -2901,6 +3182,8 @@ class Game {
         // If partner is leader and AI has a supporting hand, may pass
         if (partnerIsLeader && adjustedConfidence <= playerData[partnerName].confidence) {
             console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Partner is leader, passing to support`);
+            const playerIndex = this.players.indexOf(currentPlayer);
+            this.playerWindowManager.addPlayerMessage(playerIndex, `Partner is leading, passing to support`, 'info');
             return 'pass';
         }
         
@@ -2939,9 +3222,13 @@ class Game {
         
         if (pdata.maxBid <= this.currentBid) {
             console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Cannot outbid, passing`);
+            const playerIndex = this.players.indexOf(currentPlayer);
+            this.playerWindowManager.addPlayerMessage(playerIndex, `Cannot outbid ${this.currentBid}, passing`, 'info');
             return 'pass';
         } else {
             console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Bidding ${pdata.maxBid} with confidence ${adjustedConfidence}`);
+            const playerIndex = this.players.indexOf(currentPlayer);
+            this.playerWindowManager.addPlayerMessage(playerIndex, `Bidding ${pdata.maxBid} (confidence: ${adjustedConfidence})`, 'action');
             return pdata.maxBid;
         }
     }
@@ -2956,6 +3243,10 @@ class Game {
     }
     
     finishBidding() {
+        console.log('finishBidding called');
+        console.log('highestBidder:', this.highestBidder);
+        console.log('currentBid:', this.currentBid);
+        
         // Ensure someone wins: if all pass except last bidder, they get it for 30
         if (this.highestBidder === null) {
             const lastBidder = this.lastHandBidOrder[this.lastHandBidOrder.length - 1];
@@ -2963,6 +3254,7 @@ class Game {
             this.currentBid = 30;
             this.bidHistory[lastBidder] = 30;
             this.updateBiddingBoard(lastBidder, 30);
+            console.log('No winner, defaulting to last bidder:', lastBidder);
         }
         
         // Show ready to start prompt
@@ -3115,6 +3407,9 @@ class Game {
                 const roleName = player.role || "None";
                 console.log(`${roleName}: ${this.formatPlayerNameWithRelationship(player)} plays ${mod[0]}-${mod[1]}`);
                 this.updateStatus(`${roleName}: ${this.formatPlayerNameWithRelationship(player)} plays ${mod[0]}-${mod[1]}`);
+                
+                // Add player-specific message for AI player
+                this.playerWindowManager.addPlayerMessage(playerIdx, `Plays ${mod[0]}-${mod[1]} (${roleName})`, 'action');
             }
             
             this.currentPlayerIndex++;
@@ -3152,6 +3447,11 @@ class Game {
         // Update display
         this.displayPlayedDomino(chosenDomino, humanPlayer);
         this.displayPlayerHand();
+        
+        // Add player-specific message for human player
+        const mod = chosenDomino.modulate(this.trump, this.currentTrick.currentSuit);
+        const roleName = humanPlayer.role || "None";
+        this.playerWindowManager.addPlayerMessage(0, `Plays ${mod[0]}-${mod[1]} (${roleName})`, 'action');
         
         // Clear selection
         this.selectedDomino = null;
@@ -3209,11 +3509,17 @@ class Game {
         
         this.updateStatus(`${this.formatPlayerNameWithRelationship(winner)} wins the trick! ${team} gets ${trickPoints} points.`);
         
+        // Add player-specific message for trick winner
+        this.playerWindowManager.addPlayerMessage(winnerIdx, `Wins trick! +${trickPoints} points for ${team}`, 'action');
+        
         // Update for next trick
         this.currentLeaderIdx = winnerIdx;
         
         // Update roles for the new leader
         this.assignRoles(this.currentLeaderIdx);
+        
+        // Update player window headers with new roles
+        this.playerWindowManager.updateAllPlayerRoles();
         
         console.log('New leader index set to:', this.currentLeaderIdx);
         console.log('New leader will be:', this.formatPlayerNameWithRelationship(this.players[this.currentLeaderIdx]));
@@ -3443,6 +3749,10 @@ class Game {
         console.log('Roles assigned:');
         this.players.forEach((player, idx) => {
             console.log(`${this.formatPlayerNameWithRelationship(player)}: ${player.role}`);
+            // Add role assignment message to player window
+            this.playerWindowManager.addPlayerMessage(idx, `Role: ${player.role}`, 'info');
+            // Update player window header with new role
+            this.playerWindowManager.updatePlayerRole(idx, player.role);
         });
     }
     
