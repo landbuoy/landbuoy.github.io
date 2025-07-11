@@ -298,7 +298,7 @@
         }
         
         .bidding-area {
-            display: none !important;
+            display: none;
             background: rgba(0, 0, 0, 0.7);
             padding: 15px;
             border: 1px solid lime;
@@ -702,6 +702,67 @@
             background: lime;
             color: black;
         }
+        
+        .player-trump-selection-area {
+            margin-top: 10px;
+            padding: 8px;
+            border: 1px solid lime;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .player-trump-selection-area label {
+            display: block;
+            color: lime;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+        
+        .player-trump-selector {
+            margin: 8px 0;
+        }
+        
+        .player-trump-option {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 2px;
+            border: 1px solid lime;
+            border-radius: 3px;
+            cursor: pointer;
+            background: black;
+            color: lime;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .player-trump-option:hover {
+            background: lime;
+            color: black;
+        }
+        
+        .player-trump-option.selected {
+            background: #4caf50;
+            color: white;
+            border-color: #4caf50;
+        }
+        
+        .player-confirm-trump-btn {
+            background: black;
+            color: lime;
+            border: 1px solid lime;
+            padding: 6px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+        
+        .player-confirm-trump-btn:hover {
+            background: lime;
+            color: black;
+        }
     </style>
 </head>
 <body>
@@ -729,8 +790,9 @@
             <div>Us: <span id="us-score">0</span></div>
             <div>Them: <span id="them-score">0</span></div>
             <div class="button-container">
-            <button id="show-history-btn" class="btn history-btn">View History</button>
-        </div>
+                <button id="show-history-btn" class="btn history-btn">View History</button>
+                <button id="start-hand-btn" class="btn hidden">Ready to Start</button>
+            </div>
         </div>
         
         <!-- Scoreboard History Modal -->
@@ -756,11 +818,7 @@
                 <input type="text" id="bid-input" class="bid-input" maxlength="3">
                 <button id="submit-bid" class="btn">Submit Bid</button>
             </div>
-            <div id="ready-to-start" class="ready-to-start hidden">
-                <h4>Bidding Complete!</h4>
-                <p>Ready to start the hand?</p>
-                <button id="start-hand-btn" class="btn">Ready to Start</button>
-            </div>
+
         </div>
         
         <div id="trump-selection" class="bidding-area hidden" style="display: none !important;">

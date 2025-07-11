@@ -26,7 +26,10 @@ const SONGBIRD_NAMES = [
     
     // Himalayan Alpine (Nepal/India)
     "Himalayan Monal", "Blood Pheasant", "Himalayan Bulbul", "Rufous-breasted Accentor",
-    "Himalayan Rubythroat", "White-browed Rosefinch", "Alpine Chough"
+    "Himalayan Rubythroat", "White-browed Rosefinch", "Alpine Chough",
+    
+    // Additional Bird
+    "Common Waxbill"
 ];
 
 // Player Window Management
@@ -35,6 +38,7 @@ class PlayerWindowManager {
         this.game = game;
         this.playerWindows = new Map();
         this.imagePaths = null;
+        this.dialogStates = new Map(); // Track dialog states for each player
         this.loadImagePaths();
     }
     
@@ -69,15 +73,11 @@ class PlayerWindowManager {
                 "Eastern Whipbird": "../assets/img/songbirds/Eastern_Whipbird.jpg",
                 "African Grey Hornbill": "../assets/img/songbirds/African_Grey_Hornbill.jpg",
                 "Lilac-breasted Roller": "../assets/img/songbirds/Lilac_breasted_Roller.jpg",
-                "Superb Starling": "../assets/img/songbirds/Superb_Starling.jpg",
-                "Red-chested Cuckoo": "../assets/img/songbirds/Red_chested_Cuckoo.jpg",
                 "Red-billed Oxpecker": "../assets/img/songbirds/Red_billed_Oxpecker.jpg",
-                "European Robin": "../assets/img/songbirds/European_Robin.jpg",
-                "Common Nightingale": "../assets/img/songbirds/Common_Nightingale.jpg",
-                "Blackcap": "../assets/img/songbirds/Blackcap.jpg",
-                "Sardinian Warbler": "../assets/img/songbirds/Sardinian_Warbler.jpg",
-                "Cirl Bunting": "../assets/img/songbirds/Cirl_Bunting.jpg",
-                "Thekla Lark": "../assets/img/songbirds/Thekla_Lark.jpg",
+                "Superb Starling": "../assets/img/songbirds/Superb_Starling.jpg",
+                "Fiscal Shrike": "../assets/img/songbirds/Fiscal_Shrike.jpg",
+                "Yellow-billed Hornbill": "../assets/img/songbirds/Yellow_billed_Hornbill.jpg",
+                "Red-chested Cuckoo": "../assets/img/songbirds/Red_chested_Cuckoo.jpg",
                 "Siberian Rubythroat": "../assets/img/songbirds/Siberian_Rubythroat.jpg",
                 "Bluethroat": "../assets/img/songbirds/Bluethroat.jpg",
                 "Pallas's Leaf Warbler": "../assets/img/songbirds/Pallass_Leaf_Warbler.jpg",
@@ -85,6 +85,13 @@ class PlayerWindowManager {
                 "Red-flanked Bluetail": "../assets/img/songbirds/Red_flanked_Bluetail.jpg",
                 "Siberian Jay": "../assets/img/songbirds/Siberian_Jay.jpg",
                 "Pine Grosbeak": "../assets/img/songbirds/Pine_Grosbeak.jpg",
+                "Common Nightingale": "../assets/img/songbirds/Common_Nightingale.jpg",
+                "European Robin": "../assets/img/songbirds/European_Robin.jpg",
+                "Blackcap": "../assets/img/songbirds/Blackcap.jpg",
+                "Sardinian Warbler": "../assets/img/songbirds/Sardinian_Warbler.jpg",
+                "Subalpine Warbler": "../assets/img/songbirds/Subalpine_Warbler.jpg",
+                "Cirl Bunting": "../assets/img/songbirds/Cirl_Bunting.jpg",
+                "Thekla Lark": "../assets/img/songbirds/Thekla_Lark.jpg",
                 "Himalayan Monal": "../assets/img/songbirds/Himalayan_Monal.png",
                 "Blood Pheasant": "../assets/img/songbirds/Blood_Pheasant.jpg",
                 "Himalayan Bulbul": "../assets/img/songbirds/Himalayan_Bulbul.jpg",
@@ -92,7 +99,7 @@ class PlayerWindowManager {
                 "Himalayan Rubythroat": "../assets/img/songbirds/Himalayan_Rubythroat.jpg",
                 "White-browed Rosefinch": "../assets/img/songbirds/White_browed_Rosefinch.jpg",
                 "Alpine Chough": "../assets/img/songbirds/Alpine_Chough.jpg",
-                "Fiscal Shrike": "../assets/img/songbirds/Fiscal_Shrike.jpg"
+                "Common Waxbill": "../assets/img/songbirds/Common_Waxbill.jpg"
             };
         }
     }
@@ -105,8 +112,15 @@ class PlayerWindowManager {
         const window = document.createElement('div');
         window.className = 'player-window';
         window.id = `player-window-${playerIndex}`;
-        window.style.left = `${50 + (playerIndex * 480)}px`;
-        window.style.top = `${50 + (playerIndex * 320)}px`;
+        
+        // Position windows in a 2x2 grid layout
+        const isTopRow = playerIndex < 2;
+        const isLeftColumn = playerIndex % 2 === 0;
+        const baseLeft = isLeftColumn ? 50 : 520;
+        const baseTop = isTopRow ? 50 : 370;
+        
+        window.style.left = `${baseLeft}px`;
+        window.style.top = `${baseTop}px`;
         
         // Get bird image path
         const imagePath = this.imagePaths[birdName] || '';
@@ -133,6 +147,19 @@ class PlayerWindowManager {
                     <label for="player-bid-input-field-${playerIndex}">Enter bid (or 'p' to pass):</label>
                     <input type="text" id="player-bid-input-field-${playerIndex}" class="player-bid-input" maxlength="3">
                     <button id="player-submit-bid-${playerIndex}" class="player-submit-bid-btn">Submit</button>
+                </div>
+                <div class="player-trump-selection-area" id="player-trump-selection-${playerIndex}" style="display: none;">
+                    <label>Select a trump suit:</label>
+                    <div class="player-trump-selector">
+                        <div class="player-trump-option" data-trump="0">0 (Blanks)</div>
+                        <div class="player-trump-option" data-trump="1">1</div>
+                        <div class="player-trump-option" data-trump="2">2</div>
+                        <div class="player-trump-option" data-trump="3">3</div>
+                        <div class="player-trump-option" data-trump="4">4</div>
+                        <div class="player-trump-option" data-trump="5">5</div>
+                        <div class="player-trump-option" data-trump="6">6</div>
+                    </div>
+                    <button id="player-confirm-trump-${playerIndex}" class="player-confirm-trump-btn">Confirm Trump</button>
                 </div>
                 ` : ''}
             </div>
@@ -195,11 +222,160 @@ class PlayerWindowManager {
     closePlayerWindow(playerIndex) {
         const window = this.playerWindows.get(playerIndex);
         if (window) {
+            // Save dialog state before closing
+            this.saveDialogState(playerIndex);
+            
             window.remove();
             this.playerWindows.delete(playerIndex);
             
             // Add reopen button if it doesn't exist
             this.addReopenButton(playerIndex);
+        }
+    }
+    
+    saveDialogState(playerIndex) {
+        const window = this.playerWindows.get(playerIndex);
+        if (!window) return;
+        
+        const dialogState = {
+            bidInputVisible: false,
+            trumpSelectionVisible: false,
+            selectedTrump: null,
+            bidInputValue: '',
+            messages: []
+        };
+        
+        // Save bid input state
+        const bidInputArea = window.querySelector('.player-bid-input-area');
+        if (bidInputArea) {
+            dialogState.bidInputVisible = bidInputArea.style.display !== 'none';
+            const inputField = bidInputArea.querySelector('.player-bid-input');
+            if (inputField) {
+                dialogState.bidInputValue = inputField.value;
+            }
+        }
+        
+        // Save trump selection state
+        const trumpSelectionArea = window.querySelector('.player-trump-selection-area');
+        if (trumpSelectionArea) {
+            dialogState.trumpSelectionVisible = trumpSelectionArea.style.display !== 'none';
+            const selectedOption = trumpSelectionArea.querySelector('.player-trump-option.selected');
+            if (selectedOption) {
+                dialogState.selectedTrump = selectedOption.dataset.trump;
+            }
+        }
+        
+        // Save messages
+        const messagesContainer = window.querySelector('.player-status-messages');
+        if (messagesContainer) {
+            const messages = messagesContainer.querySelectorAll('.player-status-message');
+            messages.forEach(msg => {
+                dialogState.messages.push({
+                    text: msg.textContent,
+                    type: msg.className.replace('player-status-message ', '').replace('player-status-message', '')
+                });
+            });
+        }
+        
+        this.dialogStates.set(playerIndex, dialogState);
+    }
+    
+    restoreDialogState(playerIndex) {
+        const dialogState = this.dialogStates.get(playerIndex);
+        if (!dialogState) return;
+        
+        const window = this.playerWindows.get(playerIndex);
+        if (!window) return;
+        
+        // Restore messages
+        if (dialogState.messages.length > 0) {
+            const messagesContainer = window.querySelector('.player-status-messages');
+            if (messagesContainer) {
+                messagesContainer.innerHTML = '';
+                dialogState.messages.forEach(msg => {
+                    this.addPlayerMessage(playerIndex, msg.text, msg.type);
+                });
+            }
+        }
+        
+        // Restore bid input state
+        if (dialogState.bidInputVisible) {
+            this.showBidInput(playerIndex);
+            const inputField = window.querySelector('.player-bid-input');
+            if (inputField && dialogState.bidInputValue) {
+                inputField.value = dialogState.bidInputValue;
+            }
+            // Re-setup handler if this is the human player
+            if (playerIndex === 0) {
+                this.setupBidInputHandler(playerIndex, this.game);
+            }
+        }
+        
+        // Restore trump selection state
+        if (dialogState.trumpSelectionVisible) {
+            this.showTrumpSelection(playerIndex);
+            if (dialogState.selectedTrump) {
+                const trumpSelectionArea = window.querySelector('.player-trump-selection-area');
+                if (trumpSelectionArea) {
+                    // Clear previous selection
+                    trumpSelectionArea.querySelectorAll('.player-trump-option').forEach(option => {
+                        option.classList.remove('selected');
+                    });
+                    // Select the saved trump
+                    const selectedOption = trumpSelectionArea.querySelector(`[data-trump="${dialogState.selectedTrump}"]`);
+                    if (selectedOption) {
+                        selectedOption.classList.add('selected');
+                    }
+                }
+            }
+            // Re-setup handler if this is the human player
+            if (playerIndex === 0) {
+                this.setupTrumpSelectionHandler(playerIndex);
+            }
+        }
+        
+        // Clear the saved state after restoration
+        this.dialogStates.delete(playerIndex);
+    }
+    
+    restoreDialogElementsOnly(playerIndex, dialogState) {
+        const window = this.playerWindows.get(playerIndex);
+        if (!window) return;
+        
+        // Restore bid input state (but not messages)
+        if (dialogState.bidInputVisible) {
+            this.showBidInput(playerIndex);
+            const inputField = window.querySelector('.player-bid-input');
+            if (inputField && dialogState.bidInputValue) {
+                inputField.value = dialogState.bidInputValue;
+            }
+            // Re-setup handler if this is the human player
+            if (playerIndex === 0) {
+                this.setupBidInputHandler(playerIndex, this.game);
+            }
+        }
+        
+        // Restore trump selection state (but not messages)
+        if (dialogState.trumpSelectionVisible) {
+            this.showTrumpSelection(playerIndex);
+            if (dialogState.selectedTrump) {
+                const trumpSelectionArea = window.querySelector('.player-trump-selection-area');
+                if (trumpSelectionArea) {
+                    // Clear previous selection
+                    trumpSelectionArea.querySelectorAll('.player-trump-option').forEach(option => {
+                        option.classList.remove('selected');
+                    });
+                    // Select the saved trump
+                    const selectedOption = trumpSelectionArea.querySelector(`[data-trump="${dialogState.selectedTrump}"]`);
+                    if (selectedOption) {
+                        selectedOption.classList.add('selected');
+                    }
+                }
+            }
+            // Re-setup handler if this is the human player
+            if (playerIndex === 0) {
+                this.setupTrumpSelectionHandler(playerIndex);
+            }
         }
     }
     
@@ -211,10 +387,14 @@ class PlayerWindowManager {
         const existingButton = document.getElementById(`reopen-player-${playerIndex}`);
         if (existingButton) return;
         
+        const player = this.game.players[playerIndex];
+        const relationship = this.game.getPlayerRelationship(playerIndex);
+        const buttonText = `${player.name} (${relationship})`;
+        
         const reopenBtn = document.createElement('button');
         reopenBtn.id = `reopen-player-${playerIndex}`;
         reopenBtn.className = 'reopen-player-btn';
-        reopenBtn.textContent = `Reopen Player ${playerIndex + 1}`;
+        reopenBtn.textContent = buttonText;
         reopenBtn.addEventListener('click', () => {
             this.reopenPlayerWindow(playerIndex);
         });
@@ -238,6 +418,116 @@ class PlayerWindowManager {
             if (player.role) {
                 this.updatePlayerRole(playerIndex, player.role);
             }
+            
+            // Clear any existing messages first
+            this.clearPlayerMessages(playerIndex);
+            
+            // Restore current game state (this should be the primary source of truth)
+            this.restoreCurrentGameState(playerIndex);
+            
+            // Only restore saved dialog state if it doesn't conflict with current game state
+            const savedState = this.dialogStates.get(playerIndex);
+            if (savedState) {
+                // Only restore dialog elements, not messages
+                this.restoreDialogElementsOnly(playerIndex, savedState);
+                this.dialogStates.delete(playerIndex);
+            } else {
+                // Fall back to game phase-based restoration
+                if (this.game.currentPhase === 'bidding' && playerIndex === 0) {
+                    this.game.restoreBiddingInterface();
+                }
+                
+                if (this.game.currentPhase === 'trump-selection' && playerIndex === 0) {
+                    this.addPlayerMessage(playerIndex, "Select a trump suit", 'action');
+                    this.showTrumpSelection(playerIndex);
+                }
+            }
+            
+            // Additional checks for human player to ensure dialogs appear when needed
+            if (playerIndex === 0) {
+                // If in bidding phase and human player doesn't have bid input visible, show it
+                if (this.game.currentPhase === 'bidding' && this.game.currentBiddingState.waitingForHuman) {
+                    const window = this.playerWindows.get(playerIndex);
+                    if (window) {
+                        const bidInputArea = window.querySelector('.player-bid-input-area');
+                        if (bidInputArea && bidInputArea.style.display === 'none') {
+                            this.game.restoreBiddingInterface();
+                        }
+                    }
+                }
+                
+                // If in trump selection phase and human player doesn't have trump selection visible, show it
+                if (this.game.currentPhase === 'trump-selection') {
+                    const window = this.playerWindows.get(playerIndex);
+                    if (window) {
+                        const trumpSelectionArea = window.querySelector('.player-trump-selection-area');
+                        if (trumpSelectionArea && trumpSelectionArea.style.display === 'none') {
+                            this.addPlayerMessage(playerIndex, "Select a trump suit", 'action');
+                            this.showTrumpSelection(playerIndex);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    restoreCurrentGameState(playerIndex) {
+        const game = this.game;
+        
+        // Add current game phase information
+        switch (game.currentPhase) {
+            case 'waiting':
+                this.addPlayerMessage(playerIndex, "Waiting for game to start...", 'info');
+                break;
+                
+            case 'bidding':
+                this.addPlayerMessage(playerIndex, "Bidding phase in progress...", 'info');
+                if (game.currentBid > 0) {
+                    this.addPlayerMessage(playerIndex, `Current bid: ${game.currentBid}`, 'info');
+                }
+                if (game.highestBidder) {
+                    this.addPlayerMessage(playerIndex, `Highest bidder: ${game.highestBidder}`, 'info');
+                }
+                break;
+                
+            case 'trump-selection':
+                this.addPlayerMessage(playerIndex, "Trump selection phase", 'info');
+                break;
+                
+            case 'playing':
+                this.addPlayerMessage(playerIndex, "Playing hand", 'info');
+                if (game.trump !== null) {
+                    this.addPlayerMessage(playerIndex, `Trump: ${game.trump}'s`, 'info');
+                }
+                if (game.bidWinner) {
+                    this.addPlayerMessage(playerIndex, `Bid winner: ${game.bidWinner} (${game.winningBid})`, 'info');
+                }
+                if (game.currentTrick) {
+                    const leader = game.players[game.currentTrick.leaderIdx];
+                    this.addPlayerMessage(playerIndex, `Current leader: ${game.formatPlayerNameWithRelationship(leader)}`, 'info');
+                }
+                break;
+        }
+        
+        // Add recent game events based on current state
+        if (game.currentPhase === 'playing' && game.currentHandTricks.length > 0) {
+            // Show recent tricks
+            const recentTricks = game.currentHandTricks.slice(-3); // Last 3 tricks
+            recentTricks.forEach((trick, index) => {
+                const trickNum = game.currentHandTricks.length - recentTricks.length + index + 1;
+                const winner = trick.winner;
+                this.addPlayerMessage(playerIndex, `Trick ${trickNum}: ${winner} won`, 'info');
+            });
+        }
+        
+        // Add current hand points if available
+        if (game.currentPhase === 'playing') {
+            this.addPlayerMessage(playerIndex, `Hand score - Us: ${game.usHandPoints}, Them: ${game.themHandPoints}`, 'info');
+        }
+        
+        // Add current game score
+        if (game.scores && (game.scores[0] > 0 || game.scores[1] > 0)) {
+            this.addPlayerMessage(playerIndex, `Game score - Us: ${game.scores[0]}, Them: ${game.scores[1]}`, 'info');
         }
     }
     
@@ -386,6 +676,73 @@ class PlayerWindowManager {
         
         // Process the bid through the game
         game.processPlayerBid(bid);
+    }
+    
+    showTrumpSelection(playerIndex) {
+        const window = this.playerWindows.get(playerIndex);
+        if (!window) return;
+        
+        const trumpSelectionArea = window.querySelector('.player-trump-selection-area');
+        if (trumpSelectionArea) {
+            trumpSelectionArea.style.display = 'block';
+            this.setupTrumpSelectionHandler(playerIndex);
+        }
+    }
+    
+    hideTrumpSelection(playerIndex) {
+        const window = this.playerWindows.get(playerIndex);
+        if (!window) return;
+        
+        const trumpSelectionArea = window.querySelector('.player-trump-selection-area');
+        if (trumpSelectionArea) {
+            trumpSelectionArea.style.display = 'none';
+        }
+    }
+    
+    setupTrumpSelectionHandler(playerIndex) {
+        const window = this.playerWindows.get(playerIndex);
+        if (!window) return;
+        
+        // Set up trump option click handlers
+        const trumpOptions = window.querySelectorAll('.player-trump-option');
+        trumpOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                // Remove selection from all options
+                trumpOptions.forEach(o => o.classList.remove('selected'));
+                // Add selection to clicked option
+                option.classList.add('selected');
+            });
+        });
+        
+        // Set up confirm button handler
+        const confirmBtn = window.querySelector('.player-confirm-trump-btn');
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', () => {
+                this.handlePlayerTrumpConfirm(playerIndex);
+            });
+        }
+    }
+    
+    handlePlayerTrumpConfirm(playerIndex) {
+        const window = this.playerWindows.get(playerIndex);
+        if (!window) return;
+        
+        const selectedTrump = window.querySelector('.player-trump-option.selected');
+        if (!selectedTrump) {
+            this.addPlayerMessage(playerIndex, "Please select a trump suit.", 'warning');
+            return;
+        }
+        
+        const trump = parseInt(selectedTrump.dataset.trump);
+        
+        // Hide trump selection
+        this.hideTrumpSelection(playerIndex);
+        
+        // Add confirmation message
+        this.addPlayerMessage(playerIndex, `Selected trump: ${trump}'s`, 'action');
+        
+        // Process the trump selection through the game
+        this.game.setTrumpAndStartHand(trump);
     }
 }
 
@@ -2669,6 +3026,15 @@ class Game {
         this.winningBid = null;
         this.handModes = {};
         
+        // Bidding state tracking for window restoration
+        this.currentBiddingState = {
+            bidOrder: null,
+            playerMap: null,
+            playerData: null,
+            currentIndex: null,
+            waitingForHuman: false
+        };
+        
         // UI elements
         this.statusText = document.getElementById('status-text');
         this.scoreDisplay = document.getElementById('score-display');
@@ -2678,7 +3044,6 @@ class Game {
         this.biddingStatus = document.getElementById('bidding-status');
         this.biddingBoard = document.getElementById('bidding-board');
         this.biddingResults = document.getElementById('bidding-results');
-        this.readyToStart = document.getElementById('ready-to-start');
         this.startHandBtn = document.getElementById('start-hand-btn');
         this.bidInputArea = document.getElementById('bid-input-area');
         this.bidInput = document.getElementById('bid-input');
@@ -3145,6 +3510,15 @@ class Game {
     }
     
     showBiddingInterface(player, currentIndex, bidOrder, playerMap, playerData) {
+        // Store current bidding state for window restoration
+        this.currentBiddingState = {
+            bidOrder: bidOrder,
+            playerMap: playerMap,
+            playerData: playerData,
+            currentIndex: currentIndex,
+            waitingForHuman: true
+        };
+        
         // Update main status
         this.updateStatus(`Bidding phase in progress...`);
         
@@ -3156,6 +3530,18 @@ class Game {
         // Show bid input in player window
         this.playerWindowManager.showBidInput(humanPlayerIndex);
         this.playerWindowManager.setupBidInputHandler(humanPlayerIndex, this);
+    }
+    
+    restoreBiddingInterface() {
+        if (this.currentBiddingState.waitingForHuman && this.currentPhase === 'bidding') {
+            const humanPlayerIndex = 0;
+            this.playerWindowManager.addPlayerMessage(humanPlayerIndex, 
+                `It's your turn to bid! Current bid: ${this.currentBid === 0 ? 'pass' : this.currentBid}`, 'action');
+            
+            // Show bid input in player window
+            this.playerWindowManager.showBidInput(humanPlayerIndex);
+            this.playerWindowManager.setupBidInputHandler(humanPlayerIndex, this);
+        }
     }
     
     submitBidHandler() {
@@ -3295,7 +3681,7 @@ class Game {
                     console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Last to bid, outbidding by 1`);
                     return this.currentBid + 1;
                 } else {
-                    console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Taking bid from partner with confidence ${adjustedConfidence}`);
+                    console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Taking bid from partner`);
                     return pdata.maxBid;
                 }
             } else {
@@ -3314,7 +3700,7 @@ class Game {
         if (adjustedConfidence >= 4) {
             // Very strong hand - be more aggressive
             if (pdata.maxBid > this.currentBid) {
-                console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Strong hand (confidence ${adjustedConfidence}), bidding aggressively`);
+                console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Strong hand, bidding aggressively`);
                 return pdata.maxBid;
             }
         }
@@ -3325,9 +3711,9 @@ class Game {
             this.playerWindowManager.addPlayerMessage(playerIndex, `Cannot outbid ${this.currentBid}, passing`, 'info');
             return 'pass';
         } else {
-            console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Bidding ${pdata.maxBid} with confidence ${adjustedConfidence}`);
+            console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Bidding ${pdata.maxBid}`);
             const playerIndex = this.players.indexOf(currentPlayer);
-            this.playerWindowManager.addPlayerMessage(playerIndex, `Bidding ${pdata.maxBid} (confidence: ${adjustedConfidence})`, 'action');
+            this.playerWindowManager.addPlayerMessage(playerIndex, `Bidding ${pdata.maxBid}`, 'action');
             return pdata.maxBid;
         }
     }
@@ -3369,18 +3755,27 @@ class Game {
             }
         });
         
+        // Clear bidding state since bidding is complete
+        this.currentBiddingState = {
+            bidOrder: null,
+            playerMap: null,
+            playerData: null,
+            currentIndex: null,
+            waitingForHuman: false
+        };
+        
         // Show ready to start prompt
         this.showReadyToStart();
     }
     
     showTrumpSelection(suggestedTrump) {
         this.currentPhase = 'trump-selection';
-        this.trumpSuggested.innerHTML = `Select a trump suit:`;
-        this.showElement(this.trumpSelection);
-        this.hideElement(this.biddingArea);
         
         // Add trump selection prompt to human player window
         this.playerWindowManager.addPlayerMessage(0, "Select a trump suit", 'action');
+        
+        // Show trump selection interface in human player window
+        this.playerWindowManager.showTrumpSelection(0);
     }
     
     confirmTrumpHandler() {
@@ -3776,7 +4171,7 @@ class Game {
         this.hideElement(this.trickArea);
         this.hideElement(this.playerHand);
         this.hideElement(this.biddingBoard);
-        this.hideElement(this.readyToStart);
+        this.hideElement(this.startHandBtn);
         this.playedDominoes.innerHTML = '';
         
         // Clear scoreboard
@@ -3848,7 +4243,7 @@ class Game {
     
     showReadyToStart() {
         this.hideElement(this.bidInputArea);
-        this.showElement(this.readyToStart);
+        this.showElement(this.startHandBtn);
         this.updateStatus("Bidding complete! Click 'Ready to Start' to begin the hand.");
         
         // Add ready prompt to human player window
@@ -3856,7 +4251,7 @@ class Game {
     }
     
     startHandAfterBidding() {
-        this.hideElement(this.readyToStart);
+        this.hideElement(this.startHandBtn);
         this.hideElement(this.biddingBoard);
         
         // Clear bidding messages from all player windows and hide bid input
