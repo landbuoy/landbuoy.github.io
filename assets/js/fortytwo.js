@@ -109,18 +109,49 @@ class PlayerWindowManager {
         if (!container) return;
         
         // Create window element
-        const window = document.createElement('div');
-        window.className = 'player-window';
-        window.id = `player-window-${playerIndex}`;
+        const playerWindow = document.createElement('div');
+        playerWindow.className = 'player-window';
+        playerWindow.id = `player-window-${playerIndex}`;
         
-        // Position windows in a 2x2 grid layout
-        const isTopRow = playerIndex < 2;
-        const isLeftColumn = playerIndex % 2 === 0;
-        const baseLeft = isLeftColumn ? 50 : 520;
-        const baseTop = isTopRow ? 50 : 370;
+        // Get viewport dimensions reliably
+        const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0, document.body.clientWidth || 0);
+        const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0, document.body.clientHeight || 0);
         
-        window.style.left = `${baseLeft}px`;
-        window.style.top = `${baseTop}px`;
+        // Use fallback dimensions if viewport is not available
+        const screenWidth = viewportWidth || 1200;
+        const screenHeight = viewportHeight || 800;
+        
+        // Position windows based on player relationships
+        let baseLeft, baseTop;
+        
+        switch (playerIndex) {
+            case 0: // Human - middle of bottom half
+                baseLeft = screenWidth / 2 - 150; // Center horizontally, offset by half window width (300/2)
+                baseTop = screenHeight * 0.75 - 225; // 75% down the screen, offset by half window height (450/2)
+                break;
+            case 1: // Opponent L - middle of left half
+                baseLeft = screenWidth * 0.25 - 150; // 25% from left, offset by half window width (300/2)
+                baseTop = screenHeight / 2 - 225; // Center vertically, offset by half window height (450/2)
+                break;
+            case 2: // Partner - middle of top half
+                baseLeft = screenWidth / 2 - 150; // Center horizontally, offset by half window width (300/2)
+                baseTop = screenHeight * 0.25 - 225; // 25% from top, offset by half window height (450/2)
+                break;
+            case 3: // Opponent R - middle of right half
+                baseLeft = screenWidth * 0.75 - 150; // 75% from left, offset by half window width (300/2)
+                baseTop = screenHeight / 2 - 225; // Center vertically, offset by half window height (450/2)
+                break;
+            default:
+                baseLeft = 50;
+                baseTop = 50;
+        }
+        
+        // Ensure windows don't go off-screen
+        baseLeft = Math.max(10, Math.min(baseLeft, screenWidth - 310));
+        baseTop = Math.max(10, Math.min(baseTop, screenHeight - 460));
+        
+        playerWindow.style.left = `${baseLeft}px`;
+        playerWindow.style.top = `${baseTop}px`;
         
         // Get bird image path
         const imagePath = this.imagePaths[birdName] || '';
@@ -130,7 +161,7 @@ class PlayerWindowManager {
         const initialRole = 'Bidding...';
         
         // Create window content
-        window.innerHTML = `
+        playerWindow.innerHTML = `
             <div class="player-window-header">
                 <h3 class="player-window-title">${birdName} (${relationship}) - ${initialRole}</h3>
                 <button class="player-window-close" data-player-index="${playerIndex}">×</button>
@@ -166,19 +197,19 @@ class PlayerWindowManager {
         `;
         
         // Add close button event listener
-        const closeBtn = window.querySelector('.player-window-close');
+        const closeBtn = playerWindow.querySelector('.player-window-close');
         closeBtn.addEventListener('click', () => {
             this.closePlayerWindow(playerIndex);
         });
         
         // Make window draggable
-        this.makeDraggable(window);
+        this.makeDraggable(playerWindow);
         
         // Add to container and store reference
-        container.appendChild(window);
-        this.playerWindows.set(playerIndex, window);
+        container.appendChild(playerWindow);
+        this.playerWindows.set(playerIndex, playerWindow);
         
-        return window;
+        return playerWindow;
     }
     
     makeDraggable(window) {
@@ -191,12 +222,18 @@ class PlayerWindowManager {
         let xOffset = 0;
         let yOffset = 0;
         
+        // Add click handler to bring window to front
+        window.addEventListener('mousedown', (e) => {
+            this.bringWindowToFront(window);
+        });
+        
         header.addEventListener('mousedown', (e) => {
             initialX = e.clientX - xOffset;
             initialY = e.clientY - yOffset;
             
             if (e.target === header || header.contains(e.target)) {
                 isDragging = true;
+                this.bringWindowToFront(window);
             }
         });
         
@@ -217,6 +254,28 @@ class PlayerWindowManager {
             initialY = currentY;
             isDragging = false;
         });
+    }
+    
+    bringWindowToFront(clickedWindow) {
+        // Get all player windows
+        const allWindows = Array.from(this.playerWindows.values());
+        
+        // Find the highest current z-index among player windows
+        let maxZIndex = 100; // Base z-index for player windows
+        allWindows.forEach(win => {
+            const currentZIndex = parseInt(win.style.zIndex) || 100;
+            maxZIndex = Math.max(maxZIndex, currentZIndex);
+        });
+        
+        // Check if there are any modals with higher z-index
+        const modals = document.querySelectorAll('.modalContainer');
+        modals.forEach(modal => {
+            const modalZIndex = parseInt(modal.style.zIndex) || 0;
+            maxZIndex = Math.max(maxZIndex, modalZIndex);
+        });
+        
+        // Set the clicked window to the highest z-index + 1
+        clickedWindow.style.zIndex = (maxZIndex + 1).toString();
     }
     
     closePlayerWindow(playerIndex) {
@@ -3102,6 +3161,8 @@ class Game {
         // Close modal button
         document.querySelector('.aquaButton--scoreboard').addEventListener('click', () => {
             this.hideElement(this.scoreboardHistoryModal);
+            // Reset z-index when modal is closed
+            this.scoreboardHistoryModal.style.zIndex = '';
         });
         
         // Trump selection
@@ -4382,6 +4443,9 @@ class Game {
         
         console.log('Showing modal');
         this.showElement(this.scoreboardHistoryModal);
+        
+        // Ensure the modal is brought to front
+        this.scoreboardHistoryModal.style.zIndex = '9999';
     }
     
     createHandDisplay(hand) {
