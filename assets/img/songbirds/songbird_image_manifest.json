@@ -1,0 +1,478 @@
+{
+  "songbirds": [
+    {
+      "name": "Wood Thrush",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Wood_thrush_%28Hylocichla_mustelina%29_Peten.jpg/330px-Wood_thrush_%28Hylocichla_mustelina%29_Peten.jpg",
+          "title": "Wood thrush"
+        }
+      ]
+    },
+    {
+      "name": "Black-throated Blue Warbler",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Black-throated_Blue_Warbler%2C_Parc_%C3%89coforestier_de_Johnville%2C_Quebec%2C_Canada.jpg/330px-Black-throated_Blue_Warbler%2C_Parc_%C3%89coforestier_de_Johnville%2C_Quebec%2C_Canada.jpg",
+          "title": "Black-throated blue warbler"
+        }
+      ]
+    },
+    {
+      "name": "Scarlet Tanager",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Scarlet_tanager_in_GWC_%2850867%29.jpg/330px-Scarlet_tanager_in_GWC_%2850867%29.jpg",
+          "title": "Scarlet tanager"
+        }
+      ]
+    },
+    {
+      "name": "Rose-breasted Grosbeak",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/RosebreastedGrosbeak08.jpg/330px-RosebreastedGrosbeak08.jpg",
+          "title": "Rose-breasted grosbeak"
+        }
+      ]
+    },
+    {
+      "name": "Veery",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Veery_in_CP_%2843277%29.jpg/330px-Veery_in_CP_%2843277%29.jpg",
+          "title": "Veery"
+        }
+      ]
+    },
+    {
+      "name": "Hermit Thrush",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Hermit_thrush_%2810787%29.jpg/330px-Hermit_thrush_%2810787%29.jpg",
+          "title": "Hermit thrush"
+        }
+      ]
+    },
+    {
+      "name": "Black-capped Chickadee",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Poecile-atricapilla-001.jpg/330px-Poecile-atricapilla-001.jpg",
+          "title": "Black-capped chickadee"
+        }
+      ]
+    },
+    {
+      "name": "Musician Wren",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Cyphorhinus_arada_arada_-_Musician_wren%2C_Pte._Figueiredo%2C_Amazonas%2C_Brazil.jpg/330px-Cyphorhinus_arada_arada_-_Musician_wren%2C_Pte._Figueiredo%2C_Amazonas%2C_Brazil.jpg",
+          "title": "Musician wren"
+        }
+      ]
+    },
+    {
+      "name": "Screaming Piha",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Lipaugus_vociferans_-_Screaming_Piha%3B_Manaus%2C_Amazonas%2C_Brazil.jpg/330px-Lipaugus_vociferans_-_Screaming_Piha%3B_Manaus%2C_Amazonas%2C_Brazil.jpg",
+          "title": "Screaming piha"
+        }
+      ]
+    },
+    {
+      "name": "White-bellied Antbird",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/White-bellied_antbird_%2834221189992%29.jpg/330px-White-bellied_antbird_%2834221189992%29.jpg",
+          "title": "White-bellied antbird"
+        }
+      ]
+    },
+    {
+      "name": "Amazonian Umbrellabird",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Amazonian_Umbrellabird_fem_-_Manu_NP_8291_%2816834437801%29.jpg/330px-Amazonian_Umbrellabird_fem_-_Manu_NP_8291_%2816834437801%29.jpg",
+          "title": "Amazonian umbrellabird"
+        }
+      ]
+    },
+    {
+      "name": "Spix's Guan",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Penelope_jacquacu_-Manu_National_Park%2C_Peru-8.jpg/330px-Penelope_jacquacu_-Manu_National_Park%2C_Peru-8.jpg",
+          "title": "Spix's guan"
+        }
+      ]
+    },
+    {
+      "name": "Hoatzin",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Hoatzin_%28Opisthocomus_hoazin%29_Rio_Napo.jpg/330px-Hoatzin_%28Opisthocomus_hoazin%29_Rio_Napo.jpg",
+          "title": "Hoatzin"
+        }
+      ]
+    },
+    {
+      "name": "Amazonian Royal Flycatcher",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Onychorhynchus_coronatus_-_Amazonian_Royal_Flycatcher.JPG/330px-Onychorhynchus_coronatus_-_Amazonian_Royal_Flycatcher.JPG",
+          "title": "Tropical royal flycatcher"
+        }
+      ]
+    },
+    {
+      "name": "Superb Lyrebird",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Superb_lyrbird_in_scrub.jpg/330px-Superb_lyrbird_in_scrub.jpg",
+          "title": "Superb lyrebird"
+        }
+      ]
+    },
+    {
+      "name": "Australian Magpie",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Cracticus_tibicen_hypoleuca_male_domain.jpg/330px-Cracticus_tibicen_hypoleuca_male_domain.jpg",
+          "title": "Australian magpie"
+        }
+      ]
+    },
+    {
+      "name": "Pied Butcherbird",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Pied_Butcherbird_-_Male_%28Cracticus_nigrogularis%29_03.JPG/330px-Pied_Butcherbird_-_Male_%28Cracticus_nigrogularis%29_03.JPG",
+          "title": "Pied butcherbird"
+        }
+      ]
+    },
+    {
+      "name": "Grey Shrike-thrush",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Colluricincla_harmonica_-_Brunkerville.jpg/330px-Colluricincla_harmonica_-_Brunkerville.jpg",
+          "title": "Grey shrikethrush"
+        }
+      ]
+    },
+    {
+      "name": "Rufous Whistler",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Pachycephala_rufiventris_male_1_-_Glen_Davis.jpg/330px-Pachycephala_rufiventris_male_1_-_Glen_Davis.jpg",
+          "title": "Rufous whistler"
+        }
+      ]
+    },
+    {
+      "name": "Golden Whistler",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Pachycephala_pectoralis_youngi_2.jpg/330px-Pachycephala_pectoralis_youngi_2.jpg",
+          "title": "Australian golden whistler"
+        }
+      ]
+    },
+    {
+      "name": "Eastern Whipbird",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Eastern_Whipbird.jpg/330px-Eastern_Whipbird.jpg",
+          "title": "Eastern whipbird"
+        }
+      ]
+    },
+    {
+      "name": "African Grey Hornbill",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/African_grey_hornbill_%28Tockus_nasutus_nasutus%29_male.jpg/330px-African_grey_hornbill_%28Tockus_nasutus_nasutus%29_male.jpg",
+          "title": "African grey hornbill"
+        }
+      ]
+    },
+    {
+      "name": "Lilac-breasted Roller",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Lilac-breasted_roller_%28Coracias_caudatus%29_Kruger.jpg/330px-Lilac-breasted_roller_%28Coracias_caudatus%29_Kruger.jpg",
+          "title": "Lilac-breasted roller"
+        }
+      ]
+    },
+    {
+      "name": "Red-billed Oxpecker",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Buphagus_erythrorhynchus00.jpg/330px-Buphagus_erythrorhynchus00.jpg",
+          "title": "Red-billed oxpecker"
+        }
+      ]
+    },
+    {
+      "name": "Superb Starling",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Superb_Starling_Portrait.jpg/330px-Superb_Starling_Portrait.jpg",
+          "title": "Superb starling"
+        }
+      ]
+    },
+    {
+      "name": "Fiscal Shrike",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Common_fiscal_%28Lanius_collaris_subcoronatus%29.jpg/330px-Common_fiscal_%28Lanius_collaris_subcoronatus%29.jpg",
+          "title": "Southern fiscal"
+        }
+      ]
+    },
+    {
+      "name": "Yellow-billed Hornbill",
+      "search_results": []
+    },
+    {
+      "name": "Red-chested Cuckoo",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/024_Red-chested_cuckoo_at_Kibale_forest_National_Park_Photo_by_Giles_Laurent.jpg/330px-024_Red-chested_cuckoo_at_Kibale_forest_National_Park_Photo_by_Giles_Laurent.jpg",
+          "title": "Red-chested cuckoo"
+        }
+      ]
+    },
+    {
+      "name": "Siberian Rubythroat",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Luscinia_calliope_-_Pak_Chong_2.jpg/330px-Luscinia_calliope_-_Pak_Chong_2.jpg",
+          "title": "Siberian rubythroat"
+        }
+      ]
+    },
+    {
+      "name": "Bluethroat",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Bluethroat_%28Luscinia_svecica_svecica%29_male_Oppdal.jpg/330px-Bluethroat_%28Luscinia_svecica_svecica%29_male_Oppdal.jpg",
+          "title": "Bluethroat"
+        }
+      ]
+    },
+    {
+      "name": "Pallas's Leaf Warbler",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Pallas%27s_Leaf_Warbler%2C_Tunkinskiy_Rayon%2C_Buryat%2C_Russia_2.jpg/330px-Pallas%27s_Leaf_Warbler%2C_Tunkinskiy_Rayon%2C_Buryat%2C_Russia_2.jpg",
+          "title": "Pallas's leaf warbler"
+        }
+      ]
+    },
+    {
+      "name": "Siberian Accentor",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Siberian_Accentor_%28Prunella_montanella%29_-_%D0%A1%D0%B8%D0%B1%D0%B8%D1%80%D0%B8%D0%B9%D0%BD_%D1%85%D0%B0%D0%B9%D1%80%D1%83%D1%83%D0%BB%D0%B4%D0%B0%D0%B9_%2816435139700%29.jpg/330px-Siberian_Accentor_%28Prunella_montanella%29_-_%D0%A1%D0%B8%D0%B1%D0%B8%D1%80%D0%B8%D0%B9%D0%BD_%D1%85%D0%B0%D0%B9%D1%80%D1%83%D1%83%D0%BB%D0%B4%D0%B0%D0%B9_%2816435139700%29.jpg",
+          "title": "Siberian accentor"
+        }
+      ]
+    },
+    {
+      "name": "Red-flanked Bluetail",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Tarsiger_cyanurus.jpg/330px-Tarsiger_cyanurus.jpg",
+          "title": "Red-flanked bluetail"
+        }
+      ]
+    },
+    {
+      "name": "Siberian Jay",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Perisoreus_infaustus_Kittil%C3%A4_20180418_01.jpg/330px-Perisoreus_infaustus_Kittil%C3%A4_20180418_01.jpg",
+          "title": "Siberian jay"
+        }
+      ]
+    },
+    {
+      "name": "Pine Grosbeak",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Pine_Grosbeak_%28Pinicola_enucleator%29_%2813667564073%29.jpg/330px-Pine_Grosbeak_%28Pinicola_enucleator%29_%2813667564073%29.jpg",
+          "title": "Pine grosbeak"
+        }
+      ]
+    },
+    {
+      "name": "Common Nightingale",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Luscinia_megarhynchos_-_Common_nightingale_-_Nachtegaal.jpg/330px-Luscinia_megarhynchos_-_Common_nightingale_-_Nachtegaal.jpg",
+          "title": "Common nightingale"
+        }
+      ]
+    },
+    {
+      "name": "European Robin",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Erithacus_rubecula_with_cocked_head.jpg/330px-Erithacus_rubecula_with_cocked_head.jpg",
+          "title": "European robin"
+        }
+      ]
+    },
+    {
+      "name": "Blackcap",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Blackcap_%28Sylvia_atricapilla%29_male.jpg/330px-Blackcap_%28Sylvia_atricapilla%29_male.jpg",
+          "title": "Eurasian blackcap"
+        }
+      ]
+    },
+    {
+      "name": "Sardinian Warbler",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Sardinian_Warbler.jpg/330px-Sardinian_Warbler.jpg",
+          "title": "Sardinian warbler"
+        }
+      ]
+    },
+    {
+      "name": "Subalpine Warbler",
+      "search_results": []
+    },
+    {
+      "name": "Cirl Bunting",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Cirl_bunting_cropped.jpg/330px-Cirl_bunting_cropped.jpg",
+          "title": "Cirl bunting"
+        }
+      ]
+    },
+    {
+      "name": "Thekla Lark",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/North_African_Thekla%27s_lark_%28Galerida_theklae_carolinae%29_Kebili.jpg/330px-North_African_Thekla%27s_lark_%28Galerida_theklae_carolinae%29_Kebili.jpg",
+          "title": "Thekla's lark"
+        }
+      ]
+    },
+    {
+      "name": "Himalayan Monal",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Himalayan_Monal_Adult_Male_East_Sikkim_Sikkim_India.png/330px-Himalayan_Monal_Adult_Male_East_Sikkim_Sikkim_India.png",
+          "title": "Himalayan monal"
+        }
+      ]
+    },
+    {
+      "name": "Blood Pheasant",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Blood_Pheasant_Phrumsingla_National_Park_Bhutan.jpg/330px-Blood_Pheasant_Phrumsingla_National_Park_Bhutan.jpg",
+          "title": "Blood pheasant"
+        }
+      ]
+    },
+    {
+      "name": "Himalayan Bulbul",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Himalayan_bulbul_%28Pycnonotus_leucogenys%29_Cropped.jpg/330px-Himalayan_bulbul_%28Pycnonotus_leucogenys%29_Cropped.jpg",
+          "title": "Himalayan bulbul"
+        }
+      ]
+    },
+    {
+      "name": "Rufous-breasted Accentor",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Rufous-breasted_Accentor_Lungthu_Sikkim_India_03.11.2014.jpg/330px-Rufous-breasted_Accentor_Lungthu_Sikkim_India_03.11.2014.jpg",
+          "title": "Rufous-breasted accentor"
+        }
+      ]
+    },
+    {
+      "name": "Himalayan Rubythroat",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/White_tailed_rubythroat.jpg/330px-White_tailed_rubythroat.jpg",
+          "title": "Himalayan rubythroat"
+        }
+      ]
+    },
+    {
+      "name": "White-browed Rosefinch",
+      "search_results": []
+    },
+    {
+      "name": "Alpine Chough",
+      "search_results": [
+        {
+          "source": "Wikipedia",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Alpine_Chough_by_Jim_Higham.jpg/330px-Alpine_Chough_by_Jim_Higham.jpg",
+          "title": "Alpine chough"
+        }
+      ]
+    }
+  ],
+  "search_date": "2025-07-10 13:10:28",
+  "total_birds": 49
+}

@@ -44,7 +44,7 @@ class PlayerWindowManager {
     
     async loadImagePaths() {
         try {
-            const response = await fetch('../assets/js/songbird_image_paths.json');
+            const response = await fetch('../assets/img/songbirds/songbird_image_paths.json');
             this.imagePaths = await response.json();
         } catch (error) {
             console.warn('Could not load songbird image paths:', error);
