@@ -3382,6 +3382,82 @@ class Game {
                 handle: '.modalHeader',
                 containment: 'window'
             });
+            
+            // Comprehensive draggable functionality for all modal containers
+            $(".modalContainer").draggable({
+                handle: '.modalHeader',
+                containment: 'window'
+            });
+            
+            // Lift up the last clicked modal on vertical stack
+            $(".modalContainer").click(function () {
+                $(".modalContainer")
+                    .not(this)
+                    .each(function () {
+                        $(this).css("zIndex", "0");
+                    });
+                $(this).css("zIndex", "9999");
+            });
+            
+            // Scoreboard modal controls
+            $(".aquaButton--scoreboard").click(function () {
+                $(".modalContainer--scoreboard").fadeOut();
+            });
+            
+            // Touch event handlers for mobile support
+            $(".modalContainer").on('touchstart', function(e) {
+                // Prevent default touch behavior
+                if (e.target.tagName.toLowerCase() === 'input' || 
+                    e.target.tagName.toLowerCase() === 'textarea' ||
+                    e.target.tagName.toLowerCase() === 'select') {
+                    return;
+                }
+                
+                // Get the modal container
+                const modal = $(this);
+                
+                // Store initial touch data
+                const touch = e.originalEvent.touches[0];
+                modal.data('touchStart', {
+                    x: touch.clientX,
+                    y: touch.clientY,
+                    modalX: modal.offset().left,
+                    modalY: modal.offset().top
+                });
+                
+                // Bring to front
+                modal.trigger('click');
+            });
+            
+            $(".modalContainer").on('touchmove', function(e) {
+                const modal = $(this);
+                const touchStart = modal.data('touchStart');
+                
+                if (touchStart) {
+                    e.preventDefault();
+                    const touch = e.originalEvent.touches[0];
+                    const deltaX = touch.clientX - touchStart.x;
+                    const deltaY = touch.clientY - touchStart.y;
+                    
+                    modal.css({
+                        left: touchStart.modalX + deltaX,
+                        top: touchStart.modalY + deltaY
+                    });
+                }
+            });
+            
+            $(".modalContainer").on('touchend touchcancel', function() {
+                const modal = $(this);
+                modal.removeData('touchStart');
+            });
+            
+            // Prevent text selection during drag
+            $(".modalContainer").on('selectstart', function(e) {
+                if (e.target.tagName.toLowerCase() !== 'input' && 
+                    e.target.tagName.toLowerCase() !== 'textarea') {
+                    e.preventDefault();
+                }
+            });
         });
     }
     
