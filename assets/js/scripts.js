@@ -148,4 +148,94 @@ $(document).ready(function () {
     var navBoxHeight = document.querySelector('.nav').offsetHeight;
     $(".landBuoyContainer1").css("top", navBoxHeight + 32 +"px");
     
+    // MOBILE DRAG IMPROVEMENTS
+    // Add hold-to-drag functionality for better mobile UX
+    let holdTimer;
+    let isHoldingToDrag = false;
+    let dragStarted = false;
+    
+    // Enhanced mobile dragging with hold-to-drag
+    $(".modalContainer").on('touchstart', function(e) {
+        const element = this;
+        const $element = $(element);
+        
+        // Clear any existing timer
+        clearTimeout(holdTimer);
+        
+        // Set up hold-to-drag timer
+        holdTimer = setTimeout(function() {
+            isHoldingToDrag = true;
+            $element.addClass('drag-ready');
+            
+            // Add visual feedback
+            $element.css('transform', 'scale(1.02)');
+            $element.css('transition', 'transform 0.2s ease');
+            
+            // Haptic feedback if available
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }, 400); // 400ms hold
+    });
+    
+    $(".modalContainer").on('touchmove', function(e) {
+        const touchCount = e.originalEvent.touches.length;
+        
+        // Only allow dragging if holding to drag or if already dragging
+        if (isHoldingToDrag || dragStarted) {
+            dragStarted = true;
+            // Let jQuery UI handle the drag
+        } else {
+            // Clear hold timer if moving before hold time
+            clearTimeout(holdTimer);
+        }
+    });
+    
+    $(".modalContainer").on('touchend touchcancel', function() {
+        const $element = $(this);
+        
+        // Clear hold timer
+        clearTimeout(holdTimer);
+        
+        // Reset states
+        isHoldingToDrag = false;
+        dragStarted = false;
+        
+        // Remove visual feedback
+        $element.removeClass('drag-ready');
+        $element.css('transform', '');
+        $element.css('transition', '');
+    });
+    
+    // Prevent text selection during drag on mobile
+    $(".modalContainer").on('selectstart', function(e) {
+        e.preventDefault();
+    });
+    
+    // Add CSS class for drag-ready state
+    $('<style>')
+        .prop('type', 'text/css')
+        .html(`
+            .drag-ready {
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.3) !important;
+                z-index: 10000 !important;
+            }
+            
+            /* Improve touch targets on mobile */
+            @media (max-width: 640px) {
+                .modalContainer {
+                    /* Ensure modals stay within viewport */
+                    min-width: 280px;
+                    max-width: calc(100vw - 20px);
+                    max-height: calc(100vh - 20px);
+                }
+                
+                /* Better touch feedback */
+                .modalHeader:active {
+                    background-color: rgba(0, 0, 0, 0.1);
+                }
+            }
+        `)
+        .appendTo('head');
+    
 });

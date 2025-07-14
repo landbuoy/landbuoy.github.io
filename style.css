@@ -309,6 +309,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   background-color: #eaeaea;
   display: flex;
   flex-direction: column;
+  touch-action: none; /* Prevent browser touch interference */
 }
 
 .modalContainer:hover {
@@ -681,5 +682,42 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
     height: 90%;
     width: 90%;
     min-width: auto;
+    max-width: 90vw;
+    max-height: 80vh;
+  }
+  
+  .modalContainer:hover {
+    cursor: default; /* Remove desktop cursor on mobile */
+  }
+  
+  /* Make modal headers touch-friendly */
+  .modalHeader {
+    min-height: 44px; /* iOS recommended minimum touch target */
+    padding: 8px;
+    cursor: move;
+    touch-action: none;
+    position: relative;
+  }
+  
+  /* Add visual drag handle for mobile */
+  .modalHeader::after {
+    content: "⋮⋮⋮";
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: #666;
+    letter-spacing: 2px;
+  }
+  
+  /* Make close buttons larger on mobile */
+  .aquaButton {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
   }
 }
