@@ -32,13 +32,80 @@ const SONGBIRD_NAMES = [
     "Common Waxbill"
 ];
 
-// Player Window Management
-class PlayerWindowManager {
+// Domino to Bird mapping based on the specified associations
+const DOMINO_BIRD_MAP = {
+    // 6-x dominoes
+    "6-6": "Wood Thrush",
+    "6-5": "Black-throated Blue Warbler", 
+    "6-4": "Scarlet Tanager",
+    "6-3": "Rose-breasted Grosbeak",
+    "6-2": "Veery",
+    "6-1": "Hermit Thrush",
+    "6-0": "Black-capped Chickadee",
+    
+    // 5-x dominoes
+    "5-6": "Musician Wren",
+    "5-5": "Screaming Piha",
+    "5-4": "White-bellied Antbird",
+    "5-3": "Amazonian Umbrellabird",
+    "5-2": "Spix's Guan",
+    "5-1": "Hoatzin",
+    "5-0": "Amazonian Royal Flycatcher",
+    
+    // 4-x dominoes
+    "4-6": "Superb Lyrebird",
+    "4-5": "Australian Magpie",
+    "4-4": "Pied Butcherbird",
+    "4-3": "Grey Shrike-thrush",
+    "4-2": "Rufous Whistler",
+    "4-1": "Golden Whistler",
+    "4-0": "Eastern Whipbird",
+    
+    // 3-x dominoes
+    "3-6": "African Grey Hornbill",
+    "3-5": "Lilac-breasted Roller",
+    "3-4": "Red-billed Oxpecker",
+    "3-3": "Superb Starling",
+    "3-2": "Fiscal Shrike",
+    "3-1": "Yellow-billed Hornbill",
+    "3-0": "Red-chested Cuckoo",
+    
+    // 2-x dominoes
+    "2-6": "Siberian Rubythroat",
+    "2-5": "Bluethroat",
+    "2-4": "Pallas's Leaf Warbler",
+    "2-3": "Siberian Accentor",
+    "2-2": "Red-flanked Bluetail",
+    "2-1": "Siberian Jay",
+    "2-0": "Pine Grosbeak",
+    
+    // 1-x dominoes
+    "1-6": "Common Nightingale",
+    "1-5": "European Robin",
+    "1-4": "Blackcap",
+    "1-3": "Sardinian Warbler",
+    "1-2": "Subalpine Warbler",
+    "1-1": "Cirl Bunting",
+    "1-0": "Thekla Lark",
+    
+    // 0-x dominoes
+    "0-6": "Himalayan Monal",
+    "0-5": "Blood Pheasant",
+    "0-4": "Himalayan Bulbul",
+    "0-3": "Rufous-breasted Accentor",
+    "0-2": "Himalayan Rubythroat",
+    "0-1": "White-browed Rosefinch",
+    "0-0": "Alpine Chough"
+};
+
+// Consolidated Game Table Window Manager
+class GameTableWindowManager {
     constructor(game) {
         this.game = game;
-        this.playerWindows = new Map();
+        this.gameTableWindow = null;
+        this.isOpen = false;
+        this.playerAudio = [null, null, null, null]; // Audio objects for each player
         this.imagePaths = null;
-        this.dialogStates = new Map(); // Track dialog states for each player
         this.loadImagePaths();
     }
     
@@ -104,123 +171,267 @@ class PlayerWindowManager {
         }
     }
     
-    createPlayerWindow(playerIndex, playerName, birdName) {
+    getDominoBird(domino, trump, ledSuit) {
+        // Determine the modal domino based on trump and led suit
+        const modalDomino = domino.modulate(trump, ledSuit);
+        const dominoKey = `${modalDomino[0]}-${modalDomino[1]}`;
+        return DOMINO_BIRD_MAP[dominoKey] || "Unknown Bird";
+    }
+    
+    getBirdAudioPath(birdName, playerRole) {
+        const birdFolder = birdName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        let recordingNumber = 1; // Default for LEADER
+        
+        if (playerRole === 'SUPPORTER') {
+            recordingNumber = 2;
+        } else if (playerRole === 'SETTER1' || playerRole === 'SETTER2') {
+            recordingNumber = 3;
+        }
+        
+        return `../assets/audio/birdsongs/downloads/${birdFolder}/${birdFolder}_recording_${recordingNumber}.mp3`;
+    }
+    
+    playBirdAudio(audioPath, playerIndex) {
+        // Stop current audio for this player if playing
+        if (this.playerAudio[playerIndex]) {
+            this.playerAudio[playerIndex].pause();
+            this.playerAudio[playerIndex] = null;
+        }
+        
+        // Create and play new audio for this player
+        this.playerAudio[playerIndex] = new Audio(audioPath);
+        this.playerAudio[playerIndex].loop = true;
+        this.playerAudio[playerIndex].play().catch(e => console.warn(`Could not play audio for player ${playerIndex}:`, e));
+    }
+    
+    stopBirdAudio(playerIndex = null) {
+        if (playerIndex !== null) {
+            // Stop audio for specific player
+            if (this.playerAudio[playerIndex]) {
+                this.playerAudio[playerIndex].pause();
+                this.playerAudio[playerIndex] = null;
+            }
+        } else {
+            // Stop all audio
+            for (let i = 0; i < 4; i++) {
+                if (this.playerAudio[i]) {
+                    this.playerAudio[i].pause();
+                    this.playerAudio[i] = null;
+                }
+            }
+        }
+    }
+    
+    playBirdAudioForPlayer(playerIndex) {
+        // Play stored audio for this player when bird is revealed
+        if (this.playerAudioPaths && this.playerAudioPaths[playerIndex]) {
+            const audioPath = this.playerAudioPaths[playerIndex];
+            this.playBirdAudio(audioPath, playerIndex);
+        }
+    }
+    
+    updateBidWinnerHeader(playerIndex, bid) {
+        const roleElement = document.getElementById(`player-role-${playerIndex}`);
+        if (roleElement) {
+            roleElement.textContent = `Won bid for: ${bid}`;
+            roleElement.style.color = 'lime';
+            roleElement.style.fontWeight = 'bold';
+        }
+    }
+    
+    updateGameTableHeader(trumpSuit) {
+        const titleElement = this.gameTableWindow?.querySelector('.game-table-title');
+        if (titleElement) {
+            titleElement.textContent = `Game Table - Trump suit: ${trumpSuit}`;
+        }
+    }
+    
+
+    
+    createGameTableWindow() {
         const container = document.getElementById('player-windows-container');
         if (!container) return;
         
         // Create window element
-        const playerWindow = document.createElement('div');
-        playerWindow.className = 'player-window';
-        playerWindow.id = `player-window-${playerIndex}`;
+        this.gameTableWindow = document.createElement('div');
+        this.gameTableWindow.className = 'game-table-window';
+        this.gameTableWindow.id = 'game-table-window';
         
-        // Get viewport dimensions reliably
+        // Position in center of screen
         const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0, document.body.clientWidth || 0);
         const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0, document.body.clientHeight || 0);
         
-        // Use fallback dimensions if viewport is not available
         const screenWidth = viewportWidth || 1200;
         const screenHeight = viewportHeight || 800;
         
-        // Position windows based on player relationships
-        let baseLeft, baseTop;
+        const baseLeft = screenWidth / 2 - 300; // Center horizontally
+        const baseTop = screenHeight / 2 - 300; // Center vertically
         
-        switch (playerIndex) {
-            case 0: // Human - middle of bottom half
-                baseLeft = screenWidth / 2 - 150; // Center horizontally, offset by half window width (300/2)
-                baseTop = screenHeight * 0.75 - 225; // 75% down the screen, offset by half window height (450/2)
-                break;
-            case 1: // Opponent L - middle of left half
-                baseLeft = screenWidth * 0.25 - 150; // 25% from left, offset by half window width (300/2)
-                baseTop = screenHeight / 2 - 225; // Center vertically, offset by half window height (450/2)
-                break;
-            case 2: // Partner - middle of top half
-                baseLeft = screenWidth / 2 - 150; // Center horizontally, offset by half window width (300/2)
-                baseTop = screenHeight * 0.25 - 225; // 25% from top, offset by half window height (450/2)
-                break;
-            case 3: // Opponent R - middle of right half
-                baseLeft = screenWidth * 0.75 - 150; // 75% from left, offset by half window width (300/2)
-                baseTop = screenHeight / 2 - 225; // Center vertically, offset by half window height (450/2)
-                break;
-            default:
-                baseLeft = 50;
-                baseTop = 50;
+        this.gameTableWindow.style.left = `${baseLeft}px`;
+        this.gameTableWindow.style.top = `${baseTop}px`;
+        this.gameTableWindow.style.zIndex = '1000';
+        
+        // Get player names and relationships
+        const playerNames = [];
+        const playerRelationships = [];
+        for (let i = 0; i < 4; i++) {
+            if (this.game.players[i]) {
+                const player = this.game.players[i];
+                const relationship = this.game.getPlayerRelationship(i);
+                playerNames[i] = player.name || `Player ${i}`;
+                playerRelationships[i] = relationship;
+            } else {
+                playerNames[i] = `Player ${i}`;
+                playerRelationships[i] = 'Unknown';
+            }
         }
         
-        // Ensure windows don't go off-screen
-        baseLeft = Math.max(10, Math.min(baseLeft, screenWidth - 310));
-        baseTop = Math.max(10, Math.min(baseTop, screenHeight - 460));
-        
-        playerWindow.style.left = `${baseLeft}px`;
-        playerWindow.style.top = `${baseTop}px`;
-        
-        // Get bird image path
-        const imagePath = this.imagePaths[birdName] || '';
-        
-        // Get player relationship and initial role
-        const relationship = this.game.getPlayerRelationship(playerIndex);
-        const initialRole = 'Bidding...';
-        
-        // Create window content
-        playerWindow.innerHTML = `
-            <div class="player-window-header">
-                <h3 class="player-window-title">${birdName} (${relationship}) - ${initialRole}</h3>
-                <button class="player-window-close" data-player-index="${playerIndex}">×</button>
+        // Create window content with 4-square grid
+        this.gameTableWindow.innerHTML = `
+            <div class="game-table-header">
+                <h3 class="game-table-title">Game Table</h3>
+                <button class="game-table-close">×</button>
             </div>
-            <div class="player-window-content">
-                <div class="player-bird-info">
-                    <img src="${imagePath}" alt="${birdName}" class="player-bird-image" onerror="this.style.display='none'">
-                </div>
-                <div class="player-status-messages" id="player-status-${playerIndex}">
-                    <div class="player-status-message info">Waiting for game to start...</div>
-                </div>
-                ${playerIndex === 0 ? `
-                <div class="player-bid-input-area" id="player-bid-input-${playerIndex}" style="display: none;">
-                    <label for="player-bid-input-field-${playerIndex}">Enter bid (or 'p' to pass):</label>
-                    <input type="text" id="player-bid-input-field-${playerIndex}" class="player-bid-input" maxlength="3">
-                    <button id="player-submit-bid-${playerIndex}" class="player-submit-bid-btn">Submit</button>
-                </div>
-                <div class="player-trump-selection-area" id="player-trump-selection-${playerIndex}" style="display: none;">
-                    <label>Select a trump suit:</label>
-                    <div class="player-trump-selector">
-                        <div class="player-trump-option" data-trump="0">0 (Blanks)</div>
-                        <div class="player-trump-option" data-trump="1">1</div>
-                        <div class="player-trump-option" data-trump="2">2</div>
-                        <div class="player-trump-option" data-trump="3">3</div>
-                        <div class="player-trump-option" data-trump="4">4</div>
-                        <div class="player-trump-option" data-trump="5">5</div>
-                        <div class="player-trump-option" data-trump="6">6</div>
+            <div class="game-table-content">
+                <div class="game-table-grid">
+                    <!-- Top Left: LEADER -->
+                    <div class="player-slot role-slot" id="role-slot-leader">
+                        <div class="role-label">LEADER</div>
+                        <div class="player-slot" id="player-slot-0">
+                            <div class="player-slot-header">
+                                <h4 class="player-name" id="player-name-0">${playerNames[0]} (${playerRelationships[0]})</h4>
+                                <div class="player-role" id="player-role-0">Bidding...</div>
+                            </div>
+                            <div class="player-slot-content">
+                                <div class="domino-display" id="domino-display-0" style="display: none;">
+                                    <div class="domino-image-container">
+                                        <img class="domino-image" id="domino-image-0" alt="Domino">
+                                        <img class="bird-image" id="bird-image-0" alt="Bird">
+                                    </div>
+                                    <div class="domino-label" id="domino-label-0"></div>
+                                </div>
+                                <div class="player-bid-input-area" id="player-bid-input-0" style="display: none;">
+                                    <label for="player-bid-input-field-0">Enter bid (or 'p' to pass):</label>
+                                    <input type="text" id="player-bid-input-field-0" class="player-bid-input" maxlength="3">
+                                    <button id="player-submit-bid-0" class="player-submit-bid-btn">Submit</button>
+                                </div>
+                                <div class="player-trump-selection-area" id="player-trump-selection-0" style="display: none;">
+                                    <label>Select a trump suit:</label>
+                                    <div class="player-trump-selector">
+                                        <div class="player-trump-option" data-trump="0">0 (Blanks)</div>
+                                        <div class="player-trump-option" data-trump="1">1</div>
+                                        <div class="player-trump-option" data-trump="2">2</div>
+                                        <div class="player-trump-option" data-trump="3">3</div>
+                                        <div class="player-trump-option" data-trump="4">4</div>
+                                        <div class="player-trump-option" data-trump="5">5</div>
+                                        <div class="player-trump-option" data-trump="6">6</div>
+                                    </div>
+                                    <button id="player-confirm-trump-0" class="player-confirm-trump-btn">Confirm Trump</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <button id="player-confirm-trump-${playerIndex}" class="player-confirm-trump-btn">Confirm Trump</button>
+                    
+                    <!-- Top Right: SETTER 1 -->
+                    <div class="player-slot role-slot" id="role-slot-setter1">
+                        <div class="role-label">SETTER 1</div>
+                        <div class="player-slot" id="player-slot-1">
+                            <div class="player-slot-header">
+                                <h4 class="player-name" id="player-name-1">${playerNames[1]} (${playerRelationships[1]})</h4>
+                                <div class="player-role" id="player-role-1">Bidding...</div>
+                            </div>
+                            <div class="player-slot-content">
+                                <div class="domino-display" id="domino-display-1" style="display: none;">
+                                    <div class="domino-image-container">
+                                        <img class="domino-image" id="domino-image-1" alt="Domino">
+                                        <img class="bird-image" id="bird-image-1" alt="Bird">
+                                    </div>
+                                    <div class="domino-label" id="domino-label-1"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bottom Left: SUPPORTER -->
+                    <div class="player-slot role-slot" id="role-slot-supporter">
+                        <div class="role-label">SUPPORTER</div>
+                        <div class="player-slot" id="player-slot-2">
+                            <div class="player-slot-header">
+                                <h4 class="player-name" id="player-name-2">${playerNames[2]} (${playerRelationships[2]})</h4>
+                                <div class="player-role" id="player-role-2">Bidding...</div>
+                            </div>
+                            <div class="player-slot-content">
+                                <div class="domino-display" id="domino-display-2" style="display: none;">
+                                    <div class="domino-image-container">
+                                        <img class="domino-image" id="domino-image-2" alt="Domino">
+                                        <img class="bird-image" id="bird-image-2" alt="Bird">
+                                    </div>
+                                    <div class="domino-label" id="domino-label-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bottom Right: SETTER 2 -->
+                    <div class="player-slot role-slot" id="role-slot-setter2">
+                        <div class="role-label">SETTER 2</div>
+                        <div class="player-slot" id="player-slot-3">
+                            <div class="player-slot-header">
+                                <h4 class="player-name" id="player-name-3">${playerNames[3]} (${playerRelationships[3]})</h4>
+                                <div class="player-role" id="player-role-3">Bidding...</div>
+                            </div>
+                            <div class="player-slot-content">
+                                <div class="domino-display" id="domino-display-3" style="display: none;">
+                                    <div class="domino-image-container">
+                                        <img class="domino-image" id="domino-image-3" alt="Domino">
+                                        <img class="bird-image" id="bird-image-3" alt="Bird">
+                                    </div>
+                                    <div class="domino-label" id="domino-label-3"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                ` : ''}
             </div>
         `;
         
         // Add close button event listener
-        const closeBtn = playerWindow.querySelector('.player-window-close');
-        closeBtn.addEventListener('click', () => {
-            this.closePlayerWindow(playerIndex);
-        });
+        const closeBtn = this.gameTableWindow.querySelector('.game-table-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Close button clicked');
+                this.closeGameTableWindow();
+            });
+        } else {
+            console.error('Close button not found');
+        }
         
         // Make window draggable
-        this.makeDraggable(playerWindow);
+        this.makeDraggable(this.gameTableWindow);
         
-        // Add to container and store reference
-        container.appendChild(playerWindow);
-        this.playerWindows.set(playerIndex, playerWindow);
+        // Add to container
+        container.appendChild(this.gameTableWindow);
+        this.isOpen = true;
         
-        return playerWindow;
+        // Set up event listeners for human player interactions
+        this.setupHumanPlayerEventListeners();
+        
+        return this.gameTableWindow;
     }
     
     makeDraggable(window) {
-        const header = window.querySelector('.player-window-header');
+        const header = window.querySelector('.game-table-header');
         let isDragging = false;
         let currentX;
         let currentY;
         let initialX;
         let initialY;
-        let xOffset = 0;
-        let yOffset = 0;
+        
+        // Initialize offset values based on current window position
+        let xOffset = parseInt(window.style.left) || 0;
+        let yOffset = parseInt(window.style.top) || 0;
         
         // Add click handler to bring window to front
         window.addEventListener('mousedown', (e) => {
@@ -228,12 +439,13 @@ class PlayerWindowManager {
         });
         
         header.addEventListener('mousedown', (e) => {
-            initialX = e.clientX - xOffset;
-            initialY = e.clientY - yOffset;
-            
             if (e.target === header || header.contains(e.target)) {
                 isDragging = true;
                 this.bringWindowToFront(window);
+                
+                // Update initial position based on current mouse position and window offset
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
             }
         });
         
@@ -245,25 +457,28 @@ class PlayerWindowManager {
                 xOffset = currentX;
                 yOffset = currentY;
                 
-                window.style.transform = `translate(${currentX}px, ${currentY}px)`;
+                window.style.left = `${currentX}px`;
+                window.style.top = `${currentY}px`;
             }
         });
         
         document.addEventListener('mouseup', () => {
+            if (isDragging) {
             initialX = currentX;
             initialY = currentY;
             isDragging = false;
+            }
         });
     }
     
     bringWindowToFront(clickedWindow) {
-        // Get all player windows
-        const allWindows = Array.from(this.playerWindows.values());
+        // Get all game table windows
+        const allWindows = document.querySelectorAll('.game-table-window');
         
-        // Find the highest current z-index among player windows
-        let maxZIndex = 100; // Base z-index for player windows
+        // Find the highest current z-index among game table windows
+        let maxZIndex = 1000; // Base z-index for game table windows
         allWindows.forEach(win => {
-            const currentZIndex = parseInt(win.style.zIndex) || 100;
+            const currentZIndex = parseInt(win.style.zIndex) || 1000;
             maxZIndex = Math.max(maxZIndex, currentZIndex);
         });
         
@@ -278,440 +493,461 @@ class PlayerWindowManager {
         clickedWindow.style.zIndex = (maxZIndex + 1).toString();
     }
     
-    closePlayerWindow(playerIndex) {
-        const window = this.playerWindows.get(playerIndex);
-        if (window) {
-            // Save dialog state before closing
-            this.saveDialogState(playerIndex);
-            
-            window.remove();
-            this.playerWindows.delete(playerIndex);
-            
-            // Add reopen button if it doesn't exist
-            this.addReopenButton(playerIndex);
+    closeGameTableWindow() {
+        console.log('closeGameTableWindow called');
+        if (this.gameTableWindow) {
+            console.log('Removing game table window');
+            this.gameTableWindow.remove();
+            this.gameTableWindow = null;
+            this.isOpen = false;
+            // Stop all audio when closing window
+            this.stopBirdAudio();
+            this.addReopenButton();
         }
     }
     
-    saveDialogState(playerIndex) {
-        const window = this.playerWindows.get(playerIndex);
-        if (!window) return;
+    addReopenButton() {
+        const container = document.getElementById('player-windows-container');
+        if (!container) return;
         
-        const dialogState = {
-            bidInputVisible: false,
-            trumpSelectionVisible: false,
-            selectedTrump: null,
-            bidInputValue: '',
-            messages: []
-        };
-        
-        // Save bid input state
-        const bidInputArea = window.querySelector('.player-bid-input-area');
-        if (bidInputArea) {
-            dialogState.bidInputVisible = bidInputArea.style.display !== 'none';
-            const inputField = bidInputArea.querySelector('.player-bid-input');
-            if (inputField) {
-                dialogState.bidInputValue = inputField.value;
-            }
+        // Remove existing reopen button if any
+        const existingButton = container.querySelector('.game-table-reopen-btn');
+        if (existingButton) {
+            existingButton.remove();
         }
         
-        // Save trump selection state
-        const trumpSelectionArea = window.querySelector('.player-trump-selection-area');
-        if (trumpSelectionArea) {
-            dialogState.trumpSelectionVisible = trumpSelectionArea.style.display !== 'none';
-            const selectedOption = trumpSelectionArea.querySelector('.player-trump-option.selected');
-            if (selectedOption) {
-                dialogState.selectedTrump = selectedOption.dataset.trump;
-            }
-        }
-        
-        // Save messages
-        const messagesContainer = window.querySelector('.player-status-messages');
-        if (messagesContainer) {
-            const messages = messagesContainer.querySelectorAll('.player-status-message');
-            messages.forEach(msg => {
-                dialogState.messages.push({
-                    text: msg.textContent,
-                    type: msg.className.replace('player-status-message ', '').replace('player-status-message', '')
-                });
-            });
-        }
-        
-        this.dialogStates.set(playerIndex, dialogState);
-    }
-    
-    restoreDialogState(playerIndex) {
-        const dialogState = this.dialogStates.get(playerIndex);
-        if (!dialogState) return;
-        
-        const window = this.playerWindows.get(playerIndex);
-        if (!window) return;
-        
-        // Restore messages
-        if (dialogState.messages.length > 0) {
-            const messagesContainer = window.querySelector('.player-status-messages');
-            if (messagesContainer) {
-                messagesContainer.innerHTML = '';
-                dialogState.messages.forEach(msg => {
-                    this.addPlayerMessage(playerIndex, msg.text, msg.type);
-                });
-            }
-        }
-        
-        // Restore bid input state
-        if (dialogState.bidInputVisible) {
-            this.showBidInput(playerIndex);
-            const inputField = window.querySelector('.player-bid-input');
-            if (inputField && dialogState.bidInputValue) {
-                inputField.value = dialogState.bidInputValue;
-            }
-            // Re-setup handler if this is the human player
-            if (playerIndex === 0) {
-                this.setupBidInputHandler(playerIndex, this.game);
-            }
-        }
-        
-        // Restore trump selection state
-        if (dialogState.trumpSelectionVisible) {
-            this.showTrumpSelection(playerIndex);
-            if (dialogState.selectedTrump) {
-                const trumpSelectionArea = window.querySelector('.player-trump-selection-area');
-                if (trumpSelectionArea) {
-                    // Clear previous selection
-                    trumpSelectionArea.querySelectorAll('.player-trump-option').forEach(option => {
-                        option.classList.remove('selected');
-                    });
-                    // Select the saved trump
-                    const selectedOption = trumpSelectionArea.querySelector(`[data-trump="${dialogState.selectedTrump}"]`);
-                    if (selectedOption) {
-                        selectedOption.classList.add('selected');
-                    }
-                }
-            }
-            // Re-setup handler if this is the human player
-            if (playerIndex === 0) {
-                this.setupTrumpSelectionHandler(playerIndex);
-            }
-        }
-        
-        // Clear the saved state after restoration
-        this.dialogStates.delete(playerIndex);
-    }
-    
-    restoreDialogElementsOnly(playerIndex, dialogState) {
-        const window = this.playerWindows.get(playerIndex);
-        if (!window) return;
-        
-        // Restore bid input state (but not messages)
-        if (dialogState.bidInputVisible) {
-            this.showBidInput(playerIndex);
-            const inputField = window.querySelector('.player-bid-input');
-            if (inputField && dialogState.bidInputValue) {
-                inputField.value = dialogState.bidInputValue;
-            }
-            // Re-setup handler if this is the human player
-            if (playerIndex === 0) {
-                this.setupBidInputHandler(playerIndex, this.game);
-            }
-        }
-        
-        // Restore trump selection state (but not messages)
-        if (dialogState.trumpSelectionVisible) {
-            this.showTrumpSelection(playerIndex);
-            if (dialogState.selectedTrump) {
-                const trumpSelectionArea = window.querySelector('.player-trump-selection-area');
-                if (trumpSelectionArea) {
-                    // Clear previous selection
-                    trumpSelectionArea.querySelectorAll('.player-trump-option').forEach(option => {
-                        option.classList.remove('selected');
-                    });
-                    // Select the saved trump
-                    const selectedOption = trumpSelectionArea.querySelector(`[data-trump="${dialogState.selectedTrump}"]`);
-                    if (selectedOption) {
-                        selectedOption.classList.add('selected');
-                    }
-                }
-            }
-            // Re-setup handler if this is the human player
-            if (playerIndex === 0) {
-                this.setupTrumpSelectionHandler(playerIndex);
-            }
-        }
-    }
-    
-    addReopenButton(playerIndex) {
-        const buttonContainer = document.querySelector('.button-container');
-        if (!buttonContainer) return;
-        
-        // Check if reopen button already exists
-        const existingButton = document.getElementById(`reopen-player-${playerIndex}`);
-        if (existingButton) return;
-        
-        const player = this.game.players[playerIndex];
-        const relationship = this.game.getPlayerRelationship(playerIndex);
-        const buttonText = `${player.name} (${relationship})`;
-        
-        const reopenBtn = document.createElement('button');
-        reopenBtn.id = `reopen-player-${playerIndex}`;
-        reopenBtn.className = 'reopen-player-btn';
-        reopenBtn.textContent = buttonText;
-        reopenBtn.addEventListener('click', () => {
-            this.reopenPlayerWindow(playerIndex);
+        // Create new reopen button
+        const reopenButton = document.createElement('button');
+        reopenButton.className = 'game-table-reopen-btn';
+        reopenButton.textContent = 'Game Table';
+        reopenButton.addEventListener('click', () => {
+            this.reopenGameTableWindow();
         });
         
-        buttonContainer.appendChild(reopenBtn);
+        container.appendChild(reopenButton);
     }
     
-    reopenPlayerWindow(playerIndex) {
+    reopenGameTableWindow() {
+        this.createGameTableWindow();
+        
+        // Add a small delay to ensure DOM elements are ready
+        setTimeout(() => {
+            this.restoreCurrentGameState();
+        }, 100);
+        
         // Remove reopen button
-        const reopenBtn = document.getElementById(`reopen-player-${playerIndex}`);
-        if (reopenBtn) {
-            reopenBtn.remove();
-        }
-        
-        // Recreate the player window
-        const player = this.game.players[playerIndex];
-        if (player) {
-            this.createPlayerWindow(playerIndex, player.name, player.name);
-            
-            // Update role if game is in progress
-            if (player.role) {
-                this.updatePlayerRole(playerIndex, player.role);
-            }
-            
-            // Clear any existing messages first
-            this.clearPlayerMessages(playerIndex);
-            
-            // Restore current game state (this should be the primary source of truth)
-            this.restoreCurrentGameState(playerIndex);
-            
-            // Only restore saved dialog state if it doesn't conflict with current game state
-            const savedState = this.dialogStates.get(playerIndex);
-            if (savedState) {
-                // Only restore dialog elements, not messages
-                this.restoreDialogElementsOnly(playerIndex, savedState);
-                this.dialogStates.delete(playerIndex);
-            } else {
-                // Fall back to game phase-based restoration
-                if (this.game.currentPhase === 'bidding' && playerIndex === 0) {
-                    this.game.restoreBiddingInterface();
-                }
-                
-                if (this.game.currentPhase === 'trump-selection' && playerIndex === 0) {
-                    this.addPlayerMessage(playerIndex, "Select a trump suit", 'action');
-                    this.showTrumpSelection(playerIndex);
-                }
-            }
-            
-            // Additional checks for human player to ensure dialogs appear when needed
-            if (playerIndex === 0) {
-                // If in bidding phase and human player doesn't have bid input visible, show it
-                if (this.game.currentPhase === 'bidding' && this.game.currentBiddingState.waitingForHuman) {
-                    const window = this.playerWindows.get(playerIndex);
-                    if (window) {
-                        const bidInputArea = window.querySelector('.player-bid-input-area');
-                        if (bidInputArea && bidInputArea.style.display === 'none') {
-                            this.game.restoreBiddingInterface();
-                        }
-                    }
-                }
-                
-                // If in trump selection phase and human player doesn't have trump selection visible, show it
-                if (this.game.currentPhase === 'trump-selection') {
-                    const window = this.playerWindows.get(playerIndex);
-                    if (window) {
-                        const trumpSelectionArea = window.querySelector('.player-trump-selection-area');
-                        if (trumpSelectionArea && trumpSelectionArea.style.display === 'none') {
-                            this.addPlayerMessage(playerIndex, "Select a trump suit", 'action');
-                            this.showTrumpSelection(playerIndex);
-                        }
-                    }
-                }
-            }
+        const reopenButton = document.querySelector('.game-table-reopen-btn');
+        if (reopenButton) {
+            reopenButton.remove();
         }
     }
     
-    restoreCurrentGameState(playerIndex) {
-        const game = this.game;
+    restoreCurrentGameState() {
+        console.log('Restoring current game state...');
+        console.log('Current trick:', this.game.currentTrick);
+        console.log('Current trick plays:', this.game.currentTrick?.plays);
         
-        // Add current game phase information
-        switch (game.currentPhase) {
-            case 'waiting':
-                this.addPlayerMessage(playerIndex, "Waiting for game to start...", 'info');
-                break;
-                
-            case 'bidding':
-                this.addPlayerMessage(playerIndex, "Bidding phase in progress...", 'info');
-                if (game.currentBid > 0) {
-                    this.addPlayerMessage(playerIndex, `Current bid: ${game.currentBid}`, 'info');
-                }
-                if (game.highestBidder) {
-                    this.addPlayerMessage(playerIndex, `Highest bidder: ${game.highestBidder}`, 'info');
-                }
-                break;
-                
-            case 'trump-selection':
-                this.addPlayerMessage(playerIndex, "Trump selection phase", 'info');
-                break;
-                
-            case 'playing':
-                this.addPlayerMessage(playerIndex, "Playing hand", 'info');
-                if (game.trump !== null) {
-                    this.addPlayerMessage(playerIndex, `Trump: ${game.trump}'s`, 'info');
-                }
-                if (game.bidWinner) {
-                    this.addPlayerMessage(playerIndex, `Bid winner: ${game.bidWinner} (${game.winningBid})`, 'info');
-                }
-                if (game.currentTrick) {
-                    const leader = game.players[game.currentTrick.leaderIdx];
-                    this.addPlayerMessage(playerIndex, `Current leader: ${game.formatPlayerNameWithRelationship(leader)}`, 'info');
-                }
-                break;
+        // Restore player names and roles
+        for (let i = 0; i < 4; i++) {
+            const player = this.game.players[i];
+            if (player) {
+                const relationship = this.game.getPlayerRelationship(i);
+                const playerNameWithRelationship = `${player.name} (${relationship})`;
+                this.updatePlayerName(i, playerNameWithRelationship);
+                this.updatePlayerRole(i, player.role || 'Bidding...');
+            }
         }
         
-        // Add recent game events based on current state
-        if (game.currentPhase === 'playing' && game.currentHandTricks.length > 0) {
-            // Show recent tricks
-            const recentTricks = game.currentHandTricks.slice(-3); // Last 3 tricks
-            recentTricks.forEach((trick, index) => {
-                const trickNum = game.currentHandTricks.length - recentTricks.length + index + 1;
-                const winner = trick.winner;
-                this.addPlayerMessage(playerIndex, `Trick ${trickNum}: ${winner} won`, 'info');
+        // Restore any current domino displays
+        if (this.game.currentTrick && this.game.currentTrick.playedDominoes) {
+            console.log('Restoring domino displays for', this.game.currentTrick.playedDominoes.length, 'plays');
+            this.game.currentTrick.playedDominoes.forEach(([domino, playerIdx, playedEnds]) => {
+                console.log(`Restoring play ${idx}:`, play[0], 'for player', play[1]);
+                this.displayPlayedDomino(domino, playerIdx, playedEnds);
+                this.gameTableManager.displayPlayedDomino(domino, playerIdx, playedEnds);
             });
+        } else {
+            console.log('No current trick or plays to restore');
         }
         
-        // Add current hand points if available
-        if (game.currentPhase === 'playing') {
-            this.addPlayerMessage(playerIndex, `Hand score - Us: ${game.usHandPoints}, Them: ${game.themHandPoints}`, 'info');
-        }
+        // Restore player order based on current game state
+        this.updatePlayerOrder();
         
-        // Add current game score
-        if (game.scores && (game.scores[0] > 0 || game.scores[1] > 0)) {
-            this.addPlayerMessage(playerIndex, `Game score - Us: ${game.scores[0]}, Them: ${game.scores[1]}`, 'info');
+        // Check if we're in bidding phase and restore bidding interface
+        if (this.game.currentPhase === 'bidding' && this.game.currentBiddingState) {
+            this.restoreBiddingInterface();
         }
     }
     
-    addPlayerMessage(playerIndex, message, type = 'info') {
-        const window = this.playerWindows.get(playerIndex);
-        if (!window) return;
-        
-        const messagesContainer = window.querySelector('.player-status-messages');
-        if (!messagesContainer) return;
-        
-        const messageElement = document.createElement('div');
-        messageElement.className = `player-status-message ${type}`;
-        messageElement.textContent = message;
-        
-        messagesContainer.appendChild(messageElement);
-        
-        // Keep only last 10 messages
-        const messages = messagesContainer.querySelectorAll('.player-status-message');
-        if (messages.length > 10) {
-            messages[0].remove();
+    restoreBiddingInterface() {
+        if (this.game.currentBiddingState && this.game.currentBiddingState.waitingForHuman && this.game.currentPhase === 'bidding') {
+            const humanPlayerIndex = 0;
+            this.addPlayerMessage(humanPlayerIndex, 
+                `It's your turn to bid! Current bid: ${this.game.currentBid === 0 ? 'pass' : this.game.currentBid}`, 'action');
+            
+            // Show bid input in player window
+            this.showBidInput(humanPlayerIndex);
         }
-        
-        // Auto-scroll to bottom
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
     
-    clearPlayerMessages(playerIndex) {
-        const window = this.playerWindows.get(playerIndex);
-        if (!window) return;
-        
-        const messagesContainer = window.querySelector('.player-status-messages');
-        if (messagesContainer) {
-            messagesContainer.innerHTML = '<div class="player-status-message info">Waiting for game to start...</div>';
+    updatePlayerName(playerIndex, name) {
+        const nameElement = document.getElementById(`player-name-${playerIndex}`);
+        if (nameElement) {
+            nameElement.textContent = name;
         }
     }
     
     updatePlayerRole(playerIndex, role) {
-        const window = this.playerWindows.get(playerIndex);
-        if (!window) return;
-        
-        const titleElement = window.querySelector('.player-window-title');
-        if (titleElement) {
-            const currentText = titleElement.textContent;
-            const parts = currentText.split(' - ');
-            if (parts.length >= 2) {
-                const playerInfo = parts[0]; // "BirdName (Relationship)"
-                titleElement.textContent = `${playerInfo} - ${role}`;
+        const roleElement = document.getElementById(`player-role-${playerIndex}`);
+        if (roleElement) {
+            roleElement.textContent = role;
+        }
+    }
+    
+    updatePlayerBid(playerIndex, bid) {
+        const roleElement = document.getElementById(`player-role-${playerIndex}`);
+        if (roleElement) {
+            const bidText = bid === 'pass' ? 'Pass' : `Bid: ${bid}`;
+            roleElement.textContent = bidText;
+            
+            // Style the bid display
+            if (bid !== 'pass') {
+                roleElement.style.color = 'lime';
+                roleElement.style.fontWeight = 'bold';
+            } else {
+                roleElement.style.color = '#0000ff';
+                roleElement.style.fontWeight = 'normal';
             }
         }
     }
     
-    createAllPlayerWindows(players) {
-        players.forEach((player, index) => {
-            this.createPlayerWindow(index, player.name, player.name);
-        });
+    clearPlayerBid(playerIndex) {
+        const roleElement = document.getElementById(`player-role-${playerIndex}`);
+        if (roleElement) {
+            roleElement.textContent = 'Bidding...';
+            roleElement.style.color = '#0000ff';
+            roleElement.style.fontWeight = 'normal';
+        }
     }
     
-    updateAllPlayerRoles() {
-        this.game.players.forEach((player, index) => {
-            if (player.role) {
-                this.updatePlayerRole(index, player.role);
-            } else {
-                this.updatePlayerRole(index, 'Bidding...');
-            }
+    addPlayerMessage(playerIndex, message, type = 'info') {
+        // Disabled - no status messages in player windows
+        // Only domino and bird images are displayed
+    }
+    
+    clearPlayerMessages(playerIndex) {
+        // Disabled - no status messages in player windows
+        // Only domino and bird images are displayed
+    }
+    
+    displayPlayedDomino(domino, playerIndex, playedEnds) {
+        const dominoDisplay = document.getElementById(`domino-display-${playerIndex}`);
+        const dominoImage = document.getElementById(`domino-image-${playerIndex}`);
+        const birdImage = document.getElementById(`bird-image-${playerIndex}`);
+        const dominoLabel = document.getElementById(`domino-label-${playerIndex}`);
+        
+        console.log(`Displaying domino for player ${playerIndex}:`, {
+            dominoDisplay: !!dominoDisplay,
+            dominoImage: !!dominoImage,
+            birdImage: !!birdImage,
+            dominoLabel: !!dominoLabel,
+            domino: domino
         });
+        
+        if (dominoDisplay && dominoImage && birdImage && dominoLabel) {
+            // Show domino display
+            dominoDisplay.style.display = 'block';
+            
+            // Use modulated orientation for proper display
+            const modulatedEnds = domino.modulate(this.game.trump, this.game.currentTrick?.currentSuit);
+            const dominoKey = `${modulatedEnds[0]}-${modulatedEnds[1]}`;
+            dominoImage.src = `../assets/img/dominoes/${dominoKey}.png`;
+            dominoImage.onerror = () => {
+                console.warn(`Failed to load domino image: ${dominoKey}.png`);
+                dominoImage.style.display = 'none';
+            };
+            
+            // Get bird name based on domino modality
+            const birdName = this.getDominoBird(domino, this.game.trump, this.game.currentTrick?.currentSuit);
+            const birdImagePath = this.imagePaths[birdName];
+            if (birdImagePath) {
+                birdImage.src = birdImagePath;
+                birdImage.onerror = () => {
+                    console.warn(`Failed to load bird image: ${birdName}`);
+                    birdImage.style.display = 'none';
+                };
+            }
+            
+            // Set the label with domino and bird information
+            dominoLabel.textContent = `${dominoKey} : ${birdName}`;
+            dominoLabel.style.display = 'block';
+            
+            // Add click event listener for flipping
+            dominoDisplay.onclick = () => {
+                this.flipDomino(playerIndex);
+            };
+            
+            // Ensure domino is visible and bird is hidden by default
+            dominoImage.style.opacity = '1';
+            birdImage.style.opacity = '0';
+            
+            // Store bird info for later audio playback when flipped
+            const playerRole = this.game.players[playerIndex]?.role;
+            if (playerRole) {
+                const audioPath = this.getBirdAudioPath(birdName, playerRole);
+                // Store the audio path for this player (don't play immediately)
+                this.playerAudioPaths = this.playerAudioPaths || {};
+                this.playerAudioPaths[playerIndex] = audioPath;
+            }
+        }
+    }
+    
+    clearDominoDisplay(playerIndex) {
+        const dominoDisplay = document.getElementById(`domino-display-${playerIndex}`);
+        if (dominoDisplay) {
+            dominoDisplay.style.display = 'none';
+            // Reset flipping state
+            dominoDisplay.classList.remove('flipped');
+            // Remove click event listener
+            dominoDisplay.onclick = null;
+        }
+    }
+    
+    clearAllDominoDisplays() {
+        for (let i = 0; i < 4; i++) {
+            this.clearDominoDisplay(i);
+        }
+        // Stop all audio when clearing displays
+        this.stopBirdAudio();
+    }
+    
+    clearAllDisplaysAndAudio() {
+        this.clearAllDominoDisplays();
+        this.stopBirdAudio();
+    }
+    
+    flipDomino(playerIndex) {
+        const dominoDisplay = document.getElementById(`domino-display-${playerIndex}`);
+        const dominoImage = document.getElementById(`domino-image-${playerIndex}`);
+        const birdImage = document.getElementById(`bird-image-${playerIndex}`);
+        if (dominoDisplay && dominoImage && birdImage) {
+            // Toggle visibility by opacity
+            const isDominoVisible = dominoImage.style.opacity !== '0';
+            dominoImage.style.opacity = isDominoVisible ? '0' : '1';
+            birdImage.style.opacity = isDominoVisible ? '1' : '0';
+            
+            // Play or stop bird audio based on what's visible
+            if (isDominoVisible) {
+                // Bird is now visible, play audio
+                this.playBirdAudioForPlayer(playerIndex);
+            } else {
+                // Domino is now visible, stop audio
+                this.stopBirdAudio(playerIndex);
+            }
+        }
+    }
+    
+        updatePlayerOrder(bidOrder = null) {
+        const roleLabels = document.querySelectorAll('.role-label');
+        
+        if (bidOrder) {
+            // Bidding phase: hide role labels and arrange by bidding order
+            roleLabels.forEach(label => {
+                label.style.display = 'none';
+            });
+            
+            // Convert formatted names back to player indices
+            const playerOrder = [];
+            for (const playerName of bidOrder) {
+                for (let i = 0; i < 4; i++) {
+                    if (this.game.players[i] && this.game.formatPlayerNameWithRelationship(this.game.players[i]) === playerName) {
+                        playerOrder.push(i);
+                        break;
+                    }
+                }
+            }
+            
+            // Move player slots to role slots in bidding order
+            const roleSlots = [
+                document.getElementById('role-slot-leader'),
+                document.getElementById('role-slot-setter1'),
+                document.getElementById('role-slot-supporter'),
+                document.getElementById('role-slot-setter2')
+            ];
+            
+            playerOrder.forEach((playerIndex, gridIndex) => {
+                const playerSlot = document.getElementById(`player-slot-${playerIndex}`);
+                const roleSlot = roleSlots[gridIndex];
+                
+                if (playerSlot && roleSlot) {
+                    // Remove from current parent
+                    if (playerSlot.parentNode) {
+                        playerSlot.parentNode.removeChild(playerSlot);
+                    }
+                    // Add to role slot
+                    roleSlot.appendChild(playerSlot);
+                }
+            });
+            
+        } else if (this.game.currentTrick) {
+            // Trick phase: show role labels and assign players to roles
+            roleLabels.forEach(label => {
+                label.style.display = 'block';
+            });
+            
+            // Get current player roles
+            const playerRoles = {};
+            for (let i = 0; i < 4; i++) {
+                if (this.game.players[i]) {
+                    playerRoles[i] = this.game.players[i].role;
+                }
+            }
+            
+            // Map roles to positions
+            const rolePositions = {
+                'LEADER': 'role-slot-leader',
+                'SETTER1': 'role-slot-setter1',
+                'SUPPORTER': 'role-slot-supporter',
+                'SETTER2': 'role-slot-setter2'
+            };
+            
+            // Move each player to their role position
+            Object.entries(playerRoles).forEach(([playerIndex, role]) => {
+                const playerSlot = document.getElementById(`player-slot-${playerIndex}`);
+                const roleSlot = document.getElementById(rolePositions[role]);
+                
+                if (playerSlot && roleSlot) {
+                    // Remove from current parent
+                    if (playerSlot.parentNode) {
+                        playerSlot.parentNode.removeChild(playerSlot);
+                    }
+                    // Add to role slot
+                    roleSlot.appendChild(playerSlot);
+                }
+            });
+            
+        } else {
+            // Default state: hide role labels and use default order
+            roleLabels.forEach(label => {
+                label.style.display = 'none';
+            });
+            
+            // Reset to default positions
+            const roleSlots = [
+                document.getElementById('role-slot-leader'),
+                document.getElementById('role-slot-setter1'),
+                document.getElementById('role-slot-supporter'),
+                document.getElementById('role-slot-setter2')
+            ];
+            
+            for (let i = 0; i < 4; i++) {
+                const playerSlot = document.getElementById(`player-slot-${i}`);
+                const roleSlot = roleSlots[i];
+                
+                if (playerSlot && roleSlot) {
+                    // Remove from current parent
+                    if (playerSlot.parentNode) {
+                        playerSlot.parentNode.removeChild(playerSlot);
+                    }
+                    // Add to role slot
+                    roleSlot.appendChild(playerSlot);
+                }
+            }
+        }
     }
     
     showBidInput(playerIndex) {
-        const window = this.playerWindows.get(playerIndex);
-        if (!window) return;
-        
-        const bidInputArea = window.querySelector('.player-bid-input-area');
-        if (bidInputArea) {
-            bidInputArea.style.display = 'block';
-            const inputField = bidInputArea.querySelector('.player-bid-input');
-            if (inputField) {
-                inputField.focus();
-            }
+        const bidInput = document.getElementById(`player-bid-input-${playerIndex}`);
+        if (bidInput) {
+            bidInput.style.display = 'block';
         }
     }
     
     hideBidInput(playerIndex) {
-        const window = this.playerWindows.get(playerIndex);
-        if (!window) return;
-        
-        const bidInputArea = window.querySelector('.player-bid-input-area');
-        if (bidInputArea) {
-            bidInputArea.style.display = 'none';
+        const bidInput = document.getElementById(`player-bid-input-${playerIndex}`);
+        if (bidInput) {
+            bidInput.style.display = 'none';
         }
     }
     
-    setupBidInputHandler(playerIndex, game) {
-        const window = this.playerWindows.get(playerIndex);
-        if (!window) return;
-        
-        const submitBtn = window.querySelector('.player-submit-bid-btn');
-        const inputField = window.querySelector('.player-bid-input');
-        
-        if (submitBtn && inputField) {
-            // Remove existing listeners
-            submitBtn.replaceWith(submitBtn.cloneNode(true));
-            inputField.replaceWith(inputField.cloneNode(true));
-            
-            // Get new references
-            const newSubmitBtn = window.querySelector('.player-submit-bid-btn');
-            const newInputField = window.querySelector('.player-bid-input');
-            
-            // Add new listeners
-            newSubmitBtn.addEventListener('click', () => {
-                this.handlePlayerBidSubmit(playerIndex, game);
-            });
-            
-            newInputField.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.handlePlayerBidSubmit(playerIndex, game);
-                }
-            });
+    showTrumpSelection(playerIndex) {
+        const trumpSelection = document.getElementById(`player-trump-selection-${playerIndex}`);
+        if (trumpSelection) {
+            trumpSelection.style.display = 'block';
         }
+    }
+    
+    hideTrumpSelection(playerIndex) {
+        const trumpSelection = document.getElementById(`player-trump-selection-${playerIndex}`);
+        if (trumpSelection) {
+            trumpSelection.style.display = 'none';
+        }
+    }
+    
+    createAllPlayerWindows(players) {
+        // This method is kept for compatibility but now creates the game table
+        this.createGameTableWindow();
+    }
+    
+    updateAllPlayerRoles() {
+        for (let i = 0; i < 4; i++) {
+            const player = this.game.players[i];
+            if (player) {
+                this.updatePlayerRole(i, player.role || 'Bidding...');
+            }
+        }
+    }
+    
+    // Additional methods for compatibility with the Game class
+    setupBidInputHandler(playerIndex, game) {
+        // This method is not needed in the new system as the bid input is handled differently
+        console.log('setupBidInputHandler called - not needed in new system');
+    }
+    
+    setupTrumpSelectionHandler(playerIndex) {
+        // Set up trump option click handlers for the human player
+        if (playerIndex === 0) {
+            const trumpOptions = document.querySelectorAll('.player-trump-option');
+            trumpOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    // Remove selection from all options
+                    trumpOptions.forEach(o => o.classList.remove('selected'));
+                    // Add selection to clicked option
+                    option.classList.add('selected');
+                });
+            });
+            
+            // Set up confirm button handler
+            const confirmBtn = document.getElementById('player-confirm-trump-0');
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', () => {
+                    this.handlePlayerTrumpConfirm(playerIndex);
+                });
+            }
+        }
+    }
+    
+    handlePlayerTrumpConfirm(playerIndex) {
+        const selectedTrump = document.querySelector('.player-trump-option.selected');
+        if (!selectedTrump) {
+            this.addPlayerMessage(playerIndex, "Please select a trump suit.", 'warning');
+            return;
+        }
+        
+        const trump = parseInt(selectedTrump.dataset.trump);
+        
+        // Hide trump selection
+        this.hideTrumpSelection(playerIndex);
+        
+        // Add confirmation message
+        this.addPlayerMessage(playerIndex, `Selected trump: ${trump}'s`, 'action');
+        
+        // Process the trump selection through the game
+        this.game.setTrumpAndStartHand(trump);
     }
     
     handlePlayerBidSubmit(playerIndex, game) {
-        const window = this.playerWindows.get(playerIndex);
-        if (!window) return;
-        
-        const inputField = window.querySelector('.player-bid-input');
+        const inputField = document.getElementById(`player-bid-input-field-${playerIndex}`);
         if (!inputField) return;
         
         const input = inputField.value.trim().toLowerCase();
@@ -737,33 +973,27 @@ class PlayerWindowManager {
         game.processPlayerBid(bid);
     }
     
-    showTrumpSelection(playerIndex) {
-        const window = this.playerWindows.get(playerIndex);
-        if (!window) return;
+    setupHumanPlayerEventListeners() {
+        // Set up bid input event listeners for human player (player 0)
+        const bidInputField = document.getElementById('player-bid-input-field-0');
+        const bidSubmitBtn = document.getElementById('player-submit-bid-0');
         
-        const trumpSelectionArea = window.querySelector('.player-trump-selection-area');
-        if (trumpSelectionArea) {
-            trumpSelectionArea.style.display = 'block';
-            this.setupTrumpSelectionHandler(playerIndex);
+        if (bidInputField && bidSubmitBtn) {
+            bidSubmitBtn.addEventListener('click', () => {
+                this.handlePlayerBidSubmit(0, this.game);
+            });
+            
+            bidInputField.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.handlePlayerBidSubmit(0, this.game);
+                }
+            });
         }
-    }
-    
-    hideTrumpSelection(playerIndex) {
-        const window = this.playerWindows.get(playerIndex);
-        if (!window) return;
         
-        const trumpSelectionArea = window.querySelector('.player-trump-selection-area');
-        if (trumpSelectionArea) {
-            trumpSelectionArea.style.display = 'none';
-        }
-    }
-    
-    setupTrumpSelectionHandler(playerIndex) {
-        const window = this.playerWindows.get(playerIndex);
-        if (!window) return;
+        // Set up trump selection event listeners
+        const trumpOptions = document.querySelectorAll('.player-trump-option');
+        const trumpConfirmBtn = document.getElementById('player-confirm-trump-0');
         
-        // Set up trump option click handlers
-        const trumpOptions = window.querySelectorAll('.player-trump-option');
         trumpOptions.forEach(option => {
             option.addEventListener('click', () => {
                 // Remove selection from all options
@@ -773,35 +1003,11 @@ class PlayerWindowManager {
             });
         });
         
-        // Set up confirm button handler
-        const confirmBtn = window.querySelector('.player-confirm-trump-btn');
-        if (confirmBtn) {
-            confirmBtn.addEventListener('click', () => {
-                this.handlePlayerTrumpConfirm(playerIndex);
+        if (trumpConfirmBtn) {
+            trumpConfirmBtn.addEventListener('click', () => {
+                this.handlePlayerTrumpConfirm(0);
             });
         }
-    }
-    
-    handlePlayerTrumpConfirm(playerIndex) {
-        const window = this.playerWindows.get(playerIndex);
-        if (!window) return;
-        
-        const selectedTrump = window.querySelector('.player-trump-option.selected');
-        if (!selectedTrump) {
-            this.addPlayerMessage(playerIndex, "Please select a trump suit.", 'warning');
-            return;
-        }
-        
-        const trump = parseInt(selectedTrump.dataset.trump);
-        
-        // Hide trump selection
-        this.hideTrumpSelection(playerIndex);
-        
-        // Add confirmation message
-        this.addPlayerMessage(playerIndex, `Selected trump: ${trump}'s`, 'action');
-        
-        // Process the trump selection through the game
-        this.game.setTrumpAndStartHand(trump);
     }
 }
 
@@ -922,11 +1128,12 @@ class TrickState {
         this.pointsInTrick = 0;
     }
     
-    addPlay(domino, playerIdx) {
+    // playedEnds is the [a, b] as played
+    addPlay(domino, playerIdx, playedEnds) {
         if (this.playedDominoes.length === 0) { // First domino played sets the suit
             this.currentSuit = domino.getSuit(this.trump);
         }
-        this.playedDominoes.push([domino, playerIdx]);
+        this.playedDominoes.push([domino, playerIdx, playedEnds]);
         // Add points if count domino
         const [a, b] = domino.ends.slice().sort((x, y) => x - y);
         if ((a === 5 && b === 5) || (a === 4 && b === 6)) { // 10-count dominoes
@@ -3103,7 +3310,6 @@ class Game {
         this.biddingStatus = document.getElementById('bidding-status');
         this.biddingBoard = document.getElementById('bidding-board');
         this.biddingResults = document.getElementById('bidding-results');
-        this.startHandBtn = document.getElementById('start-hand-btn');
         this.bidInputArea = document.getElementById('bid-input-area');
         this.bidInput = document.getElementById('bid-input');
         this.submitBid = document.getElementById('submit-bid');
@@ -3123,7 +3329,6 @@ class Game {
         this.scoreboard = document.getElementById('scoreboard');
         this.scoreboardContent = document.getElementById('scoreboard-content');
         this.startGame = document.getElementById('start-game');
-        this.readyBidding = document.getElementById('ready-bidding');
         this.playDomino = document.getElementById('play-domino');
         this.showHistoryBtn = document.getElementById('show-history-btn');
         this.scoreboardHistoryModal = document.getElementById('scoreboard-history-modal');
@@ -3133,7 +3338,7 @@ class Game {
         this.handHistory = []; // Array to store previous hand scoreboards
         
         // Initialize player window manager
-        this.playerWindowManager = new PlayerWindowManager(this);
+        this.gameTableManager = new GameTableWindowManager(this);
         
         // Bind event listeners
         this.bindEventListeners();
@@ -3146,7 +3351,6 @@ class Game {
     
     bindEventListeners() {
         this.startGame.addEventListener('click', () => this.startNewGame());
-        this.readyBidding.addEventListener('click', () => this.startBidding());
         this.submitBid.addEventListener('click', () => this.submitBidHandler());
         this.bidInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -3155,7 +3359,6 @@ class Game {
         });
         this.confirmTrump.addEventListener('click', () => this.confirmTrumpHandler());
         this.playDomino.addEventListener('click', () => this.playSelectedDomino());
-        this.startHandBtn.addEventListener('click', () => this.startHandAfterBidding());
         this.showHistoryBtn.addEventListener('click', () => this.showScoreboardHistory());
         
         // Close modal button
@@ -3265,12 +3468,29 @@ class Game {
         this.showElement(this.handScoreboard);
     }
     
+    showPlayNextTrickButton() {
+        const playNextTrickBtn = document.getElementById('play-next-trick-btn');
+        if (playNextTrickBtn) {
+            playNextTrickBtn.style.display = 'inline-block';
+            playNextTrickBtn.onclick = () => {
+                this.hidePlayNextTrickButton();
+                this.playTrick();
+            };
+        }
+    }
+    
+    hidePlayNextTrickButton() {
+        const playNextTrickBtn = document.getElementById('play-next-trick-btn');
+        if (playNextTrickBtn) {
+            playNextTrickBtn.style.display = 'none';
+        }
+    }
+    
     displayPlayedDomino(domino, player) {
-        const mod = domino.modulate(this.trump, this.currentTrick.currentSuit);
-        const dominoElement = document.createElement('div');
-        dominoElement.className = 'played-domino';
-        dominoElement.textContent = `${this.formatPlayerNameWithRelationship(player)}: ${mod[0]}-${mod[1]}`;
-        this.playedDominoes.appendChild(dominoElement);
+        // This method is now only used for the game table window display
+        // The main display is handled by gameTableManager.displayPlayedDomino()
+        const mod = domino.modulate(this.trump, this.currentTrick?.currentSuit);
+        console.log(`${this.formatPlayerNameWithRelationship(player)} plays ${mod[0]}-${mod[1]}`);
     }
     
     addTrickToScoreboard(trickData) {
@@ -3392,14 +3612,16 @@ class Game {
         // Display new team introductions
         this.displayTeamIntroductions();
         
-        // Create player windows
-        this.playerWindowManager.createAllPlayerWindows(this.players);
+        // Create game table window
+        this.gameTableManager.createGameTableWindow();
         
-        // Show ready button
-        this.showElement(this.readyBidding);
+        // Hide start game button
         this.hideElement(this.startGame);
         
-        this.updateStatus("Click 'Ready for Bidding' to start the first hand.");
+        this.updateStatus("Starting first hand...");
+        
+        // Automatically start bidding
+        this.startBidding();
     }
     
     startBidding() {
@@ -3414,8 +3636,6 @@ class Game {
         // Show overall score and user's hand
         this.updateScoreDisplay();
         this.displayPlayerHand();
-        
-        this.hideElement(this.readyBidding);
         
         this.updateStatus("Bidding phase starting. You'll be prompted when it's your turn to bid.");
         
@@ -3522,6 +3742,11 @@ class Game {
         // Initialize bidding board in player windows
         this.initializeBiddingBoardInPlayerWindows(bidOrder);
         
+        // Update game table player order for bidding phase
+        if (this.gameTableManager) {
+            this.gameTableManager.updatePlayerOrder(bidOrder);
+        }
+        
         this.updateStatus("Bidding phase in progress...");
         
         // Process bidding for each player
@@ -3585,23 +3810,23 @@ class Game {
         
         // Show bidding interface in human player window
         const humanPlayerIndex = 0;
-        this.playerWindowManager.addPlayerMessage(humanPlayerIndex, 
+        this.gameTableManager.addPlayerMessage(humanPlayerIndex, 
             `It's your turn to bid! Current bid: ${this.currentBid === 0 ? 'pass' : this.currentBid}`, 'action');
         
         // Show bid input in player window
-        this.playerWindowManager.showBidInput(humanPlayerIndex);
-        this.playerWindowManager.setupBidInputHandler(humanPlayerIndex, this);
+        this.gameTableManager.showBidInput(humanPlayerIndex);
+        // Note: setupBidInputHandler is not needed in the new system
     }
     
     restoreBiddingInterface() {
         if (this.currentBiddingState.waitingForHuman && this.currentPhase === 'bidding') {
             const humanPlayerIndex = 0;
-            this.playerWindowManager.addPlayerMessage(humanPlayerIndex, 
+            this.gameTableManager.addPlayerMessage(humanPlayerIndex, 
                 `It's your turn to bid! Current bid: ${this.currentBid === 0 ? 'pass' : this.currentBid}`, 'action');
             
             // Show bid input in player window
-            this.playerWindowManager.showBidInput(humanPlayerIndex);
-            this.playerWindowManager.setupBidInputHandler(humanPlayerIndex, this);
+            this.gameTableManager.showBidInput(humanPlayerIndex);
+            // Note: setupBidInputHandler is not needed in the new system
         }
     }
     
@@ -3646,7 +3871,7 @@ class Game {
         this.bidInput.value = '';
         
         // Add player-specific message for human player
-        this.playerWindowManager.addPlayerMessage(0, `Bids ${bid}`, 'action');
+        this.gameTableManager.addPlayerMessage(0, `Bids ${bid}`, 'action');
         
         // Continue bidding process
         this.continueBiddingAfterHuman();
@@ -3729,7 +3954,7 @@ class Game {
         if (partnerIsLeader && adjustedConfidence <= playerData[partnerName].confidence) {
             console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Partner is leader, passing to support`);
             const playerIndex = this.players.indexOf(currentPlayer);
-            this.playerWindowManager.addPlayerMessage(playerIndex, `Partner is leading, passing to support`, 'info');
+            this.gameTableManager.addPlayerMessage(playerIndex, `Partner is leading, passing to support`, 'info');
             return 'pass';
         }
         
@@ -3769,12 +3994,12 @@ class Game {
         if (pdata.maxBid <= this.currentBid) {
             console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Cannot outbid, passing`);
             const playerIndex = this.players.indexOf(currentPlayer);
-            this.playerWindowManager.addPlayerMessage(playerIndex, `Cannot outbid ${this.currentBid}, passing`, 'info');
+            this.gameTableManager.addPlayerMessage(playerIndex, `Cannot outbid ${this.currentBid}, passing`, 'info');
             return 'pass';
         } else {
             console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Bidding ${pdata.maxBid}`);
             const playerIndex = this.players.indexOf(currentPlayer);
-            this.playerWindowManager.addPlayerMessage(playerIndex, `Bidding ${pdata.maxBid}`, 'action');
+            this.gameTableManager.addPlayerMessage(playerIndex, `Bidding ${pdata.maxBid}`, 'action');
             return pdata.maxBid;
         }
     }
@@ -3810,9 +4035,9 @@ class Game {
             const bidText = bid === 'pass' ? 'Passed' : `Bid: ${bid}`;
             
             if (playerName === this.highestBidder) {
-                this.playerWindowManager.addPlayerMessage(index, `WON BID with ${this.currentBid}!`, 'success');
+                this.gameTableManager.addPlayerMessage(index, `WON BID with ${this.currentBid}!`, 'success');
             } else {
-                this.playerWindowManager.addPlayerMessage(index, bidText, 'info');
+                this.gameTableManager.addPlayerMessage(index, bidText, 'info');
             }
         });
         
@@ -3833,10 +4058,10 @@ class Game {
         this.currentPhase = 'trump-selection';
         
         // Add trump selection prompt to human player window
-        this.playerWindowManager.addPlayerMessage(0, "Select a trump suit", 'action');
+        this.gameTableManager.addPlayerMessage(0, "Select a trump suit", 'action');
         
         // Show trump selection interface in human player window
-        this.playerWindowManager.showTrumpSelection(0);
+        this.gameTableManager.showTrumpSelection(0);
     }
     
     confirmTrumpHandler() {
@@ -3849,7 +4074,7 @@ class Game {
         const trump = parseInt(selectedTrump.dataset.trump);
         
         // Show trump selection in human player window
-        this.playerWindowManager.addPlayerMessage(0, `Selected trump: ${trump}'s`, 'action');
+        this.gameTableManager.addPlayerMessage(0, `Selected trump: ${trump}'s`, 'action');
         
         this.setTrumpAndStartHand(trump);
     }
@@ -3865,13 +4090,20 @@ class Game {
         
         this.updateStatus(`${this.bidWinner} wins the bid with ${this.winningBid} on ${this.trump} as trump.`);
         
+        // Update bid winner header and game table header
+        const bidWinnerIdx = this.players.findIndex(p => this.formatPlayerNameWithRelationship(p) === this.bidWinner);
+        if (bidWinnerIdx !== -1 && this.gameTableManager) {
+            this.gameTableManager.updateBidWinnerHeader(bidWinnerIdx, this.winningBid);
+            this.gameTableManager.updateGameTableHeader(`${this.trump}'s`);
+        }
+        
         // Show trump selection in all player windows
         this.players.forEach((player, index) => {
             const playerName = this.formatPlayerNameWithRelationship(player);
             if (playerName === this.bidWinner) {
-                this.playerWindowManager.addPlayerMessage(index, `Trump: ${this.trump}'s`, 'success');
+                this.gameTableManager.addPlayerMessage(index, `Trump: ${this.trump}'s`, 'success');
             } else {
-                this.playerWindowManager.addPlayerMessage(index, `Trump: ${this.trump}'s`, 'info');
+                this.gameTableManager.addPlayerMessage(index, `Trump: ${this.trump}'s`, 'info');
             }
         });
         
@@ -3917,28 +4149,25 @@ class Game {
         console.log('Current leader index:', this.currentLeaderIdx);
         console.log('Bid winner is human:', this.players[bidWinnerIdx].isHuman);
         
-        this.showElement(this.trickArea);
         this.showElement(this.handScoreboard);
-        this.updateTrickInfo();
         this.updateHandScoreboard();
+        
+        // Update game table player order for trick phase
+        if (this.gameTableManager) {
+            this.gameTableManager.updatePlayerOrder();
+        }
         
         // Start the first trick
         this.playTrick();
     }
     
-    updateTrickInfo() {
-        const leader = this.players[this.currentLeaderIdx];
-        this.trickInfo.innerHTML = `
-            <strong>Current Trick:</strong><br>
-            Leader: ${this.formatPlayerNameWithRelationship(leader)}<br>
-            Trump: ${this.trump}'s<br>
-            Bid: ${this.bidWinner} won with ${this.winningBid}
-        `;
-    }
+
     
     playTrick() {
-        // Clear the current trick display for the new trick
-        this.playedDominoes.innerHTML = '';
+        // Clear all domino displays in game table
+        if (this.gameTableManager) {
+            this.gameTableManager.clearAllDominoDisplays();
+        }
         
         console.log('Starting new trick!');
         console.log('Current leader index:', this.currentLeaderIdx);
@@ -3946,6 +4175,11 @@ class Game {
         
         // Initialize new trick
         this.currentTrick = new TrickState(this.currentLeaderIdx, this.trump, this.handModes);
+        
+        // Update game table player order for this trick
+        if (this.gameTableManager) {
+            this.gameTableManager.updatePlayerOrder();
+        }
         
         // Determine play order for this trick - start with leader, then go in order 0,1,2,3
         const trickOrder = [this.currentLeaderIdx];
@@ -3981,11 +4215,14 @@ class Game {
             if (chosenDomino) {
                 const index = player.hand.indexOf(chosenDomino);
                 player.hand.splice(index, 1);
-                this.currentTrick.addPlay(chosenDomino, playerIdx);
+                this.currentTrick.addPlay(chosenDomino, playerIdx, [chosenDomino.ends[0], chosenDomino.ends[1]]);
                 this.addPlayedDomino(chosenDomino, playerIdx); // Now passes playerIdx
                 
                 // Update display
                 this.displayPlayedDomino(chosenDomino, player);
+                
+                // Update game table display
+                this.gameTableManager.displayPlayedDomino(chosenDomino, playerIdx, [chosenDomino.ends[0], chosenDomino.ends[1]]);
                 
                 // Show modulated representation
                 const mod = chosenDomino.modulate(this.trump, this.currentTrick.currentSuit);
@@ -3994,7 +4231,7 @@ class Game {
                 this.updateStatus(`${roleName}: ${this.formatPlayerNameWithRelationship(player)} plays ${mod[0]}-${mod[1]}`);
                 
                 // Add player-specific message for AI player
-                this.playerWindowManager.addPlayerMessage(playerIdx, `Plays ${mod[0]}-${mod[1]} (${roleName})`, 'action');
+                this.gameTableManager.addPlayerMessage(playerIdx, `Plays ${mod[0]}-${mod[1]} (${roleName})`, 'action');
             }
             
             this.currentPlayerIndex++;
@@ -4026,17 +4263,21 @@ class Game {
         
         // Remove domino from hand
         humanPlayer.hand.splice(this.selectedDomino, 1);
-        this.currentTrick.addPlay(chosenDomino, 0);
+        const playedEnds = [chosenDomino.ends[0], chosenDomino.ends[1]];
+        this.currentTrick.addPlay(chosenDomino, 0, playedEnds);
         this.addPlayedDomino(chosenDomino, 0); // Now passes playerIdx
         
         // Update display
         this.displayPlayedDomino(chosenDomino, humanPlayer);
         this.displayPlayerHand();
         
+        // Update game table display
+        this.gameTableManager.displayPlayedDomino(chosenDomino, 0, [chosenDomino.ends[0], chosenDomino.ends[1]]);
+        
         // Add player-specific message for human player
         const mod = chosenDomino.modulate(this.trump, this.currentTrick.currentSuit);
         const roleName = humanPlayer.role || "None";
-        this.playerWindowManager.addPlayerMessage(0, `Plays ${mod[0]}-${mod[1]} (${roleName})`, 'action');
+        this.gameTableManager.addPlayerMessage(0, `Plays ${mod[0]}-${mod[1]} (${roleName})`, 'action');
         
         // Clear selection
         this.selectedDomino = null;
@@ -4083,9 +4324,10 @@ class Game {
             points: trickPoints,
             winner: this.formatPlayerNameWithRelationship(winner),
             ledSuit: this.currentTrick.currentSuit,
-            playerPlays: this.currentTrick.playedDominoes.map(([domino, playerIdx]) => ({
+            playerPlays: this.currentTrick.playedDominoes.map(([domino, playerIdx, playedEnds]) => ({
                 domino: domino,
-                playerIdx: playerIdx
+                playerIdx: playerIdx,
+                playedEnds: playedEnds
             }))
         };
         
@@ -4095,7 +4337,7 @@ class Game {
         this.updateStatus(`${this.formatPlayerNameWithRelationship(winner)} wins the trick! ${team} gets ${trickPoints} points.`);
         
         // Add player-specific message for trick winner
-        this.playerWindowManager.addPlayerMessage(winnerIdx, `Wins trick! +${trickPoints} points for ${team}`, 'action');
+        this.gameTableManager.addPlayerMessage(winnerIdx, `Wins trick! +${trickPoints} points for ${team}`, 'action');
         
         // Update for next trick
         this.currentLeaderIdx = winnerIdx;
@@ -4104,7 +4346,7 @@ class Game {
         this.assignRoles(this.currentLeaderIdx);
         
         // Update player window headers with new roles
-        this.playerWindowManager.updateAllPlayerRoles();
+        this.gameTableManager.updateAllPlayerRoles();
         
         console.log('New leader index set to:', this.currentLeaderIdx);
         console.log('New leader will be:', this.formatPlayerNameWithRelationship(this.players[this.currentLeaderIdx]));
@@ -4113,10 +4355,8 @@ class Game {
         if (this.isHandOver()) {
             this.finishHand();
         } else {
-            // Start next trick
-            setTimeout(() => {
-                this.playTrick();
-            }, 2000);
+            // Show "Play Next Trick" button instead of automatically starting
+            this.showPlayNextTrickButton();
         }
     }
     
@@ -4188,6 +4428,9 @@ class Game {
             this.updateScoreDisplay();
         }
         
+        // Hide the play next trick button since hand is over
+        this.hidePlayNextTrickButton();
+        
         // Display hand result
         this.updateStatus(`Hand completed! ${handResult}<br>
             Final score: Us ${this.usHandPoints} - Them ${this.themHandPoints}<br>
@@ -4232,20 +4475,32 @@ class Game {
         this.hideElement(this.trickArea);
         this.hideElement(this.playerHand);
         this.hideElement(this.biddingBoard);
-        this.hideElement(this.startHandBtn);
         this.playedDominoes.innerHTML = '';
+        this.hidePlayNextTrickButton();
         
         // Clear scoreboard
         this.usTricks.innerHTML = '';
         this.themTricks.innerHTML = '';
+        
+        // Clear bidding display from all player windows
+        this.players.forEach((player, index) => {
+            this.gameTableManager.clearPlayerBid(index);
+        });
+        
+        // Stop all audio when starting a new hand
+        if (this.gameTableManager) {
+            this.gameTableManager.stopBirdAudio();
+        }
         
         // Start new hand
         this.shuffleAndDeal();
         this.handSortingPhase();
         this.displayPlayerHand();
         
-        this.updateStatus("New hand dealt! Click 'Ready for Bidding' to start bidding.");
-        this.showElement(this.readyBidding);
+        this.updateStatus("New hand dealt! Starting bidding...");
+        
+        // Automatically start bidding
+        this.startBidding();
     }
     
     initializeBiddingBoard(bidOrder) {
@@ -4265,8 +4520,10 @@ class Game {
     initializeBiddingBoardInPlayerWindows(bidOrder) {
         // Clear all player messages and add bidding info
         this.players.forEach((player, index) => {
-            this.playerWindowManager.clearPlayerMessages(index);
-            this.playerWindowManager.addPlayerMessage(index, 'Bidding phase starting...', 'info');
+            this.gameTableManager.clearPlayerMessages(index);
+            this.gameTableManager.addPlayerMessage(index, 'Bidding phase starting...', 'info');
+            // Initialize bidding display in player window header
+            this.gameTableManager.clearPlayerBid(index);
         });
         
         // Add bidding order to each player's window
@@ -4275,7 +4532,7 @@ class Game {
                 this.formatPlayerNameWithRelationship(p) === playerName
             );
             if (playerIndex !== -1) {
-                this.playerWindowManager.addPlayerMessage(playerIndex, 
+                this.gameTableManager.addPlayerMessage(playerIndex, 
                     `Bidding order: ${index + 1} of ${bidOrder.length}`, 'info');
             }
         });
@@ -4298,27 +4555,34 @@ class Game {
         );
         if (playerIndex !== -1) {
             const bidText = bid === 'pass' ? 'Pass' : `Bid: ${bid}`;
-            this.playerWindowManager.addPlayerMessage(playerIndex, bidText, 'action');
+            this.gameTableManager.addPlayerMessage(playerIndex, bidText, 'action');
+            // Update the player window header with bid information
+            this.gameTableManager.updatePlayerBid(playerIndex, bid);
         }
     }
     
     showReadyToStart() {
         this.hideElement(this.bidInputArea);
-        this.showElement(this.startHandBtn);
-        this.updateStatus("Bidding complete! Click 'Ready to Start' to begin the hand.");
+        this.updateStatus("Bidding complete! Starting hand...");
         
-        // Add ready prompt to human player window
-        this.playerWindowManager.addPlayerMessage(0, "Click 'Ready to Start' to begin the hand", 'action');
+        // Add message to human player window
+        this.gameTableManager.addPlayerMessage(0, "Bidding complete! Starting hand...", 'info');
+        
+        // Automatically start the hand after a short delay
+        setTimeout(() => {
+            this.startHandAfterBidding();
+        }, 1000);
     }
     
     startHandAfterBidding() {
-        this.hideElement(this.startHandBtn);
         this.hideElement(this.biddingBoard);
         
         // Clear bidding messages from all player windows and hide bid input
         this.players.forEach((player, index) => {
-            this.playerWindowManager.clearPlayerMessages(index);
-            this.playerWindowManager.hideBidInput(index);
+            this.gameTableManager.clearPlayerMessages(index);
+            this.gameTableManager.hideBidInput(index);
+            // Clear bidding display from player window headers
+            this.gameTableManager.clearPlayerBid(index);
         });
         
         // Set trump and winner info
@@ -4372,9 +4636,9 @@ class Game {
         this.players.forEach((player, idx) => {
             console.log(`${this.formatPlayerNameWithRelationship(player)}: ${player.role}`);
             // Add role assignment message to player window
-            this.playerWindowManager.addPlayerMessage(idx, `Role: ${player.role}`, 'info');
+            this.gameTableManager.addPlayerMessage(idx, `Role: ${player.role}`, 'info');
             // Update player window header with new role
-            this.playerWindowManager.updatePlayerRole(idx, player.role);
+            this.gameTableManager.updatePlayerRole(idx, player.role);
         });
     }
     
