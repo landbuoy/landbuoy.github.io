@@ -331,8 +331,68 @@ class GameTableWindowManager {
         
         // Create window element
         this.gameTableWindow = document.createElement('div');
-        this.gameTableWindow.className = 'game-table-window';
+        this.gameTableWindow.className = 'game-table-window modalContainer modalContainer--gameTable';
         this.gameTableWindow.id = 'game-table-window';
+        
+        // Generate random color for box-shadow
+        const colors = [
+            '#ff6347', // tomato
+            '#ff9966', // orange
+            '#9999ff', // light blue
+            '#cc66ff', // purple
+            '#ff99ff', // pink
+            '#99ff66', // light green
+            '#66ff99', // mint
+            '#33ccff', // sky blue
+            '#0066ff', // blue
+            '#ff6b6b', // coral
+            '#4ecdc4', // turquoise
+            '#45b7d1', // steel blue
+            '#96ceb4', // sage
+            '#feca57', // yellow
+            '#ff9ff3', // light pink
+            '#54a0ff', // electric blue
+            '#5f27cd', // purple
+            '#00d2d3', // cyan
+            '#ff9f43', // orange
+            '#10ac84'  // emerald
+        ];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        this.gameTableWindow.style.boxShadow = `0px 0px 32px ${randomColor}`;
+        
+        // Generate complementary color for aquaButton
+        const hexToRgb = (hex) => {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        };
+        
+        const rgbToHex = (r, g, b) => {
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        };
+        
+        const getComplementaryColor = (hex) => {
+            const rgb = hexToRgb(hex);
+            if (!rgb) return '#04c204'; // fallback to green
+            
+            // Calculate complementary color (opposite on color wheel)
+            const complementaryRgb = {
+                r: 255 - rgb.r,
+                g: 255 - rgb.g,
+                b: 255 - rgb.b
+            };
+            
+            return rgbToHex(complementaryRgb.r, complementaryRgb.g, complementaryRgb.b);
+        };
+        
+        const complementaryColor = getComplementaryColor(randomColor);
+        
+        // Store colors for later use when creating the aquaButton
+        this.gameTableWindow.dataset.boxShadowColor = randomColor;
+        this.gameTableWindow.dataset.aquaButtonColor = complementaryColor;
         
         // Position in center of screen
         const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0, document.body.clientWidth || 0);
@@ -365,10 +425,10 @@ class GameTableWindowManager {
         
         // Create window content with 4-square grid
         this.gameTableWindow.innerHTML = `
-            <div class="game-table-header">
-                <h3 class="game-table-title">Game Table</h3>
+            <div class="game-table-header modalHeader">
+                <h3 class="game-table-title modalTitle">Game Table</h3>
                 <button id="game-table-play-next-trick-btn" class="btn game-table-play-next-trick-btn" style="display: none;">Play Next Trick</button>
-                <button class="game-table-close">×</button>
+                <div class="aquaButton aquaButton--gameTable" style="background: ${this.gameTableWindow.dataset.aquaButtonColor}; box-shadow: 0px 5px 10px ${this.gameTableWindow.dataset.boxShadowColor};">×</div>
             </div>
             <div class="game-table-content">
                 <div class="game-table-grid">
@@ -474,7 +534,7 @@ class GameTableWindowManager {
         `;
         
         // Add close button event listener
-        const closeBtn = this.gameTableWindow.querySelector('.game-table-close');
+        const closeBtn = this.gameTableWindow.querySelector('.aquaButton--gameTable');
         if (closeBtn) {
             closeBtn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -500,7 +560,7 @@ class GameTableWindowManager {
     }
     
     makeDraggable(window) {
-        const header = window.querySelector('.game-table-header');
+        const header = window.querySelector('.modalHeader');
         let isDragging = false;
         let currentX;
         let currentY;
