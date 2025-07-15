@@ -438,6 +438,7 @@ class GameTableWindowManager {
             this.bringWindowToFront(window);
         });
         
+        // Mouse events for desktop
         header.addEventListener('mousedown', (e) => {
             if (e.target === header || header.contains(e.target)) {
                 isDragging = true;
@@ -446,6 +447,19 @@ class GameTableWindowManager {
                 // Update initial position based on current mouse position and window offset
                 initialX = e.clientX - xOffset;
                 initialY = e.clientY - yOffset;
+            }
+        });
+        
+        // Touch events for mobile
+        header.addEventListener('touchstart', (e) => {
+            if (e.target === header || header.contains(e.target)) {
+                isDragging = true;
+                this.bringWindowToFront(window);
+                
+                // Get the first touch
+                const touch = e.touches[0];
+                initialX = touch.clientX - xOffset;
+                initialY = touch.clientY - yOffset;
             }
         });
         
@@ -462,11 +476,35 @@ class GameTableWindowManager {
             }
         });
         
+        document.addEventListener('touchmove', (e) => {
+            if (isDragging) {
+                e.preventDefault();
+                
+                // Get the first touch
+                const touch = e.touches[0];
+                currentX = touch.clientX - initialX;
+                currentY = touch.clientY - initialY;
+                xOffset = currentX;
+                yOffset = currentY;
+                
+                window.style.left = `${currentX}px`;
+                window.style.top = `${currentY}px`;
+            }
+        });
+        
         document.addEventListener('mouseup', () => {
             if (isDragging) {
-            initialX = currentX;
-            initialY = currentY;
-            isDragging = false;
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+            }
+        });
+        
+        document.addEventListener('touchend', () => {
+            if (isDragging) {
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
             }
         });
     }
