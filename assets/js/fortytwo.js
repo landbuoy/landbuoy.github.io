@@ -205,6 +205,33 @@ class GameTableWindowManager {
         return `../assets/audio/birdsongs/downloads/${birdFolder}/${birdFolder}_recording_${recordingNumber}.mp3`;
     }
     
+    async getBirdAudioPathWithFallback(birdName, playerRole) {
+        const birdFolder = birdName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        let preferredRecordingNumber = 1; // Default for LEADER
+        
+        if (playerRole === 'SUPPORTER') {
+            preferredRecordingNumber = 2;
+        } else if (playerRole === 'SETTER1' || playerRole === 'SETTER2') {
+            preferredRecordingNumber = 3;
+        }
+        
+        // Try preferred recording first
+        const preferredPath = `../assets/audio/birdsongs/downloads/${birdFolder}/${birdFolder}_recording_${preferredRecordingNumber}.mp3`;
+        
+        try {
+            // Check if the preferred file exists
+            const response = await fetch(preferredPath, { method: 'HEAD' });
+            if (response.ok) {
+                return preferredPath;
+            }
+        } catch (e) {
+            // If fetch fails, continue to fallback
+        }
+        
+        // Fallback to recording 1 if preferred doesn't exist
+        return `../assets/audio/birdsongs/downloads/${birdFolder}/${birdFolder}_recording_1.mp3`;
+    }
+    
     playBirdAudio(audioPath, playerIndex) {
         // Stop current audio for this player if playing
         if (this.playerAudio[playerIndex]) {
@@ -452,7 +479,6 @@ class GameTableWindowManager {
             this.bringWindowToFront(window);
         });
         
-        // Mouse events for desktop
         header.addEventListener('mousedown', (e) => {
             if (e.target === header || header.contains(e.target)) {
                 isDragging = true;
@@ -461,19 +487,6 @@ class GameTableWindowManager {
                 // Update initial position based on current mouse position and window offset
                 initialX = e.clientX - xOffset;
                 initialY = e.clientY - yOffset;
-            }
-        });
-        
-        // Touch events for mobile
-        header.addEventListener('touchstart', (e) => {
-            if (e.target === header || header.contains(e.target)) {
-                isDragging = true;
-                this.bringWindowToFront(window);
-                
-                // Get the first touch
-                const touch = e.touches[0];
-                initialX = touch.clientX - xOffset;
-                initialY = touch.clientY - yOffset;
             }
         });
         
@@ -490,35 +503,11 @@ class GameTableWindowManager {
             }
         });
         
-        document.addEventListener('touchmove', (e) => {
-            if (isDragging) {
-                e.preventDefault();
-                
-                // Get the first touch
-                const touch = e.touches[0];
-                currentX = touch.clientX - initialX;
-                currentY = touch.clientY - initialY;
-                xOffset = currentX;
-                yOffset = currentY;
-                
-                window.style.left = `${currentX}px`;
-                window.style.top = `${currentY}px`;
-            }
-        });
-        
         document.addEventListener('mouseup', () => {
             if (isDragging) {
-                initialX = currentX;
-                initialY = currentY;
-                isDragging = false;
-            }
-        });
-        
-        document.addEventListener('touchend', () => {
-            if (isDragging) {
-                initialX = currentX;
-                initialY = currentY;
-                isDragging = false;
+            initialX = currentX;
+            initialY = currentY;
+            isDragging = false;
             }
         });
     }
@@ -583,8 +572,8 @@ class GameTableWindowManager {
         this.createGameTableWindow();
         
         // Add a small delay to ensure DOM elements are ready
-        setTimeout(() => {
-            this.restoreCurrentGameState();
+        setTimeout(async () => {
+        await this.restoreCurrentGameState();
         }, 100);
         
         // Remove reopen button
@@ -594,7 +583,7 @@ class GameTableWindowManager {
         }
     }
     
-    restoreCurrentGameState() {
+    async restoreCurrentGameState() {
         console.log('Restoring current game state...');
         console.log('Current trick:', this.game.currentTrick);
         console.log('Current trick plays:', this.game.currentTrick?.plays);
@@ -613,11 +602,12 @@ class GameTableWindowManager {
         // Restore any current domino displays
         if (this.game.currentTrick && this.game.currentTrick.playedDominoes) {
             console.log('Restoring domino displays for', this.game.currentTrick.playedDominoes.length, 'plays');
-            this.game.currentTrick.playedDominoes.forEach(([domino, playerIdx, playedEnds], index) => {
+            for (const [domino, playerIdx, playedEnds] of this.game.currentTrick.playedDominoes) {
+                const index = this.game.currentTrick.playedDominoes.indexOf([domino, playerIdx, playedEnds]);
                 console.log(`Restoring play ${index}:`, domino, 'for player', playerIdx);
                 this.displayPlayedDomino(domino, playerIdx, playedEnds);
-                this.gameTableManager.displayPlayedDomino(domino, playerIdx, playedEnds);
-            });
+                await this.gameTableManager.displayPlayedDomino(domino, playerIdx, playedEnds);
+            }
         } else {
             console.log('No current trick or plays to restore');
         }
@@ -692,7 +682,7 @@ class GameTableWindowManager {
         // Only domino and bird images are displayed
     }
     
-    displayPlayedDomino(domino, playerIndex, playedEnds) {
+    async displayPlayedDomino(domino, playerIndex, playedEnds) {
         const dominoDisplay = document.getElementById(`domino-display-${playerIndex}`);
         const dominoImage = document.getElementById(`domino-image-${playerIndex}`);
         const birdImage = document.getElementById(`bird-image-${playerIndex}`);
@@ -746,7 +736,8 @@ class GameTableWindowManager {
             // Store bird info for later audio playback when flipped
             const playerRole = this.game.players[playerIndex]?.role;
             if (playerRole) {
-                const audioPath = this.getBirdAudioPath(birdName, playerRole);
+                // Use fallback function to get audio path with fallback to recording 1
+                const audioPath = await this.getBirdAudioPathWithFallback(birdName, playerRole);
                 // Store the audio path for this player (don't play immediately)
                 this.playerAudioPaths = this.playerAudioPaths || {};
                 this.playerAudioPaths[playerIndex] = audioPath;
@@ -3413,7 +3404,7 @@ class Game {
             }
         });
         this.confirmTrump.addEventListener('click', () => this.confirmTrumpHandler());
-        this.playDomino.addEventListener('click', () => this.playSelectedDomino());
+        this.playDomino.addEventListener('click', async () => await this.playSelectedDomino());
         this.showHistoryBtn.addEventListener('click', () => this.showScoreboardHistory());
         
         // Close modal button
@@ -3436,82 +3427,6 @@ class Game {
             $('#scoreboard-history-modal').draggable({
                 handle: '.modalHeader',
                 containment: 'window'
-            });
-            
-            // Comprehensive draggable functionality for all modal containers
-            $(".modalContainer").draggable({
-                handle: '.modalHeader',
-                containment: 'window'
-            });
-            
-            // Lift up the last clicked modal on vertical stack
-            $(".modalContainer").click(function () {
-                $(".modalContainer")
-                    .not(this)
-                    .each(function () {
-                        $(this).css("zIndex", "0");
-                    });
-                $(this).css("zIndex", "9999");
-            });
-            
-            // Scoreboard modal controls
-            $(".aquaButton--scoreboard").click(function () {
-                $(".modalContainer--scoreboard").fadeOut();
-            });
-            
-            // Touch event handlers for mobile support
-            $(".modalContainer").on('touchstart', function(e) {
-                // Prevent default touch behavior
-                if (e.target.tagName.toLowerCase() === 'input' || 
-                    e.target.tagName.toLowerCase() === 'textarea' ||
-                    e.target.tagName.toLowerCase() === 'select') {
-                    return;
-                }
-                
-                // Get the modal container
-                const modal = $(this);
-                
-                // Store initial touch data
-                const touch = e.originalEvent.touches[0];
-                modal.data('touchStart', {
-                    x: touch.clientX,
-                    y: touch.clientY,
-                    modalX: modal.offset().left,
-                    modalY: modal.offset().top
-                });
-                
-                // Bring to front
-                modal.trigger('click');
-            });
-            
-            $(".modalContainer").on('touchmove', function(e) {
-                const modal = $(this);
-                const touchStart = modal.data('touchStart');
-                
-                if (touchStart) {
-                    e.preventDefault();
-                    const touch = e.originalEvent.touches[0];
-                    const deltaX = touch.clientX - touchStart.x;
-                    const deltaY = touch.clientY - touchStart.y;
-                    
-                    modal.css({
-                        left: touchStart.modalX + deltaX,
-                        top: touchStart.modalY + deltaY
-                    });
-                }
-            });
-            
-            $(".modalContainer").on('touchend touchcancel', function() {
-                const modal = $(this);
-                modal.removeData('touchStart');
-            });
-            
-            // Prevent text selection during drag
-            $(".modalContainer").on('selectstart', function(e) {
-                if (e.target.tagName.toLowerCase() !== 'input' && 
-                    e.target.tagName.toLowerCase() !== 'textarea') {
-                    e.preventDefault();
-                }
             });
         });
     }
@@ -3590,13 +3505,13 @@ class Game {
     
     showElement(element) {
         if (element) {
-            element.classList.remove('hidden');
+        element.classList.remove('hidden');
         }
     }
     
     hideElement(element) {
         if (element) {
-            element.classList.add('hidden');
+        element.classList.add('hidden');
         }
     }
     
@@ -4336,7 +4251,7 @@ class Game {
         this.playedDominoesThisTrick = []; // Reset playedDominoesThisTrick at the start of each trick
     }
     
-    playNextPlayer(trickOrder) {
+    async playNextPlayer(trickOrder) {
         if (this.currentPlayerIndex >= trickOrder.length) {
             // Trick complete
             this.finishTrick();
@@ -4363,7 +4278,7 @@ class Game {
                 this.displayPlayedDomino(chosenDomino, player);
                 
                 // Update game table display
-                this.gameTableManager.displayPlayedDomino(chosenDomino, playerIdx, [chosenDomino.ends[0], chosenDomino.ends[1]]);
+                await this.gameTableManager.displayPlayedDomino(chosenDomino, playerIdx, [chosenDomino.ends[0], chosenDomino.ends[1]]);
                 
                 // Show modulated representation
                 const mod = chosenDomino.modulate(this.trump, this.currentTrick.currentSuit);
@@ -4376,13 +4291,13 @@ class Game {
             }
             
             this.currentPlayerIndex++;
-            setTimeout(() => {
-                this.playNextPlayer(trickOrder);
+            setTimeout(async () => {
+                await this.playNextPlayer(trickOrder);
             }, 1000);
         }
     }
     
-    playSelectedDomino() {
+    async playSelectedDomino() {
         if (this.selectedDomino === null) {
             this.updateStatus("Please select a domino to play.");
             return;
@@ -4413,7 +4328,7 @@ class Game {
         this.displayPlayerHand();
         
         // Update game table display
-        this.gameTableManager.displayPlayedDomino(chosenDomino, 0, [chosenDomino.ends[0], chosenDomino.ends[1]]);
+        await this.gameTableManager.displayPlayedDomino(chosenDomino, 0, [chosenDomino.ends[0], chosenDomino.ends[1]]);
         
         // Add player-specific message for human player
         const mod = chosenDomino.modulate(this.trump, this.currentTrick.currentSuit);
@@ -4434,7 +4349,7 @@ class Game {
             trickOrder.push(nextPlayer);
         }
         
-        this.playNextPlayer(trickOrder);
+        await this.playNextPlayer(trickOrder);
     }
     
     finishTrick() {
@@ -4661,8 +4576,8 @@ class Game {
     initializeBiddingBoardInPlayerWindows(bidOrder) {
         // Clear all player messages and add bidding info
         this.players.forEach((player, index) => {
-            this.gameTableManager.clearPlayerMessages(index);
-            this.gameTableManager.addPlayerMessage(index, 'Bidding phase starting...', 'info');
+                    this.gameTableManager.clearPlayerMessages(index);
+        this.gameTableManager.addPlayerMessage(index, 'Bidding phase starting...', 'info');
             // Initialize bidding display in player window header
             this.gameTableManager.clearPlayerBid(index);
         });
