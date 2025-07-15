@@ -506,6 +506,9 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    touch-action: none;
+    min-height: 44px;
+    user-select: none;
 }
 
 .game-table-title {
@@ -914,5 +917,27 @@ body {
     
     .player-status-message {
         font-size: 10px;
+    }
+    
+    .game-table-header {
+        min-height: 50px;
+        padding: 12px 15px;
+    }
+    
+    .game-table-title {
+        font-size: 16px;
+    }
+    
+    .game-table-close {
+        min-width: 44px;
+        min-height: 44px;
+        font-size: 20px;
+    }
+    
+    .game-table-play-next-trick-btn {
+        min-width: 44px;
+        min-height: 44px;
+        font-size: 12px;
+        padding: 6px 10px;
     }
 } 

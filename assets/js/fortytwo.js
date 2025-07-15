@@ -516,6 +516,7 @@ class GameTableWindowManager {
             this.bringWindowToFront(window);
         });
         
+        // Mouse event handlers
         header.addEventListener('mousedown', (e) => {
             if (e.target === header || header.contains(e.target)) {
                 isDragging = true;
@@ -542,9 +543,53 @@ class GameTableWindowManager {
         
         document.addEventListener('mouseup', () => {
             if (isDragging) {
-            initialX = currentX;
-            initialY = currentY;
-            isDragging = false;
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+            }
+        });
+        
+        // Touch event handlers for mobile
+        header.addEventListener('touchstart', (e) => {
+            if (e.target === header || header.contains(e.target)) {
+                e.preventDefault();
+                isDragging = true;
+                this.bringWindowToFront(window);
+                
+                const touch = e.touches[0];
+                // Update initial position based on current touch position and window offset
+                initialX = touch.clientX - xOffset;
+                initialY = touch.clientY - yOffset;
+            }
+        });
+        
+        document.addEventListener('touchmove', (e) => {
+            if (isDragging) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                currentX = touch.clientX - initialX;
+                currentY = touch.clientY - initialY;
+                xOffset = currentX;
+                yOffset = currentY;
+                
+                window.style.left = `${currentX}px`;
+                window.style.top = `${currentY}px`;
+            }
+        });
+        
+        document.addEventListener('touchend', () => {
+            if (isDragging) {
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+            }
+        });
+        
+        document.addEventListener('touchcancel', () => {
+            if (isDragging) {
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
             }
         });
     }
