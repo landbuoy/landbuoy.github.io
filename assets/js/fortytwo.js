@@ -32,6 +32,20 @@ const SONGBIRD_NAMES = [
     "Common Waxbill"
 ];
 
+// Planet names for player identification
+const PLANET_NAMES = [
+    "Sun",
+    "Moon", 
+    "Mercury",
+    "Venus",
+    "Mars",
+    "Jupiter",
+    "Saturn",
+    "Uranus",
+    "Neptune",
+    "Pluto"
+];
+
 // Domino to Bird mapping based on the specified associations
 const DOMINO_BIRD_MAP = {
     // 6-x dominoes
@@ -599,8 +613,8 @@ class GameTableWindowManager {
         // Restore any current domino displays
         if (this.game.currentTrick && this.game.currentTrick.playedDominoes) {
             console.log('Restoring domino displays for', this.game.currentTrick.playedDominoes.length, 'plays');
-            this.game.currentTrick.playedDominoes.forEach(([domino, playerIdx, playedEnds]) => {
-                console.log(`Restoring play ${idx}:`, play[0], 'for player', play[1]);
+            this.game.currentTrick.playedDominoes.forEach(([domino, playerIdx, playedEnds], index) => {
+                console.log(`Restoring play ${index}:`, domino, 'for player', playerIdx);
                 this.displayPlayedDomino(domino, playerIdx, playedEnds);
                 this.gameTableManager.displayPlayedDomino(domino, playerIdx, playedEnds);
             });
@@ -3306,6 +3320,9 @@ class Game {
             'Them': [this.players[1], this.players[3]]
         };
         
+        // Assign initial planet names to players
+        this.assignPlanetNames();
+        
         this.handScoreboards = []; // Store scoreboard for each hand
         this.lastHandPlayerHands = null; // For troubleshooting
         this.lastHandBiddingInfo = null;
@@ -3381,8 +3398,8 @@ class Game {
         // Bind event listeners
         this.bindEventListeners();
         
-        // Display initial welcome message
-        this.updateStatus("Welcome to 42! Click 'Start New Game' to begin.");
+        // Display team introductions on page load
+        this.displayTeamIntroductions();
         
         this.playerHasNo = [new Set(), new Set(), new Set(), new Set()]; // Track suits each player cannot follow
     }
@@ -3499,6 +3516,15 @@ class Game {
         });
     }
     
+    assignPlanetNames() {
+        // Randomly assign planet names to players
+        let availableNames = [...PLANET_NAMES];
+        availableNames = shuffleArray(availableNames);
+        for (let i = 0; i < this.players.length; i++) {
+            this.players[i].name = availableNames[i];
+        }
+    }
+    
     displayTeamIntroductions() {
         this.updateStatus(`NEW GAME<br><br>
             <strong>Us:</strong><br>
@@ -3563,11 +3589,15 @@ class Game {
     }
     
     showElement(element) {
-        element.classList.remove('hidden');
+        if (element) {
+            element.classList.remove('hidden');
+        }
     }
     
     hideElement(element) {
-        element.classList.add('hidden');
+        if (element) {
+            element.classList.add('hidden');
+        }
     }
     
     updateScoreDisplay() {
@@ -3704,11 +3734,8 @@ class Game {
         this.playedDominoesThisTrick = []; // Reset each trick
         this.handHistory = []; // Clear hand history for new game
         
-        // Assign new random songbird names (only once per game)
-        let availableNames = [...SONGBIRD_NAMES];
-        availableNames = shuffleArray(availableNames);
+        // Reset player hands and roles (keep existing planet names)
         for (let i = 0; i < this.players.length; i++) {
-            this.players[i].name = availableNames[i];
             this.players[i].hand = [];
             this.players[i].role = null;
             this.players[i].tricksWon = [];
