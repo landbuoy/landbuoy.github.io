@@ -610,16 +610,6 @@ class GameTableWindowManager {
     }
     
     makeDraggable(window) {
-        const header = window.querySelector('.modalHeader');
-        if (!header) {
-            console.warn('makeDraggable: .modalHeader not found in window, skipping draggable setup.');
-            return;
-        }
-        
-        // Check if we're on mobile - disable dragging on mobile
-        const screenWidth = document.documentElement.clientWidth || document.body.clientWidth;
-        const isMobile = screenWidth <= 900;
-        
         let isDragging = false;
         let currentX;
         let currentY;
@@ -635,13 +625,16 @@ class GameTableWindowManager {
             this.bringWindowToFront(window);
         });
         
-        // Mouse event handlers
-        header.addEventListener('mousedown', (e) => {
-            if (e.target === header || header.contains(e.target)) {
+        // Mouse event handlers - make entire window draggable
+        window.addEventListener('mousedown', (e) => {
+            // Only start dragging if not clicking on a child element that should handle its own events
+            if (e.target === window || window.contains(e.target)) {
                 isDragging = true;
                 this.bringWindowToFront(window);
+                
                 // Disable transitions during drag for smoother movement
                 window.style.transition = 'none';
+                
                 // Update initial position based on current mouse position and window offset
                 initialX = e.clientX - xOffset;
                 initialY = e.clientY - yOffset;
@@ -655,6 +648,7 @@ class GameTableWindowManager {
                 currentY = e.clientY - initialY;
                 xOffset = currentX;
                 yOffset = currentY;
+                
                 window.style.left = `${currentX}px`;
                 window.style.top = `${currentY}px`;
             }
@@ -665,86 +659,78 @@ class GameTableWindowManager {
                 initialX = currentX;
                 initialY = currentY;
                 isDragging = false;
+                
                 // Re-enable transitions after drag
                 window.style.transition = 'all 0.3s ease';
             }
         });
         
-        // Touch event handlers for mobile - only add if NOT on mobile (since we want to disable mobile dragging)
-        if (!isMobile) {
-            header.addEventListener('touchstart', (e) => {
-                if (e.target === header || header.contains(e.target)) {
-                    e.preventDefault();
-                    isDragging = true;
-                    this.bringWindowToFront(window);
-                    // Disable transitions during drag for smoother movement
-                    window.style.transition = 'none';
-                    const touch = e.touches[0];
-                    // Update initial position based on current touch position and window offset
-                    initialX = touch.clientX - xOffset;
-                    initialY = touch.clientY - yOffset;
-                }
-            });
+        // Touch event handlers for mobile
+        window.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            isDragging = true;
+            this.bringWindowToFront(window);
             
-            document.addEventListener('touchmove', (e) => {
-                if (isDragging) {
-                    e.preventDefault();
-                    const touch = e.touches[0];
-                    currentX = touch.clientX - initialX;
-                    currentY = touch.clientY - initialY;
-                    xOffset = currentX;
-                    yOffset = currentY;
-                    window.style.left = `${currentX}px`;
-                    window.style.top = `${currentY}px`;
-                }
-            });
+            // Disable transitions during drag for smoother movement
+            window.style.transition = 'none';
             
-            document.addEventListener('touchend', () => {
-                if (isDragging) {
-                    initialX = currentX;
-                    initialY = currentY;
-                    isDragging = false;
-                    // Re-enable transitions after drag
-                    window.style.transition = 'all 0.3s ease';
-                }
-            });
-            
-            document.addEventListener('touchcancel', () => {
-                if (isDragging) {
-                    initialX = currentX;
-                    initialY = currentY;
-                    isDragging = false;
-                    // Re-enable transitions after drag
-                    window.style.transition = 'all 0.3s ease';
-                }
-            });
-        }
+            const touch = e.touches[0];
+            // Update initial position based on current touch position and window offset
+            initialX = touch.clientX - xOffset;
+            initialY = touch.clientY - yOffset;
+        });
         
-        if (isMobile) {
-            console.log('Mobile detected: Game table window dragging disabled for touch events');
-        }
+        document.addEventListener('touchmove', (e) => {
+            if (isDragging) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                currentX = touch.clientX - initialX;
+                currentY = touch.clientY - initialY;
+                xOffset = currentX;
+                yOffset = currentY;
+                
+                window.style.left = `${currentX}px`;
+                window.style.top = `${currentY}px`;
+            }
+        });
+        
+        document.addEventListener('touchend', () => {
+            if (isDragging) {
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+                
+                // Re-enable transitions after drag
+                window.style.transition = 'all 0.3s ease';
+            }
+        });
+        
+        document.addEventListener('touchcancel', () => {
+            if (isDragging) {
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+                
+                // Re-enable transitions after drag
+                window.style.transition = 'all 0.3s ease';
+            }
+        });
     }
     
     bringWindowToFront(clickedWindow) {
-        // Get all game table windows
-        const allWindows = document.querySelectorAll('.game-table-window');
+        // Find the highest z-index among all domino windows
+        const allWindows = document.querySelectorAll('.domino-window');
+        let maxZIndex = 1000;
         
-        // Find the highest current z-index among game table windows
-        let maxZIndex = 1000; // Base z-index for game table windows
-        allWindows.forEach(win => {
-            const currentZIndex = parseInt(win.style.zIndex) || 1000;
-            maxZIndex = Math.max(maxZIndex, currentZIndex);
+        allWindows.forEach(window => {
+            const zIndex = parseInt(window.style.zIndex) || 1000;
+            if (zIndex > maxZIndex) {
+                maxZIndex = zIndex;
+            }
         });
         
-        // Check if there are any modals with higher z-index
-        const modals = document.querySelectorAll('.modalContainer');
-        modals.forEach(modal => {
-            const modalZIndex = parseInt(modal.style.zIndex) || 0;
-            maxZIndex = Math.max(maxZIndex, modalZIndex);
-        });
-        
-        // Set the clicked window to the highest z-index + 1
-        clickedWindow.style.zIndex = (maxZIndex + 1).toString();
+        // Set the clicked window to the front
+        clickedWindow.style.zIndex = maxZIndex + 1;
     }
     
     closeGameTableWindow() {
@@ -4158,16 +4144,6 @@ class Game {
     }
     
     makeDraggable(window) {
-        const header = window.querySelector('.modalHeader');
-        if (!header) {
-            console.warn('makeDraggable: .modalHeader not found in window, skipping draggable setup.');
-            return;
-        }
-        
-        // Check if we're on mobile - disable dragging on mobile
-        const screenWidth = document.documentElement.clientWidth || document.body.clientWidth;
-        const isMobile = screenWidth <= 900;
-        
         let isDragging = false;
         let currentX;
         let currentY;
@@ -4183,13 +4159,16 @@ class Game {
             this.bringWindowToFront(window);
         });
         
-        // Mouse event handlers
-        header.addEventListener('mousedown', (e) => {
-            if (e.target === header || header.contains(e.target)) {
+        // Mouse event handlers - make entire window draggable
+        window.addEventListener('mousedown', (e) => {
+            // Only start dragging if not clicking on a child element that should handle its own events
+            if (e.target === window || window.contains(e.target)) {
                 isDragging = true;
                 this.bringWindowToFront(window);
+                
                 // Disable transitions during drag for smoother movement
                 window.style.transition = 'none';
+                
                 // Update initial position based on current mouse position and window offset
                 initialX = e.clientX - xOffset;
                 initialY = e.clientY - yOffset;
@@ -4203,6 +4182,7 @@ class Game {
                 currentY = e.clientY - initialY;
                 xOffset = currentX;
                 yOffset = currentY;
+                
                 window.style.left = `${currentX}px`;
                 window.style.top = `${currentY}px`;
             }
@@ -4213,86 +4193,78 @@ class Game {
                 initialX = currentX;
                 initialY = currentY;
                 isDragging = false;
+                
                 // Re-enable transitions after drag
                 window.style.transition = 'all 0.3s ease';
             }
         });
         
-        // Touch event handlers for mobile - only add if NOT on mobile (since we want to disable mobile dragging)
-        if (!isMobile) {
-            header.addEventListener('touchstart', (e) => {
-                if (e.target === header || header.contains(e.target)) {
-                    e.preventDefault();
-                    isDragging = true;
-                    this.bringWindowToFront(window);
-                    // Disable transitions during drag for smoother movement
-                    window.style.transition = 'none';
-                    const touch = e.touches[0];
-                    // Update initial position based on current touch position and window offset
-                    initialX = touch.clientX - xOffset;
-                    initialY = touch.clientY - yOffset;
-                }
-            });
+        // Touch event handlers for mobile
+        window.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            isDragging = true;
+            this.bringWindowToFront(window);
             
-            document.addEventListener('touchmove', (e) => {
-                if (isDragging) {
-                    e.preventDefault();
-                    const touch = e.touches[0];
-                    currentX = touch.clientX - initialX;
-                    currentY = touch.clientY - initialY;
-                    xOffset = currentX;
-                    yOffset = currentY;
-                    window.style.left = `${currentX}px`;
-                    window.style.top = `${currentY}px`;
-                }
-            });
+            // Disable transitions during drag for smoother movement
+            window.style.transition = 'none';
             
-            document.addEventListener('touchend', () => {
-                if (isDragging) {
-                    initialX = currentX;
-                    initialY = currentY;
-                    isDragging = false;
-                    // Re-enable transitions after drag
-                    window.style.transition = 'all 0.3s ease';
-                }
-            });
-            
-            document.addEventListener('touchcancel', () => {
-                if (isDragging) {
-                    initialX = currentX;
-                    initialY = currentY;
-                    isDragging = false;
-                    // Re-enable transitions after drag
-                    window.style.transition = 'all 0.3s ease';
-                }
-            });
-        }
+            const touch = e.touches[0];
+            // Update initial position based on current touch position and window offset
+            initialX = touch.clientX - xOffset;
+            initialY = touch.clientY - yOffset;
+        });
         
-        if (isMobile) {
-            console.log('Mobile detected: Game table window dragging disabled for touch events');
-        }
+        document.addEventListener('touchmove', (e) => {
+            if (isDragging) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                currentX = touch.clientX - initialX;
+                currentY = touch.clientY - initialY;
+                xOffset = currentX;
+                yOffset = currentY;
+                
+                window.style.left = `${currentX}px`;
+                window.style.top = `${currentY}px`;
+            }
+        });
+        
+        document.addEventListener('touchend', () => {
+            if (isDragging) {
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+                
+                // Re-enable transitions after drag
+                window.style.transition = 'all 0.3s ease';
+            }
+        });
+        
+        document.addEventListener('touchcancel', () => {
+            if (isDragging) {
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+                
+                // Re-enable transitions after drag
+                window.style.transition = 'all 0.3s ease';
+            }
+        });
     }
     
     bringWindowToFront(clickedWindow) {
-        // Get all game table windows
-        const allWindows = document.querySelectorAll('.game-table-window');
+        // Find the highest z-index among all domino windows
+        const allWindows = document.querySelectorAll('.domino-window');
+        let maxZIndex = 1000;
         
-        // Find the highest current z-index among game table windows
-        let maxZIndex = 1000; // Base z-index for game table windows
-        allWindows.forEach(win => {
-            const currentZIndex = parseInt(win.style.zIndex) || 1000;
-            maxZIndex = Math.max(maxZIndex, currentZIndex);
+        allWindows.forEach(window => {
+            const zIndex = parseInt(window.style.zIndex) || 1000;
+            if (zIndex > maxZIndex) {
+                maxZIndex = zIndex;
+            }
         });
         
-        // Check if there are any modals with higher z-index
-        const modals = document.querySelectorAll('.modalContainer');
-        modals.forEach(modal => {
-            const modalZIndex = parseInt(modal.style.zIndex) || 0;
-            maxZIndex = Math.max(maxZIndex, modalZIndex);
-        });
-        
-        // Set the clicked window to the highest z-index + 1
-        clickedWindow.style.zIndex = (maxZIndex + 1).toString();
+        // Set the clicked window to the front
+        clickedWindow.style.zIndex = maxZIndex + 1;
     }
     
     selectDomino(index) {

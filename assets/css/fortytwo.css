@@ -862,14 +862,14 @@ body {
 .player-bid-input-area label {
     display: block;
     color: lime;
-    font-size: 11px;
+    font-size: 14px; /* Increased from 11px */
     margin-bottom: 5px;
 }
 
 .player-bid-input {
     width: 100%;
     padding: 4px 6px;
-    font-size: 12px;
+    font-size: 16px; /* Increased from 12px */
     border: 1px solid lime;
     border-radius: 3px;
     background: black;
@@ -1178,4 +1178,44 @@ body {
     max-height: 100%;
     object-fit: contain;
     pointer-events: none;
+}
+
+/* Improved mobile responsiveness for domino windows */
+@media (max-width: 900px) {
+    .domino-window {
+        width: 120px !important;
+        height: 60px !important;
+    }
+    
+    .domino-window img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+    
+    .domino-window:hover {
+        transform: scale(1.01);
+    }
+    
+    .domino-window.selected {
+        transform: scale(1.03);
+        filter: drop-shadow(0 0 6px rgba(255, 235, 59, 0.8));
+    }
+    
+    /* Ensure bid prompt is more readable on mobile */
+    .player-bid-input-area label {
+        font-size: 16px !important; /* Even larger on mobile */
+    }
+    
+    .player-bid-input {
+        font-size: 18px !important; /* Even larger on mobile */
+        padding: 8px !important;
+        min-height: 44px; /* Better touch target */
+    }
+    
+    .player-submit-bid-btn {
+        font-size: 14px !important;
+        padding: 8px 12px !important;
+        min-height: 44px; /* Better touch target */
+    }
 }
