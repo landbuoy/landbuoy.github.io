@@ -338,6 +338,12 @@ body {
     font-size: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0,255,0,0.1);
+    position: relative;
+    z-index: 5;
+    min-height: 36px;
+    min-width: 36px;
 }
 
 .history-btn:hover {
@@ -893,6 +899,12 @@ body {
     font-size: 11px;
     font-family: 'Courier New', monospace;
     transition: all 0.3s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0,255,0,0.1);
+    position: relative;
+    z-index: 5;
+    min-height: 36px;
+    min-width: 36px;
 }
 
 .player-submit-bid-btn:hover {
@@ -1105,6 +1117,10 @@ body {
         min-height: 44px;
         font-size: 10px;
         padding: 4px 6px;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+        position: relative;
+        z-index: 10;
     }
     
     /* Domino Window Styles for Mobile */
@@ -1217,5 +1233,9 @@ body {
         font-size: 14px !important;
         padding: 8px 12px !important;
         min-height: 44px; /* Better touch target */
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+        position: relative;
+        z-index: 10;
     }
 }

@@ -1240,13 +1240,21 @@ class GameTableWindowManager {
         const bidSubmitBtn = document.getElementById('player-submit-bid-0');
         
         if (bidInputField && bidSubmitBtn) {
-            bidSubmitBtn.addEventListener('click', () => {
+            const handleBidSubmit = () => {
                 this.handlePlayerBidSubmit(0, this.game);
+            };
+            
+            // Add both click and touch events for mobile compatibility
+            bidSubmitBtn.addEventListener('click', handleBidSubmit);
+            bidSubmitBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleBidSubmit();
             });
             
             bidInputField.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
-                    this.handlePlayerBidSubmit(0, this.game);
+                    handleBidSubmit();
                 }
             });
         }
@@ -1256,25 +1264,56 @@ class GameTableWindowManager {
         const trumpConfirmBtn = document.getElementById('player-confirm-trump-0');
         
         trumpOptions.forEach(option => {
-            option.addEventListener('click', () => {
+            const handleTrumpSelect = () => {
                 // Remove selection from all options
                 trumpOptions.forEach(o => o.classList.remove('selected'));
                 // Add selection to clicked option
                 option.classList.add('selected');
+            };
+            
+            // Add both click and touch events for mobile compatibility
+            option.addEventListener('click', handleTrumpSelect);
+            option.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleTrumpSelect();
             });
         });
         
         if (trumpConfirmBtn) {
-            trumpConfirmBtn.addEventListener('click', () => {
+            const handleTrumpConfirm = () => {
                 this.handlePlayerTrumpConfirm(0);
+            };
+            
+            // Add both click and touch events for mobile compatibility
+            trumpConfirmBtn.addEventListener('click', handleTrumpConfirm);
+            trumpConfirmBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleTrumpConfirm();
             });
         }
         
-        // Set up history button event listener
+        // Set up history button event listener with mobile compatibility
         const historyBtn = document.getElementById('game-table-show-history-btn');
         if (historyBtn) {
-            historyBtn.addEventListener('click', () => {
+            const handleShowHistory = () => {
+                console.log('History button triggered'); // Debug log
                 this.game.showScoreboardHistory();
+            };
+            
+            // Add both click and touch events for mobile compatibility
+            historyBtn.addEventListener('click', handleShowHistory);
+            historyBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('History button touched'); // Debug log
+                handleShowHistory();
+            });
+            
+            // Additional touchstart handler to prevent drag interference
+            historyBtn.addEventListener('touchstart', (e) => {
+                e.stopPropagation();
             });
         }
     }
