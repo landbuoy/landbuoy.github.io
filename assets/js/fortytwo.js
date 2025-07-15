@@ -610,11 +610,6 @@ class GameTableWindowManager {
     }
     
     makeDraggable(window) {
-        const header = window.querySelector('.modalHeader');
-        if (!header) {
-            console.warn('makeDraggable: .modalHeader not found in window, skipping draggable setup.');
-            return;
-        }
         let isDragging = false;
         let currentX;
         let currentY;
@@ -630,13 +625,16 @@ class GameTableWindowManager {
             this.bringWindowToFront(window);
         });
         
-        // Mouse event handlers
-        header.addEventListener('mousedown', (e) => {
-            if (e.target === header || header.contains(e.target)) {
+        // Mouse event handlers - make entire window draggable
+        window.addEventListener('mousedown', (e) => {
+            // Only start dragging if not clicking on a child element that should handle its own events
+            if (e.target === window || window.contains(e.target)) {
                 isDragging = true;
                 this.bringWindowToFront(window);
+                
                 // Disable transitions during drag for smoother movement
                 window.style.transition = 'none';
+                
                 // Update initial position based on current mouse position and window offset
                 initialX = e.clientX - xOffset;
                 initialY = e.clientY - yOffset;
@@ -650,6 +648,7 @@ class GameTableWindowManager {
                 currentY = e.clientY - initialY;
                 xOffset = currentX;
                 yOffset = currentY;
+                
                 window.style.left = `${currentX}px`;
                 window.style.top = `${currentY}px`;
             }
@@ -660,24 +659,25 @@ class GameTableWindowManager {
                 initialX = currentX;
                 initialY = currentY;
                 isDragging = false;
+                
                 // Re-enable transitions after drag
                 window.style.transition = 'all 0.3s ease';
             }
         });
         
         // Touch event handlers for mobile
-        header.addEventListener('touchstart', (e) => {
-            if (e.target === header || header.contains(e.target)) {
-                e.preventDefault();
-                isDragging = true;
-                this.bringWindowToFront(window);
-                // Disable transitions during drag for smoother movement
-                window.style.transition = 'none';
-                const touch = e.touches[0];
-                // Update initial position based on current touch position and window offset
-                initialX = touch.clientX - xOffset;
-                initialY = touch.clientY - yOffset;
-            }
+        window.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            isDragging = true;
+            this.bringWindowToFront(window);
+            
+            // Disable transitions during drag for smoother movement
+            window.style.transition = 'none';
+            
+            const touch = e.touches[0];
+            // Update initial position based on current touch position and window offset
+            initialX = touch.clientX - xOffset;
+            initialY = touch.clientY - yOffset;
         });
         
         document.addEventListener('touchmove', (e) => {
@@ -688,6 +688,7 @@ class GameTableWindowManager {
                 currentY = touch.clientY - initialY;
                 xOffset = currentX;
                 yOffset = currentY;
+                
                 window.style.left = `${currentX}px`;
                 window.style.top = `${currentY}px`;
             }
@@ -698,6 +699,7 @@ class GameTableWindowManager {
                 initialX = currentX;
                 initialY = currentY;
                 isDragging = false;
+                
                 // Re-enable transitions after drag
                 window.style.transition = 'all 0.3s ease';
             }
@@ -708,6 +710,7 @@ class GameTableWindowManager {
                 initialX = currentX;
                 initialY = currentY;
                 isDragging = false;
+                
                 // Re-enable transitions after drag
                 window.style.transition = 'all 0.3s ease';
             }
@@ -4016,18 +4019,55 @@ class Game {
         
         // Calculate position for even distribution across screen width
         const screenWidth = document.documentElement.clientWidth || document.body.clientWidth;
-        const dominoWidth = screenWidth <= 900 ? 150 : 200; // Smaller on mobile
-        const totalDominoes = this.players[0].hand.length;
-        const totalWidth = totalDominoes * dominoWidth;
-        const spacing = Math.max(20, (screenWidth - totalWidth) / (totalDominoes + 1));
-        const leftPosition = spacing + (index * (dominoWidth + spacing));
-        
-        // Position below the game table window (adjust for mobile)
         const screenHeight = document.documentElement.clientHeight || document.body.clientHeight;
-        const topPosition = screenWidth <= 900 ? screenHeight * 0.85 : screenHeight * 0.8;
+        const isMobile = screenWidth <= 900; // Mobile detection
+        const dominoWidth = isMobile ? 120 : 200; // Smaller on mobile
+        const dominoHeight = isMobile ? 60 : 100; // Smaller height on mobile
+        const totalDominoes = this.players[0].hand.length;
         
+        let leftPosition, topPosition;
+        
+        if (isMobile) {
+            // Mobile layout: arrange dominoes in a more compact way to fit all 7 on screen
+            if (totalDominoes <= 4) {
+                // Single row for 4 or fewer dominoes
+                const totalWidth = totalDominoes * dominoWidth;
+                const spacing = Math.max(10, (screenWidth - totalWidth) / (totalDominoes + 1));
+                leftPosition = spacing + (index * (dominoWidth + spacing));
+                topPosition = screenHeight * 0.75; // Higher up on mobile
+            } else {
+                // Two rows for 5-7 dominoes
+                const dominoesPerRow = Math.ceil(totalDominoes / 2);
+                const currentRow = Math.floor(index / dominoesPerRow);
+                const positionInRow = index % dominoesPerRow;
+                const dominoesInThisRow = currentRow === 0 ? dominoesPerRow : totalDominoes - dominoesPerRow;
+                
+                // Calculate horizontal position within the row
+                const totalRowWidth = dominoesInThisRow * dominoWidth;
+                const horizontalSpacing = Math.max(5, (screenWidth - totalRowWidth) / (dominoesInThisRow + 1));
+                leftPosition = horizontalSpacing + (positionInRow * (dominoWidth + horizontalSpacing));
+                
+                // Calculate vertical position (two rows)
+                const verticalSpacing = 15; // Space between rows
+                const startingTop = screenHeight * 0.70; // Start higher for two rows
+                topPosition = startingTop + (currentRow * (dominoHeight + verticalSpacing));
+            }
+        } else {
+            // Desktop layout: single row as before
+            const totalWidth = totalDominoes * dominoWidth;
+            const spacing = Math.max(20, (screenWidth - totalWidth) / (totalDominoes + 1));
+            leftPosition = spacing + (index * (dominoWidth + spacing));
+            topPosition = screenHeight * 0.8;
+        }
+
         window.style.top = `${topPosition}px`;
         window.style.left = `${leftPosition}px`;
+        
+        // Set explicit dimensions for mobile
+        if (isMobile) {
+            window.style.width = `${dominoWidth}px`;
+            window.style.height = `${dominoHeight}px`;
+        }
         
         // Create content area
         const content = document.createElement('div');
@@ -4044,7 +4084,7 @@ class Game {
             content.innerHTML = `
                 <div style="
                     color: lime;
-                    font-size: 24px;
+                    font-size: ${isMobile ? '16px' : '24px'};
                     font-weight: bold;
                     text-align: center;
                 ">${domino.toString()}</div>
@@ -4095,7 +4135,7 @@ class Game {
         this.dominoWindows.push(window);
         
         // Debug logging
-        console.log(`Domino ${index}: screenWidth=${screenWidth}, leftPosition=${leftPosition}, topPosition=${topPosition}`);
+        console.log(`Domino ${index}: screenWidth=${screenWidth}, isMobile=${isMobile}, leftPosition=${leftPosition}, topPosition=${topPosition}`);
     }
     
     clearDominoWindows() {
@@ -4218,19 +4258,25 @@ class Game {
     }
     
     bringWindowToFront(clickedWindow) {
-        // Find the highest z-index among all domino windows
-        const allWindows = document.querySelectorAll('.domino-window');
-        let maxZIndex = 1000;
+        // Get all game table windows
+        const allWindows = document.querySelectorAll('.game-table-window');
         
-        allWindows.forEach(window => {
-            const zIndex = parseInt(window.style.zIndex) || 1000;
-            if (zIndex > maxZIndex) {
-                maxZIndex = zIndex;
-            }
+        // Find the highest current z-index among game table windows
+        let maxZIndex = 1000; // Base z-index for game table windows
+        allWindows.forEach(win => {
+            const currentZIndex = parseInt(win.style.zIndex) || 1000;
+            maxZIndex = Math.max(maxZIndex, currentZIndex);
         });
         
-        // Set the clicked window to the front
-        clickedWindow.style.zIndex = maxZIndex + 1;
+        // Check if there are any modals with higher z-index
+        const modals = document.querySelectorAll('.modalContainer');
+        modals.forEach(modal => {
+            const modalZIndex = parseInt(modal.style.zIndex) || 0;
+            maxZIndex = Math.max(maxZIndex, modalZIndex);
+        });
+        
+        // Set the clicked window to the highest z-index + 1
+        clickedWindow.style.zIndex = (maxZIndex + 1).toString();
     }
     
     selectDomino(index) {
