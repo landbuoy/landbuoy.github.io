@@ -611,6 +611,10 @@ class GameTableWindowManager {
     
     makeDraggable(window) {
         const header = window.querySelector('.modalHeader');
+        if (!header) {
+            console.warn('makeDraggable: .modalHeader not found in window, skipping draggable setup.');
+            return;
+        }
         let isDragging = false;
         let currentX;
         let currentY;
@@ -631,7 +635,8 @@ class GameTableWindowManager {
             if (e.target === header || header.contains(e.target)) {
                 isDragging = true;
                 this.bringWindowToFront(window);
-                
+                // Disable transitions during drag for smoother movement
+                window.style.transition = 'none';
                 // Update initial position based on current mouse position and window offset
                 initialX = e.clientX - xOffset;
                 initialY = e.clientY - yOffset;
@@ -645,7 +650,6 @@ class GameTableWindowManager {
                 currentY = e.clientY - initialY;
                 xOffset = currentX;
                 yOffset = currentY;
-                
                 window.style.left = `${currentX}px`;
                 window.style.top = `${currentY}px`;
             }
@@ -656,6 +660,8 @@ class GameTableWindowManager {
                 initialX = currentX;
                 initialY = currentY;
                 isDragging = false;
+                // Re-enable transitions after drag
+                window.style.transition = 'all 0.3s ease';
             }
         });
         
@@ -665,7 +671,8 @@ class GameTableWindowManager {
                 e.preventDefault();
                 isDragging = true;
                 this.bringWindowToFront(window);
-                
+                // Disable transitions during drag for smoother movement
+                window.style.transition = 'none';
                 const touch = e.touches[0];
                 // Update initial position based on current touch position and window offset
                 initialX = touch.clientX - xOffset;
@@ -681,7 +688,6 @@ class GameTableWindowManager {
                 currentY = touch.clientY - initialY;
                 xOffset = currentX;
                 yOffset = currentY;
-                
                 window.style.left = `${currentX}px`;
                 window.style.top = `${currentY}px`;
             }
@@ -692,6 +698,8 @@ class GameTableWindowManager {
                 initialX = currentX;
                 initialY = currentY;
                 isDragging = false;
+                // Re-enable transitions after drag
+                window.style.transition = 'all 0.3s ease';
             }
         });
         
@@ -700,6 +708,8 @@ class GameTableWindowManager {
                 initialX = currentX;
                 initialY = currentY;
                 isDragging = false;
+                // Re-enable transitions after drag
+                window.style.transition = 'all 0.3s ease';
             }
         });
     }
@@ -3899,6 +3909,9 @@ class Game {
     }
     
     startNewGame() {
+        // Clear any existing domino windows
+        this.clearDominoWindows();
+        
         // Reset game state
         this.scores = [0, 0];
         this.startingBidderIndex = 0;
@@ -3979,32 +3992,258 @@ class Game {
     }
     
     displayPlayerHand() {
-        if (this.dominoes) this.dominoes.innerHTML = '';
-        const humanPlayer = this.players[0];
-        
-        humanPlayer.hand.forEach((domino, index) => {
-            const dominoElement = document.createElement('div');
-            dominoElement.className = 'domino';
-            dominoElement.textContent = domino.toString();
-            dominoElement.dataset.index = index;
+        // Only create domino windows if they don't already exist
+        if (!this.dominoWindows || this.dominoWindows.length === 0) {
+            if (this.dominoes) this.dominoes.innerHTML = '';
+            const humanPlayer = this.players[0];
             
-            dominoElement.addEventListener('click', () => {
-                this.selectDomino(index);
+            // Create draggable windows for each domino
+            humanPlayer.hand.forEach((domino, index) => {
+                this.createDraggableDominoWindow(domino, index);
             });
-            
-            if (this.dominoes) this.dominoes.appendChild(dominoElement);
-        });
+        }
         
         this.showElement(this.playerHand);
     }
     
-    selectDomino(index) {
-        // Remove previous selection
-        document.querySelectorAll('.domino').forEach(d => d.classList.remove('selected'));
+    createDraggableDominoWindow(domino, index) {
+        // Create the window container
+        const window = document.createElement('div');
+        window.className = 'domino-window';
         
-        // Add selection to clicked domino
-        const dominoElement = document.querySelector(`[data-index="${index}"]`);
-        dominoElement.classList.add('selected');
+        // Add to the page first so we can get accurate screen dimensions
+        document.body.appendChild(window);
+        
+        // Calculate position for even distribution across screen width
+        const screenWidth = document.documentElement.clientWidth || document.body.clientWidth;
+        const dominoWidth = screenWidth <= 900 ? 150 : 200; // Smaller on mobile
+        const totalDominoes = this.players[0].hand.length;
+        const totalWidth = totalDominoes * dominoWidth;
+        const spacing = Math.max(20, (screenWidth - totalWidth) / (totalDominoes + 1));
+        const leftPosition = spacing + (index * (dominoWidth + spacing));
+        
+        // Position below the game table window (adjust for mobile)
+        const screenHeight = document.documentElement.clientHeight || document.body.clientHeight;
+        const topPosition = screenWidth <= 900 ? screenHeight * 0.85 : screenHeight * 0.8;
+        
+        window.style.top = `${topPosition}px`;
+        window.style.left = `${leftPosition}px`;
+        
+        // Create content area
+        const content = document.createElement('div');
+        content.className = 'domino-window-content';
+        
+        // Create domino image
+        const img = document.createElement('img');
+        img.src = `../assets/img/dominoes/${domino.ends[0]}-${domino.ends[1]}.png`;
+        img.alt = `Domino ${domino.toString()}`;
+        
+        // Handle image load error
+        img.onerror = () => {
+            // Fallback to text display if image fails to load
+            content.innerHTML = `
+                <div style="
+                    color: lime;
+                    font-size: 24px;
+                    font-weight: bold;
+                    text-align: center;
+                ">${domino.toString()}</div>
+            `;
+        };
+        
+        content.appendChild(img);
+        
+        // Store the domino index and domino object for selection
+        window.dataset.dominoIndex = index;
+        window.dataset.dominoEnds = `${domino.ends[0]}-${domino.ends[1]}`;
+        
+        // Add click handler for selection (separate from drag)
+        let wasDragging = false;
+        let startX, startY;
+        
+        window.addEventListener('mousedown', (e) => {
+            startX = e.clientX;
+            startY = e.clientY;
+            wasDragging = false;
+        });
+        
+        window.addEventListener('mousemove', (e) => {
+            if (startX !== undefined && startY !== undefined) {
+                const deltaX = Math.abs(e.clientX - startX);
+                const deltaY = Math.abs(e.clientY - startY);
+                if (deltaX > 5 || deltaY > 5) {
+                    wasDragging = true;
+                }
+            }
+        });
+        
+        window.addEventListener('click', (e) => {
+            // Only select if we didn't just drag
+            if (!wasDragging) {
+                this.selectDomino(index);
+            }
+        });
+        
+        // Assemble the window
+        window.appendChild(content);
+        
+        // Make the window draggable
+        this.makeDraggable(window);
+        
+        // Store reference to window for later removal
+        if (!this.dominoWindows) this.dominoWindows = [];
+        this.dominoWindows.push(window);
+        
+        // Debug logging
+        console.log(`Domino ${index}: screenWidth=${screenWidth}, leftPosition=${leftPosition}, topPosition=${topPosition}`);
+    }
+    
+    clearDominoWindows() {
+        if (this.dominoWindows) {
+            this.dominoWindows.forEach(window => {
+                if (window && window.parentNode) {
+                    window.parentNode.removeChild(window);
+                }
+            });
+            this.dominoWindows = [];
+        }
+    }
+    
+    makeDraggable(window) {
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+        
+        // Initialize offset values based on current window position
+        let xOffset = parseInt(window.style.left) || 0;
+        let yOffset = parseInt(window.style.top) || 0;
+        
+        // Add click handler to bring window to front
+        window.addEventListener('mousedown', (e) => {
+            this.bringWindowToFront(window);
+        });
+        
+        // Mouse event handlers - make entire window draggable
+        window.addEventListener('mousedown', (e) => {
+            // Only start dragging if not clicking on a child element that should handle its own events
+            if (e.target === window || window.contains(e.target)) {
+                isDragging = true;
+                this.bringWindowToFront(window);
+                
+                // Disable transitions during drag for smoother movement
+                window.style.transition = 'none';
+                
+                // Update initial position based on current mouse position and window offset
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+            }
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                e.preventDefault();
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+                xOffset = currentX;
+                yOffset = currentY;
+                
+                window.style.left = `${currentX}px`;
+                window.style.top = `${currentY}px`;
+            }
+        });
+        
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+                
+                // Re-enable transitions after drag
+                window.style.transition = 'all 0.3s ease';
+            }
+        });
+        
+        // Touch event handlers for mobile
+        window.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            isDragging = true;
+            this.bringWindowToFront(window);
+            
+            // Disable transitions during drag for smoother movement
+            window.style.transition = 'none';
+            
+            const touch = e.touches[0];
+            // Update initial position based on current touch position and window offset
+            initialX = touch.clientX - xOffset;
+            initialY = touch.clientY - yOffset;
+        });
+        
+        document.addEventListener('touchmove', (e) => {
+            if (isDragging) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                currentX = touch.clientX - initialX;
+                currentY = touch.clientY - initialY;
+                xOffset = currentX;
+                yOffset = currentY;
+                
+                window.style.left = `${currentX}px`;
+                window.style.top = `${currentY}px`;
+            }
+        });
+        
+        document.addEventListener('touchend', () => {
+            if (isDragging) {
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+                
+                // Re-enable transitions after drag
+                window.style.transition = 'all 0.3s ease';
+            }
+        });
+        
+        document.addEventListener('touchcancel', () => {
+            if (isDragging) {
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+                
+                // Re-enable transitions after drag
+                window.style.transition = 'all 0.3s ease';
+            }
+        });
+    }
+    
+    bringWindowToFront(clickedWindow) {
+        // Find the highest z-index among all domino windows
+        const allWindows = document.querySelectorAll('.domino-window');
+        let maxZIndex = 1000;
+        
+        allWindows.forEach(window => {
+            const zIndex = parseInt(window.style.zIndex) || 1000;
+            if (zIndex > maxZIndex) {
+                maxZIndex = zIndex;
+            }
+        });
+        
+        // Set the clicked window to the front
+        clickedWindow.style.zIndex = maxZIndex + 1;
+    }
+    
+    selectDomino(index) {
+        // Remove previous selection from domino windows
+        document.querySelectorAll('.domino-window').forEach(w => {
+            w.classList.remove('selected');
+        });
+        
+        // Find the domino window with the matching index
+        const dominoWindow = document.querySelector(`.domino-window[data-domino-index="${index}"]`);
+        if (dominoWindow) {
+            dominoWindow.classList.add('selected');
+        }
         
         this.selectedDomino = index;
         if (this.playDomino) this.playDomino.disabled = false;
@@ -4553,7 +4792,34 @@ class Game {
         }
         
         const humanPlayer = this.players[0];
-        const chosenDomino = humanPlayer.hand[this.selectedDomino];
+        
+        // Find the selected domino window to get the correct domino
+        const selectedWindow = document.querySelector('.domino-window.selected');
+        if (!selectedWindow) {
+            this.updateStatus("Please select a domino to play.");
+            return;
+        }
+        
+        // Get the domino ends from the window's data attribute
+        const dominoEnds = selectedWindow.dataset.dominoEnds;
+        if (!dominoEnds) {
+            this.updateStatus("Error: Could not identify selected domino.");
+            return;
+        }
+        
+        // Find the domino in the player's hand that matches the selected window
+        const [end1, end2] = dominoEnds.split('-').map(Number);
+        const chosenDominoIndex = humanPlayer.hand.findIndex(domino => 
+            (domino.ends[0] === end1 && domino.ends[1] === end2) ||
+            (domino.ends[0] === end2 && domino.ends[1] === end1)
+        );
+        
+        if (chosenDominoIndex === -1) {
+            this.updateStatus("Error: Selected domino not found in hand.");
+            return;
+        }
+        
+        const chosenDomino = humanPlayer.hand[chosenDominoIndex];
         
         // Check if this is a valid play
         const validPlays = humanPlayer.getValidPlays(this.currentTrick);
@@ -4567,7 +4833,7 @@ class Game {
         }
         
         // Remove domino from hand
-        humanPlayer.hand.splice(this.selectedDomino, 1);
+        humanPlayer.hand.splice(chosenDominoIndex, 1);
         const playedEnds = [chosenDomino.ends[0], chosenDomino.ends[1]];
         this.currentTrick.addPlay(chosenDomino, 0, playedEnds);
         this.addPlayedDomino(chosenDomino, 0); // Now passes playerIdx
@@ -4579,7 +4845,19 @@ class Game {
         
         // Update display
         this.displayPlayedDomino(chosenDomino, humanPlayer);
-        this.displayPlayerHand();
+        
+        // Remove the played domino window
+        if (selectedWindow && selectedWindow.parentNode) {
+            selectedWindow.parentNode.removeChild(selectedWindow);
+        }
+        
+        // Remove from dominoWindows array
+        if (this.dominoWindows) {
+            const windowIndex = this.dominoWindows.indexOf(selectedWindow);
+            if (windowIndex !== -1) {
+                this.dominoWindows.splice(windowIndex, 1);
+            }
+        }
         
         // Update game table display
         await this.gameTableManager.displayPlayedDomino(chosenDomino, 0, [chosenDomino.ends[0], chosenDomino.ends[1]]);
@@ -4768,6 +5046,9 @@ class Game {
     }
     
     startNewHand() {
+        // Clear any existing domino windows
+        this.clearDominoWindows();
+        
         // Reset hand tracking
         this.currentHandTricks = [];
         this.usHandPoints = 0;
