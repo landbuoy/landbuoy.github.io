@@ -620,25 +620,47 @@ class GameTableWindowManager {
         let xOffset = parseInt(window.style.left) || 0;
         let yOffset = parseInt(window.style.top) || 0;
         
+        // Helper function to check if element is an interactive child
+        const isInteractiveChild = (element) => {
+            const interactiveTypes = ['input', 'button', 'select', 'textarea'];
+            const interactiveClasses = ['player-trump-option', 'player-submit-bid-btn', 'player-confirm-trump-btn', 'aquaButton', 'btn', 'history-btn'];
+            
+            if (interactiveTypes.includes(element.tagName.toLowerCase())) {
+                return true;
+            }
+            
+            for (const className of interactiveClasses) {
+                if (element.classList.contains(className)) {
+                    return true;
+                }
+            }
+            
+            // Check if element is within an interactive container
+            const interactiveContainer = element.closest('.player-bid-input-area, .player-trump-selection-area, .game-table-score-display');
+            return !!interactiveContainer;
+        };
+        
         // Add click handler to bring window to front
         window.addEventListener('mousedown', (e) => {
             this.bringWindowToFront(window);
         });
         
-        // Mouse event handlers - make entire window draggable
+        // Mouse event handlers - make window draggable except for interactive elements
         window.addEventListener('mousedown', (e) => {
-            // Only start dragging if not clicking on a child element that should handle its own events
-            if (e.target === window || window.contains(e.target)) {
-                isDragging = true;
-                this.bringWindowToFront(window);
-                
-                // Disable transitions during drag for smoother movement
-                window.style.transition = 'none';
-                
-                // Update initial position based on current mouse position and window offset
-                initialX = e.clientX - xOffset;
-                initialY = e.clientY - yOffset;
+            // Don't start dragging if clicking on interactive child elements
+            if (isInteractiveChild(e.target)) {
+                return;
             }
+            
+            isDragging = true;
+            this.bringWindowToFront(window);
+            
+            // Disable transitions during drag for smoother movement
+            window.style.transition = 'none';
+            
+            // Update initial position based on current mouse position and window offset
+            initialX = e.clientX - xOffset;
+            initialY = e.clientY - yOffset;
         });
         
         document.addEventListener('mousemove', (e) => {
@@ -665,8 +687,14 @@ class GameTableWindowManager {
             }
         });
         
-        // Touch event handlers for mobile
+        // Touch event handlers for mobile with improved interactivity
         window.addEventListener('touchstart', (e) => {
+            // Don't start dragging if touching interactive child elements
+            if (isInteractiveChild(e.target)) {
+                return;
+            }
+            
+            // Only prevent default if we're actually going to start dragging
             e.preventDefault();
             isDragging = true;
             this.bringWindowToFront(window);
@@ -678,7 +706,7 @@ class GameTableWindowManager {
             // Update initial position based on current touch position and window offset
             initialX = touch.clientX - xOffset;
             initialY = touch.clientY - yOffset;
-        });
+        }, { passive: false });
         
         document.addEventListener('touchmove', (e) => {
             if (isDragging) {
@@ -692,7 +720,7 @@ class GameTableWindowManager {
                 window.style.left = `${currentX}px`;
                 window.style.top = `${currentY}px`;
             }
-        });
+        }, { passive: false });
         
         document.addEventListener('touchend', () => {
             if (isDragging) {
@@ -1246,17 +1274,28 @@ class GameTableWindowManager {
             
             // Add both click and touch events for mobile compatibility
             bidSubmitBtn.addEventListener('click', handleBidSubmit);
+            
+            // Enhanced touch handling for mobile
+            bidSubmitBtn.addEventListener('touchstart', (e) => {
+                e.stopPropagation(); // Prevent drag interference
+            }, { passive: true });
+            
             bidSubmitBtn.addEventListener('touchend', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 handleBidSubmit();
-            });
+            }, { passive: false });
             
             bidInputField.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     handleBidSubmit();
                 }
             });
+            
+            // Prevent bid input from triggering drag
+            bidInputField.addEventListener('touchstart', (e) => {
+                e.stopPropagation();
+            }, { passive: true });
         }
         
         // Set up trump selection event listeners
@@ -1273,11 +1312,17 @@ class GameTableWindowManager {
             
             // Add both click and touch events for mobile compatibility
             option.addEventListener('click', handleTrumpSelect);
+            
+            // Enhanced touch handling for mobile
+            option.addEventListener('touchstart', (e) => {
+                e.stopPropagation(); // Prevent drag interference
+            }, { passive: true });
+            
             option.addEventListener('touchend', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 handleTrumpSelect();
-            });
+            }, { passive: false });
         });
         
         if (trumpConfirmBtn) {
@@ -1287,11 +1332,17 @@ class GameTableWindowManager {
             
             // Add both click and touch events for mobile compatibility
             trumpConfirmBtn.addEventListener('click', handleTrumpConfirm);
+            
+            // Enhanced touch handling for mobile
+            trumpConfirmBtn.addEventListener('touchstart', (e) => {
+                e.stopPropagation(); // Prevent drag interference
+            }, { passive: true });
+            
             trumpConfirmBtn.addEventListener('touchend', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 handleTrumpConfirm();
-            });
+            }, { passive: false });
         }
         
         // Set up history button event listener with mobile compatibility
@@ -1304,17 +1355,18 @@ class GameTableWindowManager {
             
             // Add both click and touch events for mobile compatibility
             historyBtn.addEventListener('click', handleShowHistory);
+            
+            // Enhanced touch handling for mobile
+            historyBtn.addEventListener('touchstart', (e) => {
+                e.stopPropagation(); // Prevent drag interference
+            }, { passive: true });
+            
             historyBtn.addEventListener('touchend', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 console.log('History button touched'); // Debug log
                 handleShowHistory();
-            });
-            
-            // Additional touchstart handler to prevent drag interference
-            historyBtn.addEventListener('touchstart', (e) => {
-                e.stopPropagation();
-            });
+            }, { passive: false });
         }
     }
 }
@@ -4130,10 +4182,12 @@ class Game {
         window.dataset.dominoIndex = index;
         window.dataset.dominoEnds = `${domino.ends[0]}-${domino.ends[1]}`;
         
-        // Add click handler for selection (separate from drag)
+        // Add click and touch handlers for selection (separate from drag)
         let wasDragging = false;
         let startX, startY;
+        let touchStartX, touchStartY;
         
+        // Mouse events for selection
         window.addEventListener('mousedown', (e) => {
             startX = e.clientX;
             startY = e.clientY;
@@ -4156,6 +4210,33 @@ class Game {
                 this.selectDomino(index);
             }
         });
+        
+        // Touch events for selection on mobile
+        window.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            wasDragging = false;
+        }, { passive: true });
+        
+        window.addEventListener('touchmove', (e) => {
+            if (touchStartX !== undefined && touchStartY !== undefined) {
+                const touch = e.touches[0];
+                const deltaX = Math.abs(touch.clientX - touchStartX);
+                const deltaY = Math.abs(touch.clientY - touchStartY);
+                if (deltaX > 5 || deltaY > 5) {
+                    wasDragging = true;
+                }
+            }
+        }, { passive: true });
+        
+        window.addEventListener('touchend', (e) => {
+            // Only select if we didn't just drag
+            if (!wasDragging) {
+                e.preventDefault(); // Prevent mouse event emulation
+                this.selectDomino(index);
+            }
+        }, { passive: false });
         
         // Assemble the window
         window.appendChild(content);
@@ -4238,22 +4319,34 @@ class Game {
             }
         });
         
-        // Touch event handlers for mobile
+        // Touch event handlers for mobile with improved drag detection
+        let touchStartTime = 0;
+        let hasMoved = false;
+        
         window.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            isDragging = true;
+            // Only start dragging after a delay to allow for taps
+            touchStartTime = Date.now();
+            hasMoved = false;
+            
             this.bringWindowToFront(window);
             
-            // Disable transitions during drag for smoother movement
-            window.style.transition = 'none';
-            
             const touch = e.touches[0];
-            // Update initial position based on current touch position and window offset
             initialX = touch.clientX - xOffset;
             initialY = touch.clientY - yOffset;
-        });
+            
+            // Start drag after a small delay to distinguish from taps
+            setTimeout(() => {
+                if (!hasMoved && (Date.now() - touchStartTime) >= 150) {
+                    // Only start dragging if we haven't moved and enough time has passed
+                    isDragging = true;
+                    window.style.transition = 'none';
+                }
+            }, 150);
+        }, { passive: true });
         
         document.addEventListener('touchmove', (e) => {
+            hasMoved = true;
+            
             if (isDragging) {
                 e.preventDefault();
                 const touch = e.touches[0];
@@ -4265,7 +4358,7 @@ class Game {
                 window.style.left = `${currentX}px`;
                 window.style.top = `${currentY}px`;
             }
-        });
+        }, { passive: false });
         
         document.addEventListener('touchend', () => {
             if (isDragging) {
