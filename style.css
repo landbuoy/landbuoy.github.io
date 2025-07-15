@@ -546,6 +546,19 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   font-weight: bold;
   box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease-in-out;
+  /* Ensure proper touch handling */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  /* Prevent text selection */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* Ensure proper z-index */
+  z-index: 10001;
+  position: relative;
+  /* Better cursor for accessibility */
+  cursor: pointer;
 }
 
 .aquaButton::after {
@@ -719,5 +732,32 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
     align-items: center;
     justify-content: center;
     font-size: 18px;
+    /* Ensure proper touch handling */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    /* Prevent text selection */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /* Better touch feedback */
+    transition: all 0.15s ease;
+  }
+  
+  /* Enhanced touch feedback for aquaButtons */
+  .aquaButton:active {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  
+  /* Ensure buttons are above other elements */
+  .aquaButton {
+    z-index: 10001;
+    position: relative;
+  }
+  
+  /* Prevent touch events from bubbling to parent elements */
+  .modalHeader {
+    touch-action: pan-x pan-y;
   }
 }

@@ -1001,6 +1001,24 @@ body {
         min-width: 44px;
         min-height: 44px;
         font-size: 20px;
+        /* Ensure proper touch handling */
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        /* Prevent text selection */
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        /* Better touch feedback */
+        transition: all 0.15s ease;
+        /* Ensure proper z-index */
+        z-index: 10001;
+        position: relative;
+    }
+    
+    .aquaButton--gameTable:active {
+        transform: scale(0.95);
+        opacity: 0.8;
     }
     
     .game-table-play-next-trick-btn {

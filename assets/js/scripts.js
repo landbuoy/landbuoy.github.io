@@ -16,40 +16,67 @@ $(document).ready(function () {
     $(".modalContainer").css("zIndex", "0");
     $(".modalContainer--resume").fadeIn().css("zIndex", "9999");
   });
-  $(".aquaButton--resume").click(function () {
+  
+  // Enhanced aquaButton event handlers for mobile compatibility
+  function setupAquaButton(selector, action) {
+    const $button = $(selector);
+    
+    // Handle both click and touch events
+    $button.on('click touchstart', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      action();
+    });
+    
+    // Prevent default touch behavior that might interfere
+    $button.on('touchmove touchend', function(e) {
+      e.stopPropagation();
+    });
+  }
+  
+  // Setup all aquaButtons with proper mobile support
+  setupAquaButton(".aquaButton--resume", function() {
     $(".modalContainer--resume").fadeOut();
   });
+  
+  setupAquaButton(".aquaButton--info", function() {
+    $(".modalContainer--info").fadeOut();
+  });
+  
+  setupAquaButton(".aquaButton--hausaufgabeInfo", function() {
+    $(".modalContainer--hausaufgabeInfo").fadeOut();
+  });
+  
+  setupAquaButton(".aquaButton--uploadIThought", function() {
+    $(".modalContainer--uploadIThought").fadeOut();
+  });
+  
+  setupAquaButton(".aquaButton--uploadIIThoughts", function() {
+    $(".modalContainer--uploadIIThoughts").fadeOut();
+  });
+  
   // Info modal
   $(".button--info").click(function () {
     $(".modalContainer").css("zIndex", "0");
     $(".modalContainer--info").fadeIn().css("zIndex", "9999");
   });
-  $(".aquaButton--info").click(function () {
-    $(".modalContainer--info").fadeOut();
-  }); 
-    // hausaufgabe Info modal
+  
+  // hausaufgabe Info modal
   $(".button--hausaufgabeInfo").click(function () {
     $(".modalContainer").css("zIndex", "0");
     $(".modalContainer--hausaufgabeInfo").fadeIn().css("zIndex", "9999");
   });
-  $(".aquaButton--hausaufgabeInfo").click(function () {
-    $(".modalContainer--hausaufgabeInfo").fadeOut();
-  });
-    // UploadiThought glyph
+  
+  // UploadiThought glyph
   $(".glyph--uploadIThought").click(function () {
     $(".modalContainer").css("zIndex", "0");
     $(".modalContainer--uploadIThought").fadeIn().css("zIndex", "9999");
   });
-  $(".aquaButton--uploadIThought").click(function () {
-    $(".modalContainer--uploadIThought").fadeOut();
-  });
-    // UploadIIThought glyph
+  
+  // UploadIIThought glyph
   $(".glyph--uploadIIThoughts").click(function () {
     $(".modalContainer").css("zIndex", "0");
     $(".modalContainer--uploadIIThoughts").fadeIn().css("zIndex", "9999");
-  });
-  $(".aquaButton--uploadIIThoughts").click(function () {
-    $(".modalContainer--uploadIIThoughts").fadeOut();
   });  
 
     // glyphs in march composite landbuoy

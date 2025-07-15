@@ -533,14 +533,27 @@ class GameTableWindowManager {
             </div>
         `;
         
-        // Add close button event listener
+        // Add close button event listener - enhanced for mobile compatibility
         const closeBtn = this.gameTableWindow.querySelector('.aquaButton--gameTable');
         if (closeBtn) {
+            // Handle both click and touch events
             closeBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 console.log('Close button clicked');
                 this.closeGameTableWindow();
+            });
+            
+            closeBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Close button touched');
+                this.closeGameTableWindow();
+            });
+            
+            // Prevent default touch behavior that might interfere
+            closeBtn.addEventListener('touchmove', (e) => {
+                e.stopPropagation();
             });
         } else {
             console.error('Close button not found');
@@ -3554,12 +3567,31 @@ class Game {
         this.playDomino.addEventListener('click', async () => await this.playSelectedDomino());
         this.showHistoryBtn.addEventListener('click', () => this.showScoreboardHistory());
         
-        // Close modal button
-        document.querySelector('.aquaButton--scoreboard').addEventListener('click', () => {
-            this.hideElement(this.scoreboardHistoryModal);
-            // Reset z-index when modal is closed
-            this.scoreboardHistoryModal.style.zIndex = '';
-        });
+        // Close modal button - enhanced for mobile compatibility
+        const scoreboardCloseBtn = document.querySelector('.aquaButton--scoreboard');
+        if (scoreboardCloseBtn) {
+            // Handle both click and touch events
+            scoreboardCloseBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.hideElement(this.scoreboardHistoryModal);
+                // Reset z-index when modal is closed
+                this.scoreboardHistoryModal.style.zIndex = '';
+            });
+            
+            scoreboardCloseBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.hideElement(this.scoreboardHistoryModal);
+                // Reset z-index when modal is closed
+                this.scoreboardHistoryModal.style.zIndex = '';
+            });
+            
+            // Prevent default touch behavior that might interfere
+            scoreboardCloseBtn.addEventListener('touchmove', (e) => {
+                e.stopPropagation();
+            });
+        }
         
         // Trump selection
         document.querySelectorAll('.trump-option').forEach(option => {
