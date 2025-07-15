@@ -215,7 +215,16 @@ class GameTableWindowManager {
             preferredRecordingNumber = 3;
         }
         
-        // Try preferred recording first
+        // Check if we're running from a file:// URL (which will cause CORS issues)
+        const isFileProtocol = window.location.protocol === 'file:';
+        
+        if (isFileProtocol) {
+            // When running from file://, just return the preferred path
+            // The audio will fail to load gracefully if the file doesn't exist
+            return `../assets/audio/birdsongs/downloads/${birdFolder}/${birdFolder}_recording_${preferredRecordingNumber}.mp3`;
+        }
+        
+        // Try preferred recording first (only for http/https protocols)
         const preferredPath = `../assets/audio/birdsongs/downloads/${birdFolder}/${birdFolder}_recording_${preferredRecordingNumber}.mp3`;
         
         try {
@@ -225,7 +234,10 @@ class GameTableWindowManager {
                 return preferredPath;
             }
         } catch (e) {
-            // If fetch fails, continue to fallback
+            // If fetch fails due to CORS or other issues, just return the preferred path
+            // The audio will fail to load gracefully if the file doesn't exist
+            console.warn(`Could not check if ${preferredPath} exists (CORS or network issue), using preferred path`);
+            return preferredPath;
         }
         
         // Fallback to recording 1 if preferred doesn't exist
@@ -280,10 +292,34 @@ class GameTableWindowManager {
         }
     }
     
-    updateGameTableHeader(trumpSuit) {
+    updateGameTableHeader(trumpSuit, currentSuit = null) {
         const titleElement = this.gameTableWindow?.querySelector('.game-table-title');
         if (titleElement) {
-            titleElement.textContent = `Game Table - Trump suit: ${trumpSuit}`;
+            if (trumpSuit && currentSuit !== null) {
+                titleElement.textContent = `Trumps: ${trumpSuit} -- Follow Suit: ${currentSuit}'s`;
+            } else if (trumpSuit) {
+                titleElement.textContent = `Trumps: ${trumpSuit}`;
+            } else {
+                titleElement.textContent = 'Game Table';
+            }
+        }
+    }
+    
+    showPlayNextTrickButton() {
+        const playNextTrickBtn = this.gameTableWindow?.querySelector('#game-table-play-next-trick-btn');
+        if (playNextTrickBtn) {
+            playNextTrickBtn.style.display = 'inline-block';
+            playNextTrickBtn.onclick = () => {
+                this.hidePlayNextTrickButton();
+                this.game.playTrick();
+            };
+        }
+    }
+    
+    hidePlayNextTrickButton() {
+        const playNextTrickBtn = this.gameTableWindow?.querySelector('#game-table-play-next-trick-btn');
+        if (playNextTrickBtn) {
+            playNextTrickBtn.style.display = 'none';
         }
     }
     
@@ -331,6 +367,7 @@ class GameTableWindowManager {
         this.gameTableWindow.innerHTML = `
             <div class="game-table-header">
                 <h3 class="game-table-title">Game Table</h3>
+                <button id="game-table-play-next-trick-btn" class="btn game-table-play-next-trick-btn" style="display: none;">Play Next Trick</button>
                 <button class="game-table-close">×</button>
             </div>
             <div class="game-table-content">
@@ -599,14 +636,19 @@ class GameTableWindowManager {
             }
         }
         
+        // Restore trump suit and current suit in header if a hand is in progress
+        if (this.game.trump !== null && this.game.trump !== undefined) {
+            const currentSuit = this.game.currentTrick?.currentSuit;
+            this.updateGameTableHeader(`${this.game.trump}'s`, currentSuit);
+        }
+        
         // Restore any current domino displays
         if (this.game.currentTrick && this.game.currentTrick.playedDominoes) {
             console.log('Restoring domino displays for', this.game.currentTrick.playedDominoes.length, 'plays');
-            for (const [domino, playerIdx, playedEnds] of this.game.currentTrick.playedDominoes) {
-                const index = this.game.currentTrick.playedDominoes.indexOf([domino, playerIdx, playedEnds]);
-                console.log(`Restoring play ${index}:`, domino, 'for player', playerIdx);
-                this.displayPlayedDomino(domino, playerIdx, playedEnds);
-                await this.gameTableManager.displayPlayedDomino(domino, playerIdx, playedEnds);
+            for (let i = 0; i < this.game.currentTrick.playedDominoes.length; i++) {
+                const [domino, playerIdx, playedEnds] = this.game.currentTrick.playedDominoes[i];
+                console.log(`Restoring play ${i}:`, domino, 'for player', playerIdx);
+                await this.displayPlayedDomino(domino, playerIdx, playedEnds);
             }
         } else {
             console.log('No current trick or plays to restore');
@@ -3348,7 +3390,7 @@ class Game {
         };
         
         // UI elements
-        this.statusText = document.getElementById('status-text');
+        // Status text element removed - no longer needed
         this.scoreDisplay = document.getElementById('score-display');
         this.usScore = document.getElementById('us-score');
         this.themScore = document.getElementById('them-score');
@@ -3500,7 +3542,8 @@ class Game {
     }
     
     updateStatus(text) {
-        this.statusText.innerHTML = text;
+        // Status display removed - no longer needed
+        console.log('Status:', text);
     }
     
     showElement(element) {
@@ -3528,20 +3571,16 @@ class Game {
     }
     
     showPlayNextTrickButton() {
-        const playNextTrickBtn = document.getElementById('play-next-trick-btn');
-        if (playNextTrickBtn) {
-            playNextTrickBtn.style.display = 'inline-block';
-            playNextTrickBtn.onclick = () => {
-                this.hidePlayNextTrickButton();
-                this.playTrick();
-            };
+        // Show the button in the game table window header
+        if (this.gameTableManager) {
+            this.gameTableManager.showPlayNextTrickButton();
         }
     }
     
     hidePlayNextTrickButton() {
-        const playNextTrickBtn = document.getElementById('play-next-trick-btn');
-        if (playNextTrickBtn) {
-            playNextTrickBtn.style.display = 'none';
+        // Hide the button in the game table window header
+        if (this.gameTableManager) {
+            this.gameTableManager.hidePlayNextTrickButton();
         }
     }
     
@@ -4150,7 +4189,7 @@ class Game {
         const bidWinnerIdx = this.players.findIndex(p => this.formatPlayerNameWithRelationship(p) === this.bidWinner);
         if (bidWinnerIdx !== -1 && this.gameTableManager) {
             this.gameTableManager.updateBidWinnerHeader(bidWinnerIdx, this.winningBid);
-            this.gameTableManager.updateGameTableHeader(`${this.trump}'s`);
+            this.gameTableManager.updateGameTableHeader(`${this.trump}'s`, null);
         }
         
         // Show trump selection in all player windows
@@ -4237,6 +4276,11 @@ class Game {
             this.gameTableManager.updatePlayerOrder();
         }
         
+        // Update header to show trump suit (no current suit yet since no domino has been played)
+        if (this.gameTableManager) {
+            this.gameTableManager.updateGameTableHeader(`${this.trump}'s`, null);
+        }
+        
         // Determine play order for this trick - start with leader, then go in order 0,1,2,3
         const trickOrder = [this.currentLeaderIdx];
         for (let i = 1; i < 4; i++) {
@@ -4273,6 +4317,11 @@ class Game {
                 player.hand.splice(index, 1);
                 this.currentTrick.addPlay(chosenDomino, playerIdx, [chosenDomino.ends[0], chosenDomino.ends[1]]);
                 this.addPlayedDomino(chosenDomino, playerIdx); // Now passes playerIdx
+                
+                // Update header with current suit if this is the first domino played
+                if (this.gameTableManager && this.currentTrick.playedDominoes.length === 1) {
+                    this.gameTableManager.updateGameTableHeader(`${this.trump}'s`, this.currentTrick.currentSuit);
+                }
                 
                 // Update display
                 this.displayPlayedDomino(chosenDomino, player);
@@ -4322,6 +4371,11 @@ class Game {
         const playedEnds = [chosenDomino.ends[0], chosenDomino.ends[1]];
         this.currentTrick.addPlay(chosenDomino, 0, playedEnds);
         this.addPlayedDomino(chosenDomino, 0); // Now passes playerIdx
+        
+        // Update header with current suit if this is the first domino played
+        if (this.gameTableManager && this.currentTrick.playedDominoes.length === 1) {
+            this.gameTableManager.updateGameTableHeader(`${this.trump}'s`, this.currentTrick.currentSuit);
+        }
         
         // Update display
         this.displayPlayedDomino(chosenDomino, humanPlayer);
