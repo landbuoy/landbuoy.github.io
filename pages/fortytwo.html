@@ -22,14 +22,6 @@
     
     <div class="game-container">
         
-        <div id="score-display" class="score-display hidden">
-            <div>Us: <span id="us-score">0</span></div>
-            <div>Them: <span id="them-score">0</span></div>
-            <div class="button-container">
-                <button id="show-history-btn" class="btn history-btn">View History</button>
-            </div>
-        </div>
-        
         <!-- Scoreboard History Modal -->
         <div id="scoreboard-history-modal" class="modalContainer modalContainer--scoreboard hidden">
             <header class="modalHeader">
@@ -41,35 +33,7 @@
             </div>
         </div>
         
-        <div id="bidding-area" class="bidding-area hidden">
-            <h3>Bidding Phase</h3>
-            <div id="bidding-status"></div>
-            <div id="bidding-board" class="bidding-board hidden">
-                <h4>Bidding Results</h4>
-                <div id="bidding-results"></div>
-            </div>
-            <div id="bid-input-area" class="hidden">
-                <label for="bid-input">Enter your bid (or 'p' to pass):</label>
-                <input type="text" id="bid-input" class="bid-input" maxlength="3">
-                <button id="submit-bid" class="btn">Submit Bid</button>
-            </div>
 
-        </div>
-        
-        <div id="trump-selection" class="bidding-area hidden" style="display: none !important;">
-            <h3>Trump Selection</h3>
-            <div id="trump-suggested"></div>
-            <div class="trump-selector">
-                <div class="trump-option" data-trump="0">0 (Blanks)</div>
-                <div class="trump-option" data-trump="1">1</div>
-                <div class="trump-option" data-trump="2">2</div>
-                <div class="trump-option" data-trump="3">3</div>
-                <div class="trump-option" data-trump="4">4</div>
-                <div class="trump-option" data-trump="5">5</div>
-                <div class="trump-option" data-trump="6">6</div>
-            </div>
-            <button id="confirm-trump" class="btn">Confirm Trump</button>
-        </div>
         
         <div id="player-hand" class="player-hand hidden">
             <h3>Your Hand</h3>

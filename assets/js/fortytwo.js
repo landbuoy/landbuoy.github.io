@@ -284,11 +284,17 @@ class GameTableWindowManager {
     }
     
     updateBidWinnerHeader(playerIndex, bid) {
-        const roleElement = document.getElementById(`player-role-${playerIndex}`);
-        if (roleElement) {
-            roleElement.textContent = `Won bid for: ${bid}`;
-            roleElement.style.color = 'lime';
-            roleElement.style.fontWeight = 'bold';
+        const nameElement = document.getElementById(`player-name-${playerIndex}`);
+        if (nameElement) {
+            // Get the original player name and relationship
+            const player = this.game.players[playerIndex];
+            const relationship = this.game.getPlayerRelationship(playerIndex);
+            const originalName = `${player.name} (${relationship})`;
+            
+            // Update the name element to include the bid information
+            nameElement.textContent = `${originalName} - won bid for: ${bid}`;
+            nameElement.style.color = 'lime';
+            nameElement.style.fontWeight = 'bold';
         }
     }
     
@@ -302,6 +308,13 @@ class GameTableWindowManager {
             } else {
                 titleElement.textContent = 'Game Table';
             }
+        }
+    }
+    
+    resetGameTableHeader() {
+        const titleElement = this.gameTableWindow?.querySelector('.game-table-title');
+        if (titleElement) {
+            titleElement.textContent = 'Game Table -- Bidding';
         }
     }
     
@@ -320,6 +333,24 @@ class GameTableWindowManager {
         const playNextTrickBtn = this.gameTableWindow?.querySelector('#game-table-play-next-trick-btn');
         if (playNextTrickBtn) {
             playNextTrickBtn.style.display = 'none';
+        }
+    }
+    
+    showShuffleNextHandButton() {
+        const shuffleNextHandBtn = this.gameTableWindow?.querySelector('#game-table-shuffle-next-hand-btn');
+        if (shuffleNextHandBtn) {
+            shuffleNextHandBtn.style.display = 'inline-block';
+            shuffleNextHandBtn.onclick = () => {
+                this.hideShuffleNextHandButton();
+                this.game.startNewHand();
+            };
+        }
+    }
+    
+    hideShuffleNextHandButton() {
+        const shuffleNextHandBtn = this.gameTableWindow?.querySelector('#game-table-shuffle-next-hand-btn');
+        if (shuffleNextHandBtn) {
+            shuffleNextHandBtn.style.display = 'none';
         }
     }
     
@@ -427,7 +458,13 @@ class GameTableWindowManager {
         this.gameTableWindow.innerHTML = `
             <div class="game-table-header modalHeader">
                 <h3 class="game-table-title modalTitle">Game Table</h3>
+                <div class="game-table-score-display">
+                    <div class="score-item">Us: <span id="game-table-us-score">0</span></div>
+                    <div class="score-item">Them: <span id="game-table-them-score">0</span></div>
+                    <button id="game-table-show-history-btn" class="btn history-btn">View History</button>
+                </div>
                 <button id="game-table-play-next-trick-btn" class="btn game-table-play-next-trick-btn" style="display: none;">Play Next Trick</button>
+                <button id="game-table-shuffle-next-hand-btn" class="btn game-table-shuffle-next-hand-btn" style="display: none;">Shuffle Next Hand</button>
                 <div class="aquaButton aquaButton--gameTable" style="background: ${this.gameTableWindow.dataset.aquaButtonColor}; box-shadow: 0px 5px 10px ${this.gameTableWindow.dataset.boxShadowColor};">×</div>
             </div>
             <div class="game-table-content">
@@ -779,6 +816,9 @@ class GameTableWindowManager {
         if (this.game.currentPhase === 'bidding' && this.game.currentBiddingState) {
             this.restoreBiddingInterface();
         }
+        
+        // Make sure shuffle next hand button is hidden when restoring state
+        this.hideShuffleNextHandButton();
     }
     
     restoreBiddingInterface() {
@@ -829,6 +869,17 @@ class GameTableWindowManager {
             roleElement.textContent = 'Bidding...';
             roleElement.style.color = '#0000ff';
             roleElement.style.fontWeight = 'normal';
+        }
+        
+        // Reset player name element to original state
+        const nameElement = document.getElementById(`player-name-${playerIndex}`);
+        if (nameElement) {
+            const player = this.game.players[playerIndex];
+            const relationship = this.game.getPlayerRelationship(playerIndex);
+            const originalName = `${player.name} (${relationship})`;
+            nameElement.textContent = originalName;
+            nameElement.style.color = 'lime';
+            nameElement.style.fontWeight = 'normal';
         }
     }
     
@@ -1209,6 +1260,14 @@ class GameTableWindowManager {
         if (trumpConfirmBtn) {
             trumpConfirmBtn.addEventListener('click', () => {
                 this.handlePlayerTrumpConfirm(0);
+            });
+        }
+        
+        // Set up history button event listener
+        const historyBtn = document.getElementById('game-table-show-history-btn');
+        if (historyBtn) {
+            historyBtn.addEventListener('click', () => {
+                this.game.showScoreboardHistory();
             });
         }
     }
@@ -3508,25 +3567,26 @@ class Game {
         };
         
         // UI elements
-        // Status text element removed - no longer needed
-        this.scoreDisplay = document.getElementById('score-display');
-        this.usScore = document.getElementById('us-score');
-        this.themScore = document.getElementById('them-score');
-        this.biddingArea = document.getElementById('bidding-area');
-        this.biddingStatus = document.getElementById('bidding-status');
-        this.biddingBoard = document.getElementById('bidding-board');
-        this.biddingResults = document.getElementById('bidding-results');
-        this.bidInputArea = document.getElementById('bid-input-area');
-        this.bidInput = document.getElementById('bid-input');
-        this.submitBid = document.getElementById('submit-bid');
-        this.trumpSelection = document.getElementById('trump-selection');
-        this.trumpSuggested = document.getElementById('trump-suggested');
-        this.confirmTrump = document.getElementById('confirm-trump');
+        // Score display elements moved to game table window header
+        this.scoreDisplay = null;
+        this.usScore = null;
+        this.themScore = null;
+        // Bidding elements removed from main container - now handled in player windows
+        this.biddingArea = null;
+        this.biddingStatus = null;
+        this.biddingBoard = null;
+        this.biddingResults = null;
+        this.bidInputArea = null;
+        this.bidInput = null;
+        this.submitBid = null;
+        this.trumpSelection = null;
+        this.trumpSuggested = null;
+        this.confirmTrump = null;
         this.playerHand = document.getElementById('player-hand');
         this.dominoes = document.getElementById('dominoes');
-        this.trickArea = document.getElementById('trick-area');
-        this.trickInfo = document.getElementById('trick-info');
-        this.playedDominoes = document.getElementById('played-dominoes');
+        this.trickArea = null; // Element doesn't exist in HTML
+        this.trickInfo = null; // Element doesn't exist in HTML
+        this.playedDominoes = null; // Element doesn't exist in HTML
         this.handScoreboard = document.getElementById('hand-scoreboard');
         this.usHandPointsElement = document.getElementById('us-hand-points');
         this.themHandPointsElement = document.getElementById('them-hand-points');
@@ -3536,7 +3596,7 @@ class Game {
         this.scoreboardContent = document.getElementById('scoreboard-content');
         this.startGame = document.getElementById('start-game');
         this.playDomino = document.getElementById('play-domino');
-        this.showHistoryBtn = document.getElementById('show-history-btn');
+        this.showHistoryBtn = null; // Moved to game table window header
         this.scoreboardHistoryModal = document.getElementById('scoreboard-history-modal');
         this.historyContent = document.getElementById('history-content');
         
@@ -3556,16 +3616,10 @@ class Game {
     }
     
     bindEventListeners() {
-        this.startGame.addEventListener('click', () => this.startNewGame());
-        this.submitBid.addEventListener('click', () => this.submitBidHandler());
-        this.bidInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.submitBidHandler();
-            }
-        });
-        this.confirmTrump.addEventListener('click', () => this.confirmTrumpHandler());
-        this.playDomino.addEventListener('click', async () => await this.playSelectedDomino());
-        this.showHistoryBtn.addEventListener('click', () => this.showScoreboardHistory());
+        if (this.startGame) this.startGame.addEventListener('click', () => this.startNewGame());
+        // Bidding and trump selection event listeners removed - now handled in player windows
+        if (this.playDomino) this.playDomino.addEventListener('click', async () => await this.playSelectedDomino());
+        // History button event listener moved to game table window header
         
         // Close modal button - enhanced for mobile compatibility
         const scoreboardCloseBtn = document.querySelector('.aquaButton--scoreboard');
@@ -3576,7 +3630,7 @@ class Game {
                 e.stopPropagation();
                 this.hideElement(this.scoreboardHistoryModal);
                 // Reset z-index when modal is closed
-                this.scoreboardHistoryModal.style.zIndex = '';
+                if (this.scoreboardHistoryModal) this.scoreboardHistoryModal.style.zIndex = '';
             });
             
             scoreboardCloseBtn.addEventListener('touchstart', (e) => {
@@ -3584,7 +3638,7 @@ class Game {
                 e.stopPropagation();
                 this.hideElement(this.scoreboardHistoryModal);
                 // Reset z-index when modal is closed
-                this.scoreboardHistoryModal.style.zIndex = '';
+                if (this.scoreboardHistoryModal) this.scoreboardHistoryModal.style.zIndex = '';
             });
             
             // Prevent default touch behavior that might interfere
@@ -3696,14 +3750,23 @@ class Game {
     }
     
     updateScoreDisplay() {
-        this.usScore.textContent = this.scores[0];
-        this.themScore.textContent = this.scores[1];
+        // Update original score display (if it exists)
+        if (this.usScore) this.usScore.textContent = this.scores[0];
+        if (this.themScore) this.themScore.textContent = this.scores[1];
         this.showElement(this.scoreDisplay);
+        
+        // Update game table window score display
+        if (this.gameTableManager) {
+            const gameTableUsScore = document.getElementById('game-table-us-score');
+            const gameTableThemScore = document.getElementById('game-table-them-score');
+            if (gameTableUsScore) gameTableUsScore.textContent = this.scores[0];
+            if (gameTableThemScore) gameTableThemScore.textContent = this.scores[1];
+        }
     }
     
     updateHandScoreboard() {
-        this.usHandPointsElement.textContent = this.usHandPoints;
-        this.themHandPointsElement.textContent = this.themHandPoints;
+        if (this.usHandPointsElement) this.usHandPointsElement.textContent = this.usHandPoints;
+        if (this.themHandPointsElement) this.themHandPointsElement.textContent = this.themHandPoints;
         this.showElement(this.handScoreboard);
     }
     
@@ -3721,6 +3784,27 @@ class Game {
         }
     }
     
+    showShuffleNextHandButton() {
+        // Show the button in the game table window header
+        if (this.gameTableManager) {
+            this.gameTableManager.showShuffleNextHandButton();
+        }
+    }
+    
+    hideShuffleNextHandButton() {
+        // Hide the button in the game table window header
+        if (this.gameTableManager) {
+            this.gameTableManager.hideShuffleNextHandButton();
+        }
+    }
+    
+    resetGameTableHeader() {
+        // Reset the game table window header to bidding mode
+        if (this.gameTableManager) {
+            this.gameTableManager.resetGameTableHeader();
+        }
+    }
+    
     displayPlayedDomino(domino, player) {
         // This method is now only used for the game table window display
         // The main display is handled by gameTableManager.displayPlayedDomino()
@@ -3732,8 +3816,8 @@ class Game {
         this.currentHandTricks.push(trickData);
         
         // Clear previous scoreboard
-        this.usTricks.innerHTML = '';
-        this.themTricks.innerHTML = '';
+        if (this.usTricks) this.usTricks.innerHTML = '';
+        if (this.themTricks) this.themTricks.innerHTML = '';
         
         // Group tricks by team
         const usTricks = this.currentHandTricks.filter(t => t.team === 'Us');
@@ -3772,7 +3856,7 @@ class Game {
             });
             
             trickGroup.appendChild(trickDominoes);
-            this.usTricks.appendChild(trickGroup);
+            if (this.usTricks) this.usTricks.appendChild(trickGroup);
         });
         
         // Display THEM tricks
@@ -3808,7 +3892,7 @@ class Game {
             });
             
             trickGroup.appendChild(trickDominoes);
-            this.themTricks.appendChild(trickGroup);
+            if (this.themTricks) this.themTricks.appendChild(trickGroup);
         });
         
         this.updateHandScoreboard();
@@ -3895,7 +3979,7 @@ class Game {
     }
     
     displayPlayerHand() {
-        this.dominoes.innerHTML = '';
+        if (this.dominoes) this.dominoes.innerHTML = '';
         const humanPlayer = this.players[0];
         
         humanPlayer.hand.forEach((domino, index) => {
@@ -3908,7 +3992,7 @@ class Game {
                 this.selectDomino(index);
             });
             
-            this.dominoes.appendChild(dominoElement);
+            if (this.dominoes) this.dominoes.appendChild(dominoElement);
         });
         
         this.showElement(this.playerHand);
@@ -3923,7 +4007,7 @@ class Game {
         dominoElement.classList.add('selected');
         
         this.selectedDomino = index;
-        this.playDomino.disabled = false;
+        if (this.playDomino) this.playDomino.disabled = false;
     }
     
     biddingPhase() {
@@ -3978,6 +4062,9 @@ class Game {
         if (this.gameTableManager) {
             this.gameTableManager.updatePlayerOrder(bidOrder);
         }
+        
+        // Reset game table header to bidding mode
+        this.resetGameTableHeader();
         
         this.updateStatus("Bidding phase in progress...");
         
@@ -4063,20 +4150,8 @@ class Game {
     }
     
     submitBidHandler() {
-        const input = this.bidInput.value.trim().toLowerCase();
-        let bid;
-        
-        if (input === 'p') {
-            bid = 'pass';
-        } else {
-            bid = parseInt(input);
-            if (isNaN(bid) || bid <= this.currentBid) {
-                this.updateStatus("Invalid bid. Enter a number higher than current bid or 'p' to pass.");
-                return;
-            }
-        }
-        
-        this.processPlayerBid(bid);
+        // This method is no longer used - bidding is handled in player windows
+        console.warn('submitBidHandler called but bidding is now handled in player windows');
     }
     
     processPlayerBid(bid) {
@@ -4099,8 +4174,7 @@ class Game {
             this.highestBidder = playerName;
         }
         
-        this.hideElement(this.bidInputArea);
-        this.bidInput.value = '';
+        // Bid input area removed from main container - handled in player windows
         
         // Add player-specific message for human player
         this.gameTableManager.addPlayerMessage(0, `Bids ${bid}`, 'action');
@@ -4297,18 +4371,8 @@ class Game {
     }
     
     confirmTrumpHandler() {
-        const selectedTrump = document.querySelector('.trump-option.selected');
-        if (!selectedTrump) {
-            this.updateStatus("Please select a trump suit.");
-            return;
-        }
-        
-        const trump = parseInt(selectedTrump.dataset.trump);
-        
-        // Show trump selection in human player window
-        this.gameTableManager.addPlayerMessage(0, `Selected trump: ${trump}'s`, 'action');
-        
-        this.setTrumpAndStartHand(trump);
+        // This method is no longer used - trump selection is handled in player windows
+        console.warn('confirmTrumpHandler called but trump selection is now handled in player windows');
     }
     
     setTrumpAndStartHand(trump) {
@@ -4317,8 +4381,7 @@ class Game {
         this.winningBid = this.currentBid;
         this.handModes = this.profileHandModes(trump);
         
-        this.hideElement(this.trumpSelection);
-        this.hideElement(this.biddingArea);
+        // Trump selection and bidding area removed from main container - handled in player windows
         
         this.updateStatus(`${this.bidWinner} wins the bid with ${this.winningBid} on ${this.trump} as trump.`);
         
@@ -4528,7 +4591,7 @@ class Game {
         
         // Clear selection
         this.selectedDomino = null;
-        this.playDomino.disabled = true;
+        if (this.playDomino) this.playDomino.disabled = true;
         
         // Continue with next player in the current trick order
         this.currentPlayerIndex++;
@@ -4699,10 +4762,8 @@ class Game {
                 }
             }, 3000);
         } else {
-            // Start new hand
-            setTimeout(() => {
-                this.startNewHand();
-            }, 3000);
+            // Show shuffle next hand button instead of automatically starting
+            this.showShuffleNextHandButton();
         }
     }
     
@@ -4719,15 +4780,16 @@ class Game {
         
         // Clear UI
         this.hideElement(this.handScoreboard);
-        this.hideElement(this.trickArea);
+        if (this.trickArea) this.hideElement(this.trickArea);
         this.hideElement(this.playerHand);
-        this.hideElement(this.biddingBoard);
-        this.playedDominoes.innerHTML = '';
+        if (this.biddingBoard) this.hideElement(this.biddingBoard);
+        if (this.playedDominoes) this.playedDominoes.innerHTML = '';
         this.hidePlayNextTrickButton();
+        this.hideShuffleNextHandButton();
         
         // Clear scoreboard
-        this.usTricks.innerHTML = '';
-        this.themTricks.innerHTML = '';
+        if (this.usTricks) this.usTricks.innerHTML = '';
+        if (this.themTricks) this.themTricks.innerHTML = '';
         
         // Clear bidding display from all player windows
         this.players.forEach((player, index) => {
@@ -4738,6 +4800,14 @@ class Game {
         if (this.gameTableManager) {
             this.gameTableManager.stopBirdAudio();
         }
+        
+        // Clear all domino displays from player windows
+        if (this.gameTableManager) {
+            this.gameTableManager.clearAllDominoDisplays();
+        }
+        
+        // Reset game table header to bidding mode
+        this.resetGameTableHeader();
         
         // Start new hand
         this.shuffleAndDeal();
@@ -4751,17 +4821,8 @@ class Game {
     }
     
     initializeBiddingBoard(bidOrder) {
-        this.biddingResults.innerHTML = '';
-        bidOrder.forEach(playerName => {
-            const resultDiv = document.createElement('div');
-            resultDiv.className = 'bidding-result';
-            resultDiv.innerHTML = `
-                <span class="player-name">${playerName}</span>
-                <span class="bid-amount">--</span>
-            `;
-            resultDiv.dataset.player = playerName;
-            this.biddingResults.appendChild(resultDiv);
-        });
+        // No-op since bidding area was removed from main container
+        // Bidding is now handled entirely in player windows
     }
     
     initializeBiddingBoardInPlayerWindows(bidOrder) {
@@ -4786,17 +4847,7 @@ class Game {
     }
     
     updateBiddingBoard(playerName, bid) {
-        const resultDiv = this.biddingResults.querySelector(`[data-player="${playerName}"]`);
-        if (resultDiv) {
-            const bidAmount = resultDiv.querySelector('.bid-amount');
-            bidAmount.textContent = bid === 'pass' ? 'Pass' : bid;
-            if (bid !== 'pass') {
-                bidAmount.style.color = 'lime';
-                bidAmount.style.fontWeight = 'bold';
-            }
-        }
-        
-        // Also update player window
+        // Update player window only since bidding area was removed from main container
         const playerIndex = this.players.findIndex(p => 
             this.formatPlayerNameWithRelationship(p) === playerName
         );
@@ -4809,7 +4860,7 @@ class Game {
     }
     
     showReadyToStart() {
-        this.hideElement(this.bidInputArea);
+        // Bid input area removed from main container - handled in player windows
         this.updateStatus("Bidding complete! Starting hand...");
         
         // Add message to human player window
@@ -4822,7 +4873,7 @@ class Game {
     }
     
     startHandAfterBidding() {
-        this.hideElement(this.biddingBoard);
+        // Bidding board removed from main container - handled in player windows
         
         // Clear bidding messages from all player windows and hide bid input
         this.players.forEach((player, index) => {
@@ -4910,10 +4961,10 @@ class Game {
         console.log('Show scoreboard history called');
         console.log('Hand history length:', this.handHistory.length);
         
-        this.historyContent.innerHTML = '';
+        if (this.historyContent) this.historyContent.innerHTML = '';
         
         if (this.handHistory.length === 0) {
-            this.historyContent.innerHTML = '<p>No hand history available yet.</p>';
+            if (this.historyContent) this.historyContent.innerHTML = '<p>No hand history available yet.</p>';
         } else {
             this.handHistory.forEach((hand, index) => {
                 const handDiv = document.createElement('div');
@@ -4948,7 +4999,7 @@ class Game {
                     </div>
                 `;
                 
-                this.historyContent.appendChild(handDiv);
+                if (this.historyContent) this.historyContent.appendChild(handDiv);
             });
         }
         
@@ -4956,7 +5007,7 @@ class Game {
         this.showElement(this.scoreboardHistoryModal);
         
         // Ensure the modal is brought to front
-        this.scoreboardHistoryModal.style.zIndex = '9999';
+        if (this.scoreboardHistoryModal) this.scoreboardHistoryModal.style.zIndex = '9999';
     }
     
     createHandDisplay(hand) {
