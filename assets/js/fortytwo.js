@@ -127,6 +127,7 @@ class GameTableWindowManager {
         try {
             const response = await fetch('../assets/img/songbirds/songbird_image_paths.json');
             this.imagePaths = await response.json();
+            console.log('Successfully loaded image paths from JSON:', Object.keys(this.imagePaths).length, 'entries');
         } catch (error) {
             console.warn('Could not load songbird image paths:', error);
             // Provide fallback image paths for local development
@@ -930,6 +931,12 @@ class GameTableWindowManager {
     }
     
     async displayPlayedDomino(domino, playerIndex, playedEnds) {
+        // Ensure image paths are loaded before proceeding
+        if (!this.imagePaths) {
+            console.log('Image paths not loaded yet, waiting...');
+            await this.loadImagePaths();
+        }
+        
         const dominoDisplay = document.getElementById(`domino-display-${playerIndex}`);
         const dominoImage = document.getElementById(`domino-image-${playerIndex}`);
         const birdImage = document.getElementById(`bird-image-${playerIndex}`);
@@ -958,13 +965,18 @@ class GameTableWindowManager {
             
             // Get bird name based on domino modality
             const birdName = this.getDominoBird(domino, this.game.trump, this.game.currentTrick?.currentSuit);
+            console.log(`Loading bird image for: ${birdName}`);
+            console.log('Available image paths:', this.imagePaths ? Object.keys(this.imagePaths) : 'No image paths loaded');
             const birdImagePath = this.imagePaths[birdName];
+            console.log(`Bird image path for ${birdName}:`, birdImagePath);
             if (birdImagePath) {
                 birdImage.src = birdImagePath;
                 birdImage.onerror = () => {
-                    console.warn(`Failed to load bird image: ${birdName}`);
+                    console.warn(`Failed to load bird image: ${birdName} from path: ${birdImagePath}`);
                     birdImage.style.display = 'none';
                 };
+            } else {
+                console.error(`No image path found for bird: ${birdName}`);
             }
             
             // Set the label with domino and bird information
