@@ -791,6 +791,13 @@ body {
     position: relative;
     overflow: visible;
     aspect-ratio: 3/2;
+    /* Better touch handling for mobile */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 255, 0, 0.2);
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 @keyframes fadeIn {
@@ -974,6 +981,13 @@ body {
 .player-trump-option {
     background: black;
     color: lime;
+    /* Better touch handling for mobile */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 255, 0, 0.2);
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
     border: 1px solid lime;
     padding: 3px 6px;
     border-radius: 3px;
@@ -1004,6 +1018,13 @@ body {
     font-size: 11px;
     font-family: 'Courier New', monospace;
     transition: all 0.3s ease;
+    /* Better touch handling for mobile */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 255, 0, 0.2);
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .player-confirm-trump-btn:hover {
@@ -1091,6 +1112,18 @@ body {
     
     .player-status-message {
         font-size: 10px;
+    }
+    
+    .domino-display {
+        margin: 5px;
+        padding: 10px;
+        min-height: 120px;
+        /* Enhanced touch handling for mobile */
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0, 255, 0, 0.3);
+        /* Ensure proper touch target size */
+        min-width: 44px;
+        min-height: 44px;
     }
     
     .modalHeader {

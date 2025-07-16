@@ -946,10 +946,39 @@ class GameTableWindowManager {
             dominoLabel.textContent = `${dominoKey} : ${birdName}`;
             dominoLabel.style.display = 'block';
             
-            // Add click event listener for flipping
-            dominoDisplay.onclick = () => {
+            // Add click and touch event listeners for flipping
+            const handleFlip = () => {
                 this.flipDomino(playerIndex);
             };
+            
+            // Click event for desktop
+            dominoDisplay.onclick = handleFlip;
+            
+            // Touch events for mobile compatibility
+            const touchstartHandler = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            };
+            
+            const touchendHandler = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleFlip();
+            };
+            
+            const touchmoveHandler = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            };
+            
+            dominoDisplay.addEventListener('touchstart', touchstartHandler);
+            dominoDisplay.addEventListener('touchend', touchendHandler);
+            dominoDisplay.addEventListener('touchmove', touchmoveHandler);
+            
+            // Store references for later removal
+            dominoDisplay._touchstartHandler = touchstartHandler;
+            dominoDisplay._touchendHandler = touchendHandler;
+            dominoDisplay._touchmoveHandler = touchmoveHandler;
             
             // Ensure domino is visible and bird is hidden by default
             dominoImage.style.opacity = '1';
@@ -973,8 +1002,11 @@ class GameTableWindowManager {
             dominoDisplay.style.display = 'none';
             // Reset flipping state
             dominoDisplay.classList.remove('flipped');
-            // Remove click event listener
+            // Remove all event listeners
             dominoDisplay.onclick = null;
+            dominoDisplay.removeEventListener('touchstart', dominoDisplay._touchstartHandler);
+            dominoDisplay.removeEventListener('touchend', dominoDisplay._touchendHandler);
+            dominoDisplay.removeEventListener('touchmove', dominoDisplay._touchmoveHandler);
         }
     }
     
@@ -1351,14 +1383,22 @@ class GameTableWindowManager {
             
             // Add both click and touch events for mobile compatibility
             playDominoBtn.addEventListener('click', handlePlayDomino);
+            
+            // Touch events for mobile compatibility
+            playDominoBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+            
             playDominoBtn.addEventListener('touchend', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 handlePlayDomino();
             });
             
-            // Additional touchstart handler to prevent drag interference
-            playDominoBtn.addEventListener('touchstart', (e) => {
+            // Additional touchmove handler to prevent drag interference
+            playDominoBtn.addEventListener('touchmove', (e) => {
+                e.preventDefault();
                 e.stopPropagation();
             });
         }
