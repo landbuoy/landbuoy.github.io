@@ -567,6 +567,12 @@ class GameTableWindowManager {
                         </div>
                     </div>
                 </div>
+                <!-- Player Hand Section -->
+                <div id="player-hand" class="player-hand hidden">
+                    <h3>Your Hand</h3>
+                    <div id="dominoes"></div>
+                    <button id="play-domino" class="btn" disabled>Play Selected Domino</button>
+                </div>
             </div>
         `;
         

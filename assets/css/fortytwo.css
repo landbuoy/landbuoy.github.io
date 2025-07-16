@@ -683,6 +683,8 @@ body {
     padding: 15px;
     height: calc(100% - 60px);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .game-table-grid {
@@ -690,7 +692,42 @@ body {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
     gap: 10px;
-    height: 100%;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Player hand in game table window */
+.game-table-content .player-hand {
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid lime;
+    border-radius: 6px;
+    padding: 10px;
+    margin-top: 10px;
+    flex-shrink: 0;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.game-table-content .player-hand h3 {
+    color: lime;
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    text-align: center;
+}
+
+.game-table-content .player-hand #dominoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.game-table-content .player-hand .btn {
+    font-size: 12px;
+    padding: 6px 12px;
+    min-height: 36px;
+    width: 100%;
 }
 
 .player-slot {
@@ -1218,24 +1255,173 @@ body {
         filter: drop-shadow(0 0 6px rgba(255, 235, 59, 0.8));
     }
     
-    /* Ensure bid prompt is more readable on mobile */
+    /* Enhanced mobile accessibility for bidding prompt */
+    .player-bid-input-area {
+        background: rgba(0, 0, 0, 0.9) !important; /* Darker background for better visibility */
+        border: 2px solid lime !important; /* More prominent border */
+        border-radius: 8px !important;
+        padding: 15px !important;
+        margin: 10px 0 !important;
+        min-height: 120px; /* Ensure enough space */
+    }
+    
     .player-bid-input-area label {
-        font-size: 16px !important; /* Even larger on mobile */
+        font-size: 18px !important; /* Larger text for readability */
+        color: lime !important;
+        font-weight: bold !important;
+        margin-bottom: 10px !important;
+        display: block !important;
     }
     
     .player-bid-input {
-        font-size: 18px !important; /* Even larger on mobile */
-        padding: 8px !important;
-        min-height: 44px; /* Better touch target */
+        font-size: 20px !important; /* Larger input text */
+        padding: 12px !important;
+        min-height: 50px !important; /* Better touch target */
+        width: 100% !important;
+        box-sizing: border-box !important;
+        border: 2px solid lime !important;
+        border-radius: 6px !important;
+        background: black !important;
+        color: lime !important;
+        text-align: center !important;
+        margin-bottom: 10px !important;
+    }
+    
+    .player-bid-input:focus {
+        outline: none !important;
+        border-color: #ffeb3b !important;
+        box-shadow: 0 0 10px rgba(255, 235, 59, 0.5) !important;
     }
     
     .player-submit-bid-btn {
-        font-size: 14px !important;
-        padding: 8px 12px !important;
-        min-height: 44px; /* Better touch target */
+        font-size: 16px !important;
+        padding: 12px 20px !important;
+        min-height: 50px !important; /* Better touch target */
+        width: 100% !important;
         touch-action: manipulation;
-        -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+        -webkit-tap-highlight-color: rgba(0,255,0,0.2);
         position: relative;
         z-index: 10;
+        border: 2px solid lime !important;
+        border-radius: 6px !important;
+        background: black !important;
+        color: lime !important;
+        font-weight: bold !important;
+        cursor: pointer !important;
     }
+    
+    .player-submit-bid-btn:hover,
+    .player-submit-bid-btn:focus {
+        background: lime !important;
+        color: black !important;
+        transform: scale(1.02) !important;
+    }
+    
+         .player-submit-bid-btn:active {
+         transform: scale(0.98) !important;
+         background: #ccff00 !important;
+     }
+     
+     /* Mobile adjustments for player hand in game table */
+     .game-table-content .player-hand {
+         max-height: 100px !important;
+         padding: 8px !important;
+         margin-top: 8px !important;
+     }
+     
+     .game-table-content .player-hand h3 {
+         font-size: 12px !important;
+         margin: 0 0 8px 0 !important;
+     }
+     
+     .game-table-content .player-hand #dominoes {
+         gap: 3px !important;
+         margin-bottom: 8px !important;
+     }
+     
+     .game-table-content .player-hand .btn {
+         font-size: 11px !important;
+         padding: 4px 8px !important;
+         min-height: 32px !important;
+     }
+     
+     /* Enhanced mobile accessibility for trump selection */
+     .player-trump-selection-area {
+         background: rgba(0, 0, 0, 0.9) !important;
+         border: 2px solid lime !important;
+         border-radius: 8px !important;
+         padding: 15px !important;
+         margin: 10px 0 !important;
+     }
+     
+     .player-trump-selection-area label {
+         font-size: 16px !important;
+         color: lime !important;
+         font-weight: bold !important;
+         margin-bottom: 10px !important;
+         display: block !important;
+         text-align: center !important;
+     }
+     
+     .player-trump-selector {
+         display: grid !important;
+         grid-template-columns: repeat(3, 1fr) !important;
+         gap: 8px !important;
+         margin-bottom: 15px !important;
+     }
+     
+     .player-trump-option {
+         font-size: 14px !important;
+         padding: 12px 8px !important;
+         min-height: 44px !important;
+         border: 2px solid lime !important;
+         border-radius: 6px !important;
+         background: black !important;
+         color: lime !important;
+         text-align: center !important;
+         cursor: pointer !important;
+         touch-action: manipulation !important;
+         -webkit-tap-highlight-color: rgba(0,255,0,0.2) !important;
+     }
+     
+     .player-trump-option:hover,
+     .player-trump-option:focus {
+         background: lime !important;
+         color: black !important;
+         transform: scale(1.02) !important;
+     }
+     
+     .player-trump-option.selected {
+         background: #ffeb3b !important;
+         color: black !important;
+         border-color: #f57f17 !important;
+         transform: scale(1.05) !important;
+     }
+     
+     .player-confirm-trump-btn {
+         font-size: 16px !important;
+         padding: 12px 20px !important;
+         min-height: 50px !important;
+         width: 100% !important;
+         border: 2px solid lime !important;
+         border-radius: 6px !important;
+         background: black !important;
+         color: lime !important;
+         font-weight: bold !important;
+         cursor: pointer !important;
+         touch-action: manipulation !important;
+         -webkit-tap-highlight-color: rgba(0,255,0,0.2) !important;
+     }
+     
+     .player-confirm-trump-btn:hover,
+     .player-confirm-trump-btn:focus {
+         background: lime !important;
+         color: black !important;
+         transform: scale(1.02) !important;
+     }
+     
+     .player-confirm-trump-btn:active {
+         transform: scale(0.98) !important;
+         background: #ccff00 !important;
+     }
 }
