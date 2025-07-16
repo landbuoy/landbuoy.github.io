@@ -457,14 +457,15 @@ class GameTableWindowManager {
         // Create window content with 4-square grid
         this.gameTableWindow.innerHTML = `
             <div class="game-table-header modalHeader">
-                <h3 class="game-table-title modalTitle">Game Table</h3>
+                <h3 class="game-table-title modalTitle" style="font-size: 14px;">Game Table</h3>
                 <div class="game-table-score-display">
-                    <div class="score-item">Us: <span id="game-table-us-score">0</span></div>
-                    <div class="score-item">Them: <span id="game-table-them-score">0</span></div>
-                    <button id="game-table-show-history-btn" class="btn history-btn">View History</button>
+                    <div class="score-item" style="font-size: 12px;">Us: <span id="game-table-us-score">0</span></div>
+                    <div class="score-item" style="font-size: 12px;">Them: <span id="game-table-them-score">0</span></div>
+                    <button id="game-table-show-history-btn" class="btn history-btn" style="font-size: 11px;">History</button>
                 </div>
-                <button id="game-table-play-next-trick-btn" class="btn game-table-play-next-trick-btn" style="display: none;">Play Next Trick</button>
-                <button id="game-table-shuffle-next-hand-btn" class="btn game-table-shuffle-next-hand-btn" style="display: none;">Shuffle Next Hand</button>
+                <button id="play-domino" class="btn" disabled style="font-size: 11px; margin-left: 10px;">Play Domino</button>
+                <button id="game-table-play-next-trick-btn" class="btn game-table-play-next-trick-btn" style="display: none; font-size: 11px;">Next Trick</button>
+                <button id="game-table-shuffle-next-hand-btn" class="btn game-table-shuffle-next-hand-btn" style="display: none; font-size: 11px;">New Hand</button>
                 <div class="aquaButton aquaButton--gameTable" style="background: ${this.gameTableWindow.dataset.aquaButtonColor}; box-shadow: 0px 5px 10px ${this.gameTableWindow.dataset.boxShadowColor};">×</div>
             </div>
             <div class="game-table-content">
@@ -566,12 +567,6 @@ class GameTableWindowManager {
                             </div>
                         </div>
                     </div>
-                </div>
-                <!-- Player Hand Section -->
-                <div id="player-hand" class="player-hand hidden">
-                    <h3>Your Hand</h3>
-                    <div id="dominoes"></div>
-                    <button id="play-domino" class="btn" disabled>Play Selected Domino</button>
                 </div>
             </div>
         `;
@@ -1343,6 +1338,27 @@ class GameTableWindowManager {
             
             // Additional touchstart handler to prevent drag interference
             historyBtn.addEventListener('touchstart', (e) => {
+                e.stopPropagation();
+            });
+        }
+        
+        // Set up play domino button event listener with mobile compatibility
+        const playDominoBtn = this.gameTableWindow?.querySelector('#play-domino');
+        if (playDominoBtn) {
+            const handlePlayDomino = async () => {
+                await this.game.playSelectedDomino();
+            };
+            
+            // Add both click and touch events for mobile compatibility
+            playDominoBtn.addEventListener('click', handlePlayDomino);
+            playDominoBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handlePlayDomino();
+            });
+            
+            // Additional touchstart handler to prevent drag interference
+            playDominoBtn.addEventListener('touchstart', (e) => {
                 e.stopPropagation();
             });
         }
@@ -3658,8 +3674,8 @@ class Game {
         this.trumpSelection = null;
         this.trumpSuggested = null;
         this.confirmTrump = null;
-        this.playerHand = document.getElementById('player-hand');
-        this.dominoes = document.getElementById('dominoes');
+        // this.playerHand removed - player hand section no longer exists
+        // this.dominoes removed - dominoes are displayed as draggable windows
         this.trickArea = null; // Element doesn't exist in HTML
         this.trickInfo = null; // Element doesn't exist in HTML
         this.playedDominoes = null; // Element doesn't exist in HTML
@@ -3671,7 +3687,7 @@ class Game {
         this.scoreboard = document.getElementById('scoreboard');
         this.scoreboardContent = document.getElementById('scoreboard-content');
         this.startGame = document.getElementById('start-game');
-        this.playDomino = document.getElementById('play-domino');
+        // this.playDomino removed - now handled in setupHumanPlayerEventListeners
         this.showHistoryBtn = null; // Moved to game table window header
         this.scoreboardHistoryModal = document.getElementById('scoreboard-history-modal');
         this.historyContent = document.getElementById('history-content');
@@ -3694,7 +3710,7 @@ class Game {
     bindEventListeners() {
         if (this.startGame) this.startGame.addEventListener('click', () => this.startNewGame());
         // Bidding and trump selection event listeners removed - now handled in player windows
-        if (this.playDomino) this.playDomino.addEventListener('click', async () => await this.playSelectedDomino());
+        // Play domino button event listener moved to setupHumanPlayerEventListeners
         // History button event listener moved to game table window header
         
         // Close modal button - enhanced for mobile compatibility
@@ -4028,6 +4044,12 @@ class Game {
             this.handSortingPhase();
         }
         
+        // Disable the play button during bidding
+        const playDominoButton = this.gameTableManager?.gameTableWindow?.querySelector('#play-domino');
+        if (playDominoButton) {
+            playDominoButton.disabled = true;
+        }
+        
         // Show overall score and user's hand
         this.updateScoreDisplay();
         this.displayPlayerHand();
@@ -4060,7 +4082,6 @@ class Game {
     displayPlayerHand() {
         // Only create domino windows if they don't already exist
         if (!this.dominoWindows || this.dominoWindows.length === 0) {
-            if (this.dominoes) this.dominoes.innerHTML = '';
             const humanPlayer = this.players[0];
             
             // Create draggable windows for each domino
@@ -4069,7 +4090,8 @@ class Game {
             });
         }
         
-        this.showElement(this.playerHand);
+        // Player hand section removed - dominoes are displayed as draggable windows
+        // The play button is now in the game table header
     }
     
     createDraggableDominoWindow(domino, index) {
@@ -4352,7 +4374,11 @@ class Game {
         }
         
         this.selectedDomino = index;
-        if (this.playDomino) this.playDomino.disabled = false;
+        // Find the play domino button within the game table window
+        const playDominoButton = this.gameTableManager?.gameTableWindow?.querySelector('#play-domino');
+        if (playDominoButton) {
+            playDominoButton.disabled = false;
+        }
     }
     
     biddingPhase() {
@@ -4853,9 +4879,19 @@ class Game {
         if (player.isHuman) {
             // Human player - wait for input
             this.updateStatus(`Your turn to play. Select a domino from your hand.`);
-            this.showElement(this.playerHand);
+            // Enable the play button for human player
+            const playDominoButton = this.gameTableManager?.gameTableWindow?.querySelector('#play-domino');
+            if (playDominoButton) {
+                playDominoButton.disabled = false;
+            }
         } else {
             // AI player - make play automatically
+            // Disable the play button for AI players
+            const playDominoButton = this.gameTableManager?.gameTableWindow?.querySelector('#play-domino');
+            if (playDominoButton) {
+                playDominoButton.disabled = true;
+            }
+            
             const chosenDomino = player.chooseDomino(this.currentTrick);
             if (chosenDomino) {
                 const index = player.hand.indexOf(chosenDomino);
@@ -4975,7 +5011,11 @@ class Game {
         
         // Clear selection
         this.selectedDomino = null;
-        if (this.playDomino) this.playDomino.disabled = true;
+        // Find the play domino button within the game table window
+        const playDominoButton = this.gameTableManager?.gameTableWindow?.querySelector('#play-domino');
+        if (playDominoButton) {
+            playDominoButton.disabled = true;
+        }
         
         // Continue with next player in the current trick order
         this.currentPlayerIndex++;
@@ -5168,7 +5208,11 @@ class Game {
         // Clear UI
         this.hideElement(this.handScoreboard);
         if (this.trickArea) this.hideElement(this.trickArea);
-        this.hideElement(this.playerHand);
+        // Disable the play button when starting a new hand
+        const playDominoButton = this.gameTableManager?.gameTableWindow?.querySelector('#play-domino');
+        if (playDominoButton) {
+            playDominoButton.disabled = true;
+        }
         if (this.biddingBoard) this.hideElement(this.biddingBoard);
         if (this.playedDominoes) this.playedDominoes.innerHTML = '';
         this.hidePlayNextTrickButton();
