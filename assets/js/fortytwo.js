@@ -830,6 +830,19 @@ class GameTableWindowManager {
         
         // Make sure shuffle next hand button is hidden when restoring state
         this.hideShuffleNextHandButton();
+
+        // --- FIX: Restore Play Next Trick button if needed ---
+        // Only show if: in playing phase, hand not over, and not in the middle of a trick
+        if (
+            this.game.currentPhase === 'playing' &&
+            !this.game.isHandOver() &&
+            (
+                !this.game.currentTrick ||
+                (this.game.currentTrick && this.game.currentTrick.playedDominoes.length === 4)
+            )
+        ) {
+            this.showPlayNextTrickButton();
+        }
     }
     
     restoreBiddingInterface() {
