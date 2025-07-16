@@ -843,6 +843,18 @@ class GameTableWindowManager {
         ) {
             this.showPlayNextTrickButton();
         }
+
+        // --- FIX: Restore Shuffle Next Hand button if needed ---
+        // Only show if: in playing phase, hand is over, and game is not over
+        if (
+            this.game.currentPhase === 'playing' &&
+            this.game.isHandOver() &&
+            this.game.scores &&
+            this.game.scores[0] < 7 &&
+            this.game.scores[1] < 7
+        ) {
+            this.showShuffleNextHandButton();
+        }
     }
     
     restoreBiddingInterface() {
