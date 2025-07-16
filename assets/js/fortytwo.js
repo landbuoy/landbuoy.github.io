@@ -4088,6 +4088,20 @@ class Game {
         // Display new team introductions
         this.displayTeamIntroductions();
         
+        // Clean up any existing game table window and reopen button
+        if (this.gameTableManager) {
+            // Remove any existing reopen button
+            const existingReopenButton = document.querySelector('.game-table-reopen-btn');
+            if (existingReopenButton) {
+                existingReopenButton.remove();
+            }
+            
+            // Close existing game table window if it exists
+            if (this.gameTableManager.gameTableWindow) {
+                this.gameTableManager.closeGameTableWindow();
+            }
+        }
+        
         // Create game table window
         this.gameTableManager.createGameTableWindow();
         
