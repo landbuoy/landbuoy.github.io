@@ -669,8 +669,8 @@ class GameTableWindowManager {
         
         // Touch event handlers for mobile
         window.addEventListener('touchstart', (e) => {
-            // Only prevent default if not touching an interactive element
-            if (!e.target.closest('button, input, select, textarea, .interactive-element')) {
+            // Only prevent default if not touching an interactive element or domino window
+            if (!e.target.closest('button, input, select, textarea, .interactive-element, .domino-window, .domino-window-content')) {
                 e.preventDefault();
             }
             isDragging = true;
@@ -4277,6 +4277,7 @@ class Game {
         let wasDragging = false;
         let startX, startY;
         
+        // Mouse event handlers for desktop
         window.addEventListener('mousedown', (e) => {
             startX = e.clientX;
             startY = e.clientY;
@@ -4298,6 +4299,42 @@ class Game {
             if (!wasDragging) {
                 this.selectDomino(index);
             }
+        });
+        
+        // Touch event handlers for mobile
+        let touchStartX, touchStartY;
+        let wasTouchDragging = false;
+        
+        window.addEventListener('touchstart', (e) => {
+            // Don't prevent default here - let the global handler decide
+            if (e.touches.length === 1) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                wasTouchDragging = false;
+            }
+        });
+        
+        window.addEventListener('touchmove', (e) => {
+            if (touchStartX !== undefined && touchStartY !== undefined && e.touches.length === 1) {
+                const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
+                const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
+                if (deltaX > 5 || deltaY > 5) {
+                    wasTouchDragging = true;
+                }
+            }
+        });
+        
+        window.addEventListener('touchend', (e) => {
+            // Only select if we didn't just drag and this was a single touch
+            if (!wasTouchDragging && e.changedTouches.length === 1) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.selectDomino(index);
+            }
+            // Reset touch tracking
+            touchStartX = undefined;
+            touchStartY = undefined;
+            wasTouchDragging = false;
         });
         
         // Assemble the window
@@ -4383,8 +4420,8 @@ class Game {
         
         // Touch event handlers for mobile
         window.addEventListener('touchstart', (e) => {
-            // Only prevent default if not touching an interactive element
-            if (!e.target.closest('button, input, select, textarea, .interactive-element')) {
+            // Only prevent default if not touching an interactive element or domino window
+            if (!e.target.closest('button, input, select, textarea, .interactive-element, .domino-window, .domino-window-content')) {
                 e.preventDefault();
             }
             isDragging = true;

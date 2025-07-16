@@ -150,3 +150,84 @@ Ensure all interactive elements meet mobile accessibility standards:
 4. **Long-term (Low)**: Comprehensive mobile UX improvements
 
 This analysis provides a roadmap for resolving the mobile game table functionality issues.
+
+---
+
+## FIXES IMPLEMENTED ✅
+
+### Critical Issue: Missing Touch Event Handlers for Domino Selection
+
+**Problem Identified**: The "play selected domino" button wasn't working on mobile because domino selection was completely broken on touch devices. The domino windows only had mouse event handlers for selection, but no touch event handlers.
+
+**Root Cause**: 
+- Domino displays had touch handlers for flipping (domino ↔ bird view) but not selection
+- Domino windows had mouse handlers for selection but no touch handlers  
+- Users could flip dominoes by touching but couldn't select them for playing
+- Global touch event prevention was blocking touch events on domino windows
+
+**Fixes Applied**:
+
+1. **Added Touch Event Handlers for Domino Selection** (lines ~4275-4310):
+```javascript
+// Touch event handlers for mobile
+let touchStartX, touchStartY;
+let wasTouchDragging = false;
+
+window.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        wasTouchDragging = false;
+    }
+});
+
+window.addEventListener('touchmove', (e) => {
+    if (touchStartX !== undefined && touchStartY !== undefined && e.touches.length === 1) {
+        const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
+        const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
+        if (deltaX > 5 || deltaY > 5) {
+            wasTouchDragging = true;
+        }
+    }
+});
+
+window.addEventListener('touchend', (e) => {
+    if (!wasTouchDragging && e.changedTouches.length === 1) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.selectDomino(index);
+    }
+    touchStartX = undefined;
+    touchStartY = undefined;
+    wasTouchDragging = false;
+});
+```
+
+2. **Updated Global Touch Event Prevention** (lines 671 and 4422):
+```javascript
+// Before:
+if (!e.target.closest('button, input, select, textarea, .interactive-element')) {
+    e.preventDefault();
+}
+
+// After:
+if (!e.target.closest('button, input, select, textarea, .interactive-element, .domino-window, .domino-window-content')) {
+    e.preventDefault();
+}
+```
+
+**Expected Result**: 
+- Mobile users can now touch domino windows to select dominoes
+- Selected dominoes will show visual feedback (scale + glow effect)
+- The "play selected domino" button will work after touching a domino
+- Touch events are properly distinguished between drag and selection
+- Global touch prevention no longer blocks domino interaction
+
+**Status**: ✅ **IMPLEMENTED** - Ready for mobile testing
+
+**Testing Instructions**:
+1. Load the game on a mobile device
+2. Start a new game and wait for domino windows to appear
+3. Touch a domino window (not just the domino image) - it should get selected (scale up + glow)
+4. The "play selected domino" button should now be enabled and functional
+5. Touch the "play selected domino" button to play the selected domino
