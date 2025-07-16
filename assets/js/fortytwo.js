@@ -112,6 +112,446 @@ const DOMINO_BIRD_MAP = {
     "0-0": "Alpine Chough"
 };
 
+// Hand Scoreboard Window Manager
+class HandScoreboardWindowManager {
+    constructor(game) {
+        this.game = game;
+        this.handScoreboardWindow = null;
+        this.isOpen = false;
+    }
+    
+    createHandScoreboardWindow() {
+        // Remove existing window if any
+        if (this.handScoreboardWindow) {
+            this.handScoreboardWindow.remove();
+        }
+        
+        // Create the window container
+        this.handScoreboardWindow = document.createElement('div');
+        this.handScoreboardWindow.className = 'hand-scoreboard-window';
+        
+        // Generate random color for this window
+        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3', '#ff9f43'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        
+        // Helper functions for color conversion
+        const hexToRgb = (hex) => {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        };
+        
+        const rgbToHex = (r, g, b) => {
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        };
+        
+        const getComplementaryColor = (hex) => {
+            const rgb = hexToRgb(hex);
+            if (!rgb) return '#04c204'; // fallback to green
+            
+            // Calculate complementary color (opposite on color wheel)
+            const complementaryRgb = {
+                r: 255 - rgb.r,
+                g: 255 - rgb.g,
+                b: 255 - rgb.b
+            };
+            
+            return rgbToHex(complementaryRgb.r, complementaryRgb.g, complementaryRgb.b);
+        };
+        
+        const complementaryColor = getComplementaryColor(randomColor);
+        
+        // Store colors for later use when creating the aquaButton
+        this.handScoreboardWindow.dataset.boxShadowColor = randomColor;
+        this.handScoreboardWindow.dataset.aquaButtonColor = complementaryColor;
+        
+        // Apply box shadow to the window (like game table window)
+        this.handScoreboardWindow.style.boxShadow = `0px 0px 32px ${randomColor}`;
+        
+        // Position in center of screen
+        const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0, document.body.clientWidth || 0);
+        const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0, document.body.clientHeight || 0);
+        
+        const screenWidth = viewportWidth || 1200;
+        const screenHeight = viewportHeight || 800;
+        
+        const baseLeft = screenWidth / 2 - 300; // Center horizontally
+        const baseTop = screenHeight / 2 - 200; // Center vertically
+        
+        this.handScoreboardWindow.style.left = `${baseLeft}px`;
+        this.handScoreboardWindow.style.top = `${baseTop}px`;
+        this.handScoreboardWindow.style.zIndex = '1000';
+        
+        // Create window content with header and close button
+        this.handScoreboardWindow.innerHTML = `
+            <div class="modalHeader">
+                <h2 class="modalTitle">Hand Scorecard</h2>
+                <div class="aquaButton aquaButton--scoreboard" style="background: ${this.handScoreboardWindow.dataset.aquaButtonColor}; box-shadow: 0px 5px 10px ${this.handScoreboardWindow.dataset.boxShadowColor};">×</div>
+            </div>
+        `;
+        
+        // Add close button event listener
+        const closeBtn = this.handScoreboardWindow.querySelector('.aquaButton--scoreboard');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.closeHandScoreboardWindow();
+            });
+            
+            closeBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.closeHandScoreboardWindow();
+            });
+        }
+        
+        // Create content area
+        const content = document.createElement('div');
+        content.className = 'hand-scoreboard-content';
+        
+        const grid = document.createElement('div');
+        grid.className = 'hand-scoreboard-grid';
+        
+        // Create US team column
+        const usColumn = document.createElement('div');
+        usColumn.className = 'team-column';
+        
+        const usHeader = document.createElement('div');
+        usHeader.className = 'team-header';
+        usHeader.innerHTML = `US - <span id="us-hand-points">${this.game.usHandPoints || 0}</span>`;
+        
+        const usTricks = document.createElement('div');
+        usTricks.id = 'us-tricks';
+        
+        usColumn.appendChild(usHeader);
+        usColumn.appendChild(usTricks);
+        
+        // Create THEM team column
+        const themColumn = document.createElement('div');
+        themColumn.className = 'team-column';
+        
+        const themHeader = document.createElement('div');
+        themHeader.className = 'team-header';
+        themHeader.innerHTML = `THEM - <span id="them-hand-points">${this.game.themHandPoints || 0}</span>`;
+        
+        const themTricks = document.createElement('div');
+        themTricks.id = 'them-tricks';
+        
+        themColumn.appendChild(themHeader);
+        themColumn.appendChild(themTricks);
+        
+        grid.appendChild(usColumn);
+        grid.appendChild(themColumn);
+        content.appendChild(grid);
+        
+        this.handScoreboardWindow.appendChild(content);
+        
+        // Add to page
+        document.body.appendChild(this.handScoreboardWindow);
+        
+        // Make draggable
+        this.makeDraggable(this.handScoreboardWindow);
+        
+        // Position window
+        this.handScoreboardWindow.style.left = '50px';
+        this.handScoreboardWindow.style.top = '100px';
+        
+        // Set state
+        this.isOpen = true;
+        
+        // Populate with current data
+        this.populateHandScoreboard();
+    }
+    
+    makeDraggable(window) {
+        let isDragging = false;
+        let startX, startY, startLeft, startTop;
+        
+        const handleMouseDown = (e) => {
+            // Don't start drag if clicking on interactive elements
+            if (e.target.closest('.aquaButton') || e.target.closest('input') || e.target.closest('button')) {
+                return;
+            }
+            
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            startLeft = parseInt(window.style.left) || 0;
+            startTop = parseInt(window.style.top) || 0;
+            
+            e.preventDefault();
+        };
+        
+        const handleMouseMove = (e) => {
+            if (!isDragging) return;
+            
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            
+            window.style.left = (startLeft + deltaX) + 'px';
+            window.style.top = (startTop + deltaY) + 'px';
+        };
+        
+        const handleMouseUp = () => {
+            isDragging = false;
+        };
+        
+        // Mouse events
+        window.addEventListener('mousedown', handleMouseDown);
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        
+        // Touch events for mobile
+        const handleTouchStart = (e) => {
+            if (e.target.closest('.aquaButton') || e.target.closest('input') || e.target.closest('button')) {
+                return;
+            }
+            
+            isDragging = true;
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            startLeft = parseInt(window.style.left) || 0;
+            startTop = parseInt(window.style.top) || 0;
+            
+            e.preventDefault();
+        };
+        
+        const handleTouchMove = (e) => {
+            if (!isDragging) return;
+            
+            const deltaX = e.touches[0].clientX - startX;
+            const deltaY = e.touches[0].clientY - startY;
+            
+            window.style.left = (startLeft + deltaX) + 'px';
+            window.style.top = (startTop + deltaY) + 'px';
+            
+            e.preventDefault();
+        };
+        
+        const handleTouchEnd = () => {
+            isDragging = false;
+        };
+        
+        window.addEventListener('touchstart', handleTouchStart, { passive: false });
+        window.addEventListener('touchmove', handleTouchMove, { passive: false });
+        window.addEventListener('touchend', handleTouchEnd);
+        
+        // Bring to front on click
+        window.addEventListener('click', () => {
+            this.bringWindowToFront(window);
+        });
+    }
+    
+    bringWindowToFront(clickedWindow) {
+        const allWindows = document.querySelectorAll('.hand-scoreboard-window');
+        let maxZIndex = 1000;
+        
+        allWindows.forEach(window => {
+            const zIndex = parseInt(window.style.zIndex) || 1000;
+            maxZIndex = Math.max(maxZIndex, zIndex);
+        });
+        
+        clickedWindow.style.zIndex = maxZIndex + 1;
+    }
+    
+    closeHandScoreboardWindow() {
+        if (this.handScoreboardWindow) {
+            this.handScoreboardWindow.remove();
+            this.handScoreboardWindow = null;
+            this.isOpen = false;
+        }
+        this.addReopenButton();
+    }
+    
+    addReopenButton() {
+        let container = document.getElementById('window-controls-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'window-controls-container';
+            container.className = 'window-controls-container';
+            document.body.appendChild(container);
+        }
+        // Remove existing reopen button if any
+        const existingButton = container.querySelector('.hand-scoreboard-reopen-btn');
+        if (existingButton) {
+            existingButton.remove();
+        }
+        // Create new reopen button
+        const reopenButton = document.createElement('button');
+        reopenButton.className = 'hand-scoreboard-reopen-btn';
+        reopenButton.textContent = 'Hand Scorecard';
+        reopenButton.style.cursor = 'pointer';
+        reopenButton.style.pointerEvents = 'auto';
+        // Add click event listener
+        const self = this;
+        reopenButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            self.reopenHandScoreboardWindow();
+        });
+        // Add touch event listener for mobile
+        reopenButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+        reopenButton.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            self.reopenHandScoreboardWindow();
+        });
+        container.appendChild(reopenButton);
+        container.style.display = 'flex';
+    }
+    
+    reopenHandScoreboardWindow() {
+        this.createHandScoreboardWindow();
+        
+        // Remove reopen button
+        const reopenButton = document.querySelector('.hand-scoreboard-reopen-btn');
+        if (reopenButton) {
+            reopenButton.remove();
+        }
+        
+        // Hide container if no buttons remain
+        this.updateButtonContainerVisibility();
+    }
+    
+    populateHandScoreboard() {
+        // Clear previous scoreboard
+        const usTricks = document.getElementById('us-tricks');
+        const themTricks = document.getElementById('them-tricks');
+        
+        if (usTricks) usTricks.innerHTML = '';
+        if (themTricks) themTricks.innerHTML = '';
+        
+        // Group tricks by team
+        const usTricksData = this.game.currentHandTricks.filter(t => t.team === 'Us');
+        const themTricksData = this.game.currentHandTricks.filter(t => t.team === 'Them');
+        
+        // Display US tricks
+        usTricksData.forEach((trick, index) => {
+            const trickGroup = document.createElement('div');
+            trickGroup.className = 'trick-group';
+            
+            const trickLabel = document.createElement('div');
+            trickLabel.className = 'trick-label';
+            trickLabel.textContent = `Trick ${trick.trickNum}`;
+            trickGroup.appendChild(trickLabel);
+            
+            const trickDominoes = document.createElement('div');
+            trickDominoes.className = 'trick-dominoes';
+            
+            // Display plays in the order they were made
+            trick.playerPlays.forEach((play, playIndex) => {
+                const playerPlay = document.createElement('div');
+                playerPlay.className = 'player-play';
+                
+                const playerName = document.createElement('div');
+                playerName.className = 'player-name';
+                playerName.textContent = this.game.getPlayerRelationship(play.playerIdx);
+                playerPlay.appendChild(playerName);
+                
+                const dominoElement = document.createElement('img');
+                dominoElement.className = 'domino-small';
+                const mod = play.domino.modulate(this.game.trump, trick.ledSuit);
+                const dominoKey = `${mod[0]}-${mod[1]}`;
+                dominoElement.src = `../assets/img/dominoes/${dominoKey}.png`;
+                dominoElement.alt = dominoKey;
+                dominoElement.onerror = () => {
+                    console.warn(`Failed to load domino image: ${dominoKey}.png`);
+                    // Fallback to text if image fails to load
+                    dominoElement.style.display = 'none';
+                    const fallbackElement = document.createElement('div');
+                    fallbackElement.className = 'domino-small';
+                    fallbackElement.textContent = dominoKey;
+                    playerPlay.appendChild(fallbackElement);
+                };
+                playerPlay.appendChild(dominoElement);
+                
+                trickDominoes.appendChild(playerPlay);
+            });
+            
+            trickGroup.appendChild(trickDominoes);
+            if (usTricks) usTricks.appendChild(trickGroup);
+        });
+        
+        // Display THEM tricks
+        themTricksData.forEach((trick, index) => {
+            const trickGroup = document.createElement('div');
+            trickGroup.className = 'trick-group';
+            
+            const trickLabel = document.createElement('div');
+            trickLabel.className = 'trick-label';
+            trickLabel.textContent = `Trick ${trick.trickNum}`;
+            trickGroup.appendChild(trickLabel);
+            
+            const trickDominoes = document.createElement('div');
+            trickDominoes.className = 'trick-dominoes';
+            
+            // Display plays in the order they were made
+            trick.playerPlays.forEach((play, playIndex) => {
+                const playerPlay = document.createElement('div');
+                playerPlay.className = 'player-play';
+                
+                const playerName = document.createElement('div');
+                playerName.className = 'player-name';
+                playerName.textContent = this.game.getPlayerRelationship(play.playerIdx);
+                playerPlay.appendChild(playerName);
+                
+                const dominoElement = document.createElement('img');
+                dominoElement.className = 'domino-small';
+                const mod = play.domino.modulate(this.game.trump, trick.ledSuit);
+                const dominoKey = `${mod[0]}-${mod[1]}`;
+                dominoElement.src = `../assets/img/dominoes/${dominoKey}.png`;
+                dominoElement.alt = dominoKey;
+                dominoElement.onerror = () => {
+                    console.warn(`Failed to load domino image: ${dominoKey}.png`);
+                    // Fallback to text if image fails to load
+                    dominoElement.style.display = 'none';
+                    const fallbackElement = document.createElement('div');
+                    fallbackElement.className = 'domino-small';
+                    fallbackElement.textContent = dominoKey;
+                    playerPlay.appendChild(fallbackElement);
+                };
+                playerPlay.appendChild(dominoElement);
+                
+                trickDominoes.appendChild(playerPlay);
+            });
+            
+            trickGroup.appendChild(trickDominoes);
+            if (themTricks) themTricks.appendChild(trickGroup);
+        });
+        
+        // Update points
+        const usPointsElement = document.getElementById('us-hand-points');
+        const themPointsElement = document.getElementById('them-hand-points');
+        
+        if (usPointsElement) usPointsElement.textContent = this.game.usHandPoints || 0;
+        if (themPointsElement) themPointsElement.textContent = this.game.themHandPoints || 0;
+    }
+    
+    updateButtonContainerVisibility() {
+        let container = document.getElementById('window-controls-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'window-controls-container';
+            container.className = 'window-controls-container';
+            document.body.appendChild(container);
+        }
+        
+        const buttons = container.querySelectorAll('button');
+        if (buttons.length === 0) {
+            container.style.display = 'none';
+        } else {
+            container.style.display = 'flex';
+        }
+    }
+}
+
 // Consolidated Game Table Window Manager
 class GameTableWindowManager {
     constructor(game) {
@@ -358,8 +798,7 @@ class GameTableWindowManager {
 
     
     createGameTableWindow() {
-        const container = document.getElementById('player-windows-container');
-        if (!container) return;
+        // Create window directly in the main body
         
         // Create window element
         this.gameTableWindow = document.createElement('div');
@@ -462,7 +901,6 @@ class GameTableWindowManager {
                 <div class="game-table-score-display">
                     <div class="score-item" style="font-size: 12px;">Us: <span id="game-table-us-score">0</span></div>
                     <div class="score-item" style="font-size: 12px;">Them: <span id="game-table-them-score">0</span></div>
-                    <button id="game-table-show-history-btn" class="btn history-btn" style="font-size: 11px;">History</button>
                 </div>
                 <button id="play-domino" class="btn" disabled style="font-size: 11px; margin-left: 10px;">Play Domino</button>
                 <button id="game-table-play-next-trick-btn" class="btn game-table-play-next-trick-btn" style="display: none; font-size: 11px;">Next Trick</button>
@@ -601,8 +1039,8 @@ class GameTableWindowManager {
         // Make window draggable
         this.makeDraggable(this.gameTableWindow);
         
-        // Add to container
-        container.appendChild(this.gameTableWindow);
+        // Add to main body
+        document.body.appendChild(this.gameTableWindow);
         this.isOpen = true;
         
         // Set up event listeners for human player interactions
@@ -752,8 +1190,13 @@ class GameTableWindowManager {
     }
     
     addReopenButton() {
-        const container = document.getElementById('player-windows-container');
-        if (!container) return;
+        let container = document.getElementById('window-controls-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'window-controls-container';
+            container.className = 'window-controls-container';
+            document.body.appendChild(container);
+        }
         
         // Remove existing reopen button if any
         const existingButton = container.querySelector('.game-table-reopen-btn');
@@ -770,6 +1213,7 @@ class GameTableWindowManager {
         });
         
         container.appendChild(reopenButton);
+        container.style.display = 'flex';
     }
     
     reopenGameTableWindow() {
@@ -785,6 +1229,9 @@ class GameTableWindowManager {
         if (reopenButton) {
             reopenButton.remove();
         }
+        
+        // Hide container if no buttons remain
+        this.updateButtonContainerVisibility();
     }
     
     async restoreCurrentGameState() {
@@ -855,6 +1302,23 @@ class GameTableWindowManager {
             this.game.scores[1] < 7
         ) {
             this.showShuffleNextHandButton();
+        }
+    }
+    
+    updateButtonContainerVisibility() {
+        let container = document.getElementById('window-controls-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'window-controls-container';
+            container.className = 'window-controls-container';
+            document.body.appendChild(container);
+        }
+        
+        const buttons = container.querySelectorAll('button');
+        if (buttons.length === 0) {
+            container.style.display = 'none';
+        } else {
+            container.style.display = 'flex';
         }
     }
     
@@ -1388,28 +1852,7 @@ class GameTableWindowManager {
             });
         }
         
-        // Set up history button event listener with mobile compatibility
-        const historyBtn = document.getElementById('game-table-show-history-btn');
-        if (historyBtn) {
-            const handleShowHistory = () => {
-                console.log('History button triggered'); // Debug log
-                this.game.showScoreboardHistory();
-            };
-            
-            // Add both click and touch events for mobile compatibility
-            historyBtn.addEventListener('click', handleShowHistory);
-            historyBtn.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('History button touched'); // Debug log
-                handleShowHistory();
-            });
-            
-            // Additional touchstart handler to prevent drag interference
-            historyBtn.addEventListener('touchstart', (e) => {
-                e.stopPropagation();
-            });
-        }
+
         
         // Set up play domino button event listener with mobile compatibility
         const playDominoBtn = this.gameTableWindow?.querySelector('#play-domino');
@@ -3763,20 +4206,24 @@ class Game {
         this.themTricks = document.getElementById('them-tricks');
         this.scoreboard = document.getElementById('scoreboard');
         this.scoreboardContent = document.getElementById('scoreboard-content');
-        this.startGame = document.getElementById('start-game');
+        this.startGame = null; // Will be created dynamically
         // this.playDomino removed - now handled in setupHumanPlayerEventListeners
         this.showHistoryBtn = null; // Moved to game table window header
-        this.scoreboardHistoryModal = document.getElementById('scoreboard-history-modal');
-        this.historyContent = document.getElementById('history-content');
+        this.scoreboardHistoryModal = null; // Will be created dynamically
+        this.historyContent = null; // Will be created dynamically
         
         // Hand history tracking
         this.handHistory = []; // Array to store previous hand scoreboards
         
-        // Initialize player window manager
+        // Initialize window managers
         this.gameTableManager = new GameTableWindowManager(this);
+        this.handScoreboardManager = new HandScoreboardWindowManager(this);
         
         // Bind event listeners
         this.bindEventListeners();
+        
+        // Create start game button in window-controls-container
+        this.createStartGameButton();
         
         // Display team introductions on page load
         this.displayTeamIntroductions();
@@ -3784,37 +4231,35 @@ class Game {
         this.playerHasNo = [new Set(), new Set(), new Set(), new Set()]; // Track suits each player cannot follow
     }
     
+    createStartGameButton() {
+        let container = document.getElementById('window-controls-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'window-controls-container';
+            container.className = 'window-controls-container';
+            document.body.appendChild(container);
+        }
+        
+        // Create start game button
+        this.startGame = document.createElement('button');
+        this.startGame.id = 'start-game';
+        this.startGame.className = 'btn';
+        this.startGame.textContent = 'Start New Game';
+        
+        // Add event listener
+        this.startGame.addEventListener('click', () => this.startNewGame());
+        
+        // Add to container
+        container.appendChild(this.startGame);
+        container.style.display = 'flex';
+    }
+    
     bindEventListeners() {
-        if (this.startGame) this.startGame.addEventListener('click', () => this.startNewGame());
         // Bidding and trump selection event listeners removed - now handled in player windows
         // Play domino button event listener moved to setupHumanPlayerEventListeners
         // History button event listener moved to game table window header
         
-        // Close modal button - enhanced for mobile compatibility
-        const scoreboardCloseBtn = document.querySelector('.aquaButton--scoreboard');
-        if (scoreboardCloseBtn) {
-            // Handle both click and touch events
-            scoreboardCloseBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.hideElement(this.scoreboardHistoryModal);
-                // Reset z-index when modal is closed
-                if (this.scoreboardHistoryModal) this.scoreboardHistoryModal.style.zIndex = '';
-            });
-            
-            scoreboardCloseBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.hideElement(this.scoreboardHistoryModal);
-                // Reset z-index when modal is closed
-                if (this.scoreboardHistoryModal) this.scoreboardHistoryModal.style.zIndex = '';
-            });
-            
-            // Prevent default touch behavior that might interfere
-            scoreboardCloseBtn.addEventListener('touchmove', (e) => {
-                e.stopPropagation();
-            });
-        }
+        // Close modal button event listeners will be added dynamically when modal is created
         
         // Trump selection
         document.querySelectorAll('.trump-option').forEach(option => {
@@ -3824,13 +4269,7 @@ class Game {
             });
         });
         
-        // Initialize draggable modal
-        $(document).ready(() => {
-            $('#scoreboard-history-modal').draggable({
-                handle: '.modalHeader',
-                containment: 'window'
-            });
-        });
+        // Draggable functionality is now handled manually in makeHistoryModalDraggable()
     }
     
     assignPlanetNames() {
@@ -3934,9 +4373,10 @@ class Game {
     }
     
     updateHandScoreboard() {
-        if (this.usHandPointsElement) this.usHandPointsElement.textContent = this.usHandPoints;
-        if (this.themHandPointsElement) this.themHandPointsElement.textContent = this.themHandPoints;
-        this.showElement(this.handScoreboard);
+        // Update the hand scoreboard window if it exists and is open
+        if (this.handScoreboardManager && this.handScoreboardManager.isOpen) {
+            this.handScoreboardManager.populateHandScoreboard();
+        }
     }
     
     showPlayNextTrickButton() {
@@ -3984,87 +4424,58 @@ class Game {
     addTrickToScoreboard(trickData) {
         this.currentHandTricks.push(trickData);
         
-        // Clear previous scoreboard
-        if (this.usTricks) this.usTricks.innerHTML = '';
-        if (this.themTricks) this.themTricks.innerHTML = '';
+        // Update the hand scoreboard window if it exists and is open
+        if (this.handScoreboardManager && this.handScoreboardManager.isOpen) {
+            this.handScoreboardManager.populateHandScoreboard();
+        }
+    }
+    
+    addHistoryButton() {
+        let container = document.getElementById('window-controls-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'window-controls-container';
+            container.className = 'window-controls-container';
+            document.body.appendChild(container);
+        }
         
-        // Group tricks by team
-        const usTricks = this.currentHandTricks.filter(t => t.team === 'Us');
-        const themTricks = this.currentHandTricks.filter(t => t.team === 'Them');
+        // Remove existing history button if any
+        const existingButton = container.querySelector('.history-btn');
+        if (existingButton) {
+            existingButton.remove();
+        }
         
-        // Display US tricks
-        usTricks.forEach((trick, index) => {
-            const trickGroup = document.createElement('div');
-            trickGroup.className = 'trick-group';
-            
-            const trickLabel = document.createElement('div');
-            trickLabel.className = 'trick-label';
-            trickLabel.textContent = `Trick ${trick.trickNum}`;
-            trickGroup.appendChild(trickLabel);
-            
-            const trickDominoes = document.createElement('div');
-            trickDominoes.className = 'trick-dominoes';
-            
-            // Display plays in the order they were made
-            trick.playerPlays.forEach((play, playIndex) => {
-                const playerPlay = document.createElement('div');
-                playerPlay.className = 'player-play';
-                
-                const playerName = document.createElement('div');
-                playerName.className = 'player-name';
-                playerName.textContent = this.getPlayerRelationship(play.playerIdx);
-                playerPlay.appendChild(playerName);
-                
-                const dominoElement = document.createElement('div');
-                dominoElement.className = 'domino-small';
-                const mod = play.domino.modulate(this.trump, trick.ledSuit);
-                dominoElement.textContent = `${mod[0]}-${mod[1]}`;
-                playerPlay.appendChild(dominoElement);
-                
-                trickDominoes.appendChild(playerPlay);
-            });
-            
-            trickGroup.appendChild(trickDominoes);
-            if (this.usTricks) this.usTricks.appendChild(trickGroup);
+        // Create new history button
+        const historyButton = document.createElement('button');
+        historyButton.className = 'history-btn';
+        historyButton.textContent = 'Hand History';
+        historyButton.style.cursor = 'pointer';
+        historyButton.style.pointerEvents = 'auto';
+        
+        // Add click event listener
+        historyButton.addEventListener('click', (e) => {
+            console.log('History button clicked');
+            e.preventDefault();
+            e.stopPropagation();
+            this.showScoreboardHistory();
         });
         
-        // Display THEM tricks
-        themTricks.forEach((trick, index) => {
-            const trickGroup = document.createElement('div');
-            trickGroup.className = 'trick-group';
-            
-            const trickLabel = document.createElement('div');
-            trickLabel.className = 'trick-label';
-            trickLabel.textContent = `Trick ${trick.trickNum}`;
-            trickGroup.appendChild(trickLabel);
-            
-            const trickDominoes = document.createElement('div');
-            trickDominoes.className = 'trick-dominoes';
-            
-            // Display plays in the order they were made
-            trick.playerPlays.forEach((play, playIndex) => {
-                const playerPlay = document.createElement('div');
-                playerPlay.className = 'player-play';
-                
-                const playerName = document.createElement('div');
-                playerName.className = 'player-name';
-                playerName.textContent = this.getPlayerRelationship(play.playerIdx);
-                playerPlay.appendChild(playerName);
-                
-                const dominoElement = document.createElement('div');
-                dominoElement.className = 'domino-small';
-                const mod = play.domino.modulate(this.trump, trick.ledSuit);
-                dominoElement.textContent = `${mod[0]}-${mod[1]}`;
-                playerPlay.appendChild(dominoElement);
-                
-                trickDominoes.appendChild(playerPlay);
-            });
-            
-            trickGroup.appendChild(trickDominoes);
-            if (this.themTricks) this.themTricks.appendChild(trickGroup);
+        // Add touch event listener for mobile
+        historyButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
         });
         
-        this.updateHandScoreboard();
+        historyButton.addEventListener('touchend', (e) => {
+            console.log('History button touched');
+            e.preventDefault();
+            e.stopPropagation();
+            this.showScoreboardHistory();
+        });
+        
+        container.appendChild(historyButton);
+        container.style.display = 'flex';
+        console.log('History button created and added to container');
     }
     
     startNewGame() {
@@ -4116,6 +4527,12 @@ class Game {
         
         // Create game table window
         this.gameTableManager.createGameTableWindow();
+        
+        // Add hand scoreboard reopen button (window will be created when button is clicked)
+        this.handScoreboardManager.addReopenButton();
+        
+        // Add history button (independent of game table state)
+        this.addHistoryButton();
         
         // Hide start game button
         this.hideElement(this.startGame);
@@ -5368,6 +5785,12 @@ class Game {
         // Reset game table header to bidding mode
         this.resetGameTableHeader();
         
+        // Add hand scoreboard reopen button for new hand (window will be created when button is clicked)
+        this.handScoreboardManager.addReopenButton();
+        
+        // Ensure history button is available (independent of game table state)
+        this.addHistoryButton();
+        
         // Start new hand
         this.shuffleAndDeal();
         this.handSortingPhase();
@@ -5520,6 +5943,108 @@ class Game {
         console.log('Show scoreboard history called');
         console.log('Hand history length:', this.handHistory.length);
         
+        // Remove existing modal if any
+        if (this.scoreboardHistoryModal) {
+            this.scoreboardHistoryModal.remove();
+        }
+        
+        // Create the modal dynamically
+        this.scoreboardHistoryModal = document.createElement('div');
+        this.scoreboardHistoryModal.className = 'modalContainer modalContainer--scoreboard';
+        this.scoreboardHistoryModal.id = 'scoreboard-history-modal';
+        
+        // Generate random color for this modal
+        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3', '#ff9f43'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        
+        // Helper functions for color conversion
+        const hexToRgb = (hex) => {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        };
+        
+        const rgbToHex = (r, g, b) => {
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        };
+        
+        const getComplementaryColor = (hex) => {
+            const rgb = hexToRgb(hex);
+            if (!rgb) return '#04c204'; // fallback to green
+            
+            // Calculate complementary color (opposite on color wheel)
+            const complementaryRgb = {
+                r: 255 - rgb.r,
+                g: 255 - rgb.g,
+                b: 255 - rgb.b
+            };
+            
+            return rgbToHex(complementaryRgb.r, complementaryRgb.g, complementaryRgb.b);
+        };
+        
+        const complementaryColor = getComplementaryColor(randomColor);
+        
+        // Apply box shadow to the modal (like other windows)
+        this.scoreboardHistoryModal.style.boxShadow = `0px 0px 32px ${randomColor}`;
+        
+        // Position in center of screen
+        const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0, document.body.clientWidth || 0);
+        const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0, document.body.clientHeight || 0);
+        
+        const screenWidth = viewportWidth || 1200;
+        const screenHeight = viewportHeight || 800;
+        
+        const baseLeft = screenWidth / 2 - 300; // Center horizontally
+        const baseTop = screenHeight / 2 - 300; // Center vertically
+        
+        this.scoreboardHistoryModal.style.left = `${baseLeft}px`;
+        this.scoreboardHistoryModal.style.top = `${baseTop}px`;
+        this.scoreboardHistoryModal.style.zIndex = '9999';
+        
+        // Create modal content
+        this.scoreboardHistoryModal.innerHTML = `
+            <header class="modalHeader">
+                <h2 class="modalTitle">Hand History</h2>
+                <div class="aquaButton aquaButton--scoreboard" style="background: ${complementaryColor}; box-shadow: 0px 5px 10px ${randomColor};">×</div>
+            </header>
+            <div class="modalInnerContainer">
+                <div id="history-content"></div>
+            </div>
+        `;
+        
+        // Get reference to history content
+        this.historyContent = this.scoreboardHistoryModal.querySelector('#history-content');
+        
+        // Add close button event listeners
+        const closeBtn = this.scoreboardHistoryModal.querySelector('.aquaButton--scoreboard');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.closeHistoryModal();
+            });
+            
+            closeBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.closeHistoryModal();
+            });
+            
+            closeBtn.addEventListener('touchmove', (e) => {
+                e.stopPropagation();
+            });
+        }
+        
+        // Add to page body (not game container)
+        document.body.appendChild(this.scoreboardHistoryModal);
+        
+        // Make draggable
+        this.makeHistoryModalDraggable();
+        
+        // Populate content
         if (this.historyContent) this.historyContent.innerHTML = '';
         
         if (this.handHistory.length === 0) {
@@ -5562,11 +6087,14 @@ class Game {
             });
         }
         
-        console.log('Showing modal');
-        this.showElement(this.scoreboardHistoryModal);
+        // Remove history button when modal is opened
+        const historyButton = document.querySelector('.history-btn');
+        if (historyButton) {
+            historyButton.remove();
+        }
         
-        // Ensure the modal is brought to front
-        if (this.scoreboardHistoryModal) this.scoreboardHistoryModal.style.zIndex = '9999';
+        // Hide container if no buttons remain
+        this.updateButtonContainerVisibility();
     }
     
     createHandDisplay(hand) {
@@ -5609,16 +6137,17 @@ class Game {
             // Sort plays by trick number to get chronological order
             playerPlays.sort((a, b) => a.trickNum - b.trickNum);
             
-            // Display dominoes in play order
-            for (let i = 0; i < 7; i++) {
-                if (i < playerPlays.length) {
-                    const play = playerPlays[i];
-                    const mod = play.domino.modulate(hand.trump, null);
-                    display += `<span class="domino-display">[ ${mod[0]}-${mod[1]} ]</span>`;
-                } else {
-                    display += '<span class="domino-display">[     ]</span>';
+                            // Display dominoes in play order
+                for (let i = 0; i < 7; i++) {
+                    if (i < playerPlays.length) {
+                        const play = playerPlays[i];
+                        const mod = play.domino.modulate(hand.trump, null);
+                        const dominoKey = `${mod[0]}-${mod[1]}`;
+                        display += `<span class="domino-display"><img src="../assets/img/dominoes/${dominoKey}.png" alt="${dominoKey}" class="domino-small" style="transform: none;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"><span class="domino-fallback" style="display:none;">[ ${dominoKey} ]</span></span>`;
+                    } else {
+                        display += '<span class="domino-display">[     ]</span>';
+                    }
                 }
-            }
             
             display += '</div>';
         });
@@ -5628,6 +6157,126 @@ class Game {
     
     playerHasNoSuit(playerIdx, suit) {
         return this.playerHasNo[playerIdx].has(suit);
+    }
+    
+    closeHistoryModal() {
+        if (this.scoreboardHistoryModal) {
+            this.scoreboardHistoryModal.remove();
+            this.scoreboardHistoryModal = null;
+            this.historyContent = null;
+        }
+        // Restore history button when modal is closed
+        this.addHistoryButton();
+    }
+    
+    makeHistoryModalDraggable() {
+        let isDragging = false;
+        let startX, startY, startLeft, startTop;
+        
+        const handleMouseDown = (e) => {
+            // Don't start drag if clicking on interactive elements
+            if (e.target.closest('.aquaButton') || e.target.closest('input') || e.target.closest('button')) {
+                return;
+            }
+            
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            startLeft = parseInt(this.scoreboardHistoryModal.style.left) || 0;
+            startTop = parseInt(this.scoreboardHistoryModal.style.top) || 0;
+            
+            e.preventDefault();
+        };
+        
+        const handleMouseMove = (e) => {
+            if (!isDragging) return;
+            
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            
+            this.scoreboardHistoryModal.style.left = (startLeft + deltaX) + 'px';
+            this.scoreboardHistoryModal.style.top = (startTop + deltaY) + 'px';
+        };
+        
+        const handleMouseUp = () => {
+            isDragging = false;
+        };
+        
+        // Mouse events
+        this.scoreboardHistoryModal.addEventListener('mousedown', handleMouseDown);
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        
+        // Touch events for mobile
+        const handleTouchStart = (e) => {
+            if (e.target.closest('.aquaButton') || e.target.closest('input') || e.target.closest('button')) {
+                return;
+            }
+            
+            isDragging = true;
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            startLeft = parseInt(this.scoreboardHistoryModal.style.left) || 0;
+            startTop = parseInt(this.scoreboardHistoryModal.style.top) || 0;
+            
+            e.preventDefault();
+        };
+        
+        const handleTouchMove = (e) => {
+            if (!isDragging) return;
+            
+            const deltaX = e.touches[0].clientX - startX;
+            const deltaY = e.touches[0].clientY - startY;
+            
+            this.scoreboardHistoryModal.style.left = (startLeft + deltaX) + 'px';
+            this.scoreboardHistoryModal.style.top = (startTop + deltaY) + 'px';
+            
+            e.preventDefault();
+        };
+        
+        const handleTouchEnd = () => {
+            isDragging = false;
+        };
+        
+        this.scoreboardHistoryModal.addEventListener('touchstart', handleTouchStart, { passive: false });
+        this.scoreboardHistoryModal.addEventListener('touchmove', handleTouchMove, { passive: false });
+        this.scoreboardHistoryModal.addEventListener('touchend', handleTouchEnd);
+        
+        // Bring to front on click
+        this.scoreboardHistoryModal.addEventListener('click', () => {
+            this.bringHistoryModalToFront();
+        });
+    }
+    
+    bringHistoryModalToFront() {
+        if (this.scoreboardHistoryModal) {
+            const allModals = document.querySelectorAll('.modalContainer--scoreboard');
+            let maxZIndex = 9999;
+            
+            allModals.forEach(modal => {
+                const zIndex = parseInt(modal.style.zIndex) || 9999;
+                maxZIndex = Math.max(maxZIndex, zIndex);
+            });
+            
+            this.scoreboardHistoryModal.style.zIndex = maxZIndex + 1;
+        }
+    }
+    
+    updateButtonContainerVisibility() {
+        let container = document.getElementById('window-controls-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'window-controls-container';
+            container.className = 'window-controls-container';
+            document.body.appendChild(container);
+        }
+        
+        const buttons = container.querySelectorAll('button');
+        if (buttons.length === 0) {
+            container.style.display = 'none';
+        } else {
+            container.style.display = 'flex';
+        }
     }
 }
 

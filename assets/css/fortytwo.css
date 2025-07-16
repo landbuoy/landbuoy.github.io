@@ -10,15 +10,7 @@ body {
     color: #0000ff;
 }
 
-.game-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: rgba(0, 0, 0, 0.8);
-    border: 2px solid lime;
-    margin-top: 100px;
-    margin-bottom: 20px;
-}
+
 
 
 
@@ -256,13 +248,20 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    min-height: 50px;
+    min-height: 220px;
+    gap: 5px;
 }
 
 .player-play {
     flex: 1;
     text-align: center;
     margin: 0 2px;
+    width: 100px;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .player-name {
@@ -273,14 +272,17 @@ body {
 
 .domino-small {
     display: inline-block;
-    background: black;
-    border: 1px solid lime;
-    border-radius: 2px;
-    padding: 4px 6px;
+    background: transparent;
+    border: none;
+    padding: 0;
     font-size: 12px;
     color: lime;
-    min-width: 30px;
+    width: 100px;
+    height: 200px;
     text-align: center;
+    object-fit: contain;
+    transition: opacity 0.6s ease;
+    transform: rotate(90deg);
 }
 
 .hidden {
@@ -310,46 +312,12 @@ body {
     color: black;
 } 
 
-/* Game Table Window Container */
-.player-windows-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 100;
-}
-
-.player-windows-container .game-table-window {
+/* Game Table Window - now in main body */
+.game-table-window {
     pointer-events: all;
 }
 
-.player-windows-container .game-table-reopen-btn {
-    pointer-events: all;
-}
 
-/* Additional styles from HTML */
-.history-btn {
-    background: black;
-    color: lime;
-    border: 1px solid lime;
-    padding: 5px 10px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: rgba(0,255,0,0.1);
-    position: relative;
-    z-index: 5;
-    min-height: 36px;
-    min-width: 36px;
-}
-
-.history-btn:hover {
-    background: lime;
-    color: black;
-}
 
 .bidding-board {
     background: rgba(0, 0, 0, 0.7);
@@ -397,24 +365,43 @@ body {
     height: 80vh;
     box-shadow: 0px 0px 32px #ff6347;
     animation: morph 180s infinite;
-    background-color: #eaeaea;
+    background: rgba(0, 0, 0, 0.95);
+    border: 3px solid lime;
+    border-radius: 8px;
     color: #0000ff;
     z-index: 1000;
+    font-family: 'Courier New', monospace;
+    /* Prevent text selection during drag */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /* Better touch handling */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .modalHeader {
-    background: #eaeaea;
-    padding: 10px;
-    border-bottom: 2px solid #0000ff;
-    display: flex;
-    align-items: center;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 10px 15px;
+    border-bottom: 2px solid lime;
     cursor: move;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    touch-action: none;
+    min-height: 44px;
+    user-select: none;
 }
 
 .modalTitle {
+    width: 100%;
+    text-transform: uppercase;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: lime;
     margin: 0;
-    color: #0000ff;
-    flex-grow: 1;
 }
 
 .modalInnerContainer {
@@ -424,18 +411,16 @@ body {
 }
 
 .aquaButton--scoreboard {
-    background: #00ffff;
-    color: black;
-    border: 2px solid #0000ff;
-    padding: 5px 10px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-right: 10px;
+    /* Use same styling as other aqua buttons - colors will be set dynamically */
+    background: #04c204; /* Default green, will be overridden by JavaScript */
 }
 
 .aquaButton--scoreboard:hover {
-    background: #0000ff;
-    color: #00ffff;
+    background: #12ee12;
+}
+
+.aquaButton--scoreboard:active {
+    background: #06c506;
 }
 
 .hand-history-item {
@@ -453,6 +438,110 @@ body {
 
 .hand-history-details {
     font-size: 14px;
+    color: #0000ff;
+}
+
+/* Hand Scoreboard Window Styles */
+.hand-scoreboard-window {
+    position: absolute;
+    width: 600px;
+    height: 400px;
+    background: rgba(0, 0, 0, 0.95);
+    border: 3px solid lime;
+    border-radius: 8px;
+    z-index: 1000;
+    font-family: 'Courier New', monospace;
+    color: #0000ff;
+    /* Prevent text selection during drag */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /* Better touch handling */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.hand-scoreboard-content {
+    padding: 15px;
+    height: calc(100% - 60px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.95);
+}
+
+.hand-scoreboard-grid {
+    display: flex;
+    justify-content: space-between;
+    flex: 1;
+    gap: 15px;
+}
+
+/* Hand display styling for history modal */
+.hand-display {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid #0000ff;
+    border-radius: 4px;
+}
+
+.hand-display-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #0000ff;
+}
+
+.player-label {
+    min-width: 120px;
+    margin-right: 10px;
+}
+
+.play-number {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    color: #0000ff;
+    margin: 0 2px;
+}
+
+.hand-display-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #0000ff;
+}
+
+.hand-display-row .player-name {
+    min-width: 120px;
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.hand-display-row .domino-display {
+    flex: 1;
+    text-align: center;
+    margin: 0 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hand-display-row .domino-display img {
+    width: 200px;
+    height: 100px;
+    object-fit: contain;
+    border: none;
+    background: transparent;
+}
+
+.hand-display-row .domino-fallback {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
     color: #0000ff;
 }
 
@@ -496,6 +585,16 @@ body {
     cursor: pointer;
     border: none;
     outline: none;
+    /* Ensure proper touch handling */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    /* Prevent text selection */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /* Ensure proper z-index */
+    z-index: 10001;
 }
 
 .aquaButton::after {
@@ -827,10 +926,8 @@ body {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    border: 2px solid lime;
-    border-radius: 4px;
+    border: none;
     background: transparent;
-    box-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
     transition: opacity 0.6s ease;
 }
 
@@ -841,9 +938,7 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border: 2px solid lime;
-    border-radius: 6px;
-    box-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
+    border: none;
     transition: opacity 0.6s ease;
     background: transparent;
 }
@@ -1032,11 +1127,20 @@ body {
     color: black;
 }
 
-/* Reopen button styles */
-.game-table-reopen-btn {
+/* Window Controls Container */
+.window-controls-container {
     position: fixed;
     top: 20px;
     right: 20px;
+    display: flex;
+    gap: 15px;
+    z-index: 999;
+    /* Hide by default - buttons will be shown individually when needed */
+    display: none;
+}
+
+/* Reopen button styles */
+.game-table-reopen-btn {
     background: black;
     color: lime;
     border: 2px solid lime;
@@ -1047,11 +1151,56 @@ body {
     font-family: 'Courier New', monospace;
     font-weight: bold;
     transition: all 0.3s ease;
-    z-index: 999;
     box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
 }
 
 .game-table-reopen-btn:hover {
+    background: lime;
+    color: black;
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+}
+
+/* Hand Scoreboard Reopen Button */
+.hand-scoreboard-reopen-btn {
+    background: black;
+    color: lime;
+    border: 2px solid lime;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+}
+
+.hand-scoreboard-reopen-btn:hover {
+    background: lime;
+    color: black;
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+}
+
+/* Hand History Button - moved to top right with other buttons */
+.history-btn {
+    background: black;
+    color: lime;
+    border: 2px solid lime;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+    min-height: 36px;
+    min-width: 36px;
+}
+
+.history-btn:hover {
     background: lime;
     color: black;
     transform: scale(1.05);
@@ -1126,6 +1275,14 @@ body {
         min-height: 44px;
     }
     
+    .modalContainer--scoreboard {
+        width: 90vw !important;
+        height: 80vh !important;
+        left: 5vw !important;
+        top: 10vh !important;
+        right: auto !important;
+    }
+    
     .modalHeader {
         min-height: 50px;
         padding: 12px 15px;
@@ -1133,6 +1290,54 @@ body {
     
     .modalTitle {
         font-size: 16px;
+    }
+    
+    .aquaButton--gameTable {
+        min-width: 44px;
+        min-height: 44px;
+        font-size: 20px;
+        /* Ensure proper touch handling */
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        /* Prevent text selection */
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        /* Better touch feedback */
+        transition: all 0.15s ease;
+        /* Ensure proper z-index */
+        z-index: 10001;
+        position: relative;
+    }
+    
+    .aquaButton--gameTable:active {
+        transform: scale(0.95);
+        opacity: 0.8;
+    }
+    
+    .aquaButton--scoreboard {
+        min-width: 44px;
+        min-height: 44px;
+        font-size: 20px;
+        /* Ensure proper touch handling */
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        /* Prevent text selection */
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        /* Better touch feedback */
+        transition: all 0.15s ease;
+        /* Ensure proper z-index */
+        z-index: 10001;
+        position: relative;
+    }
+    
+    .aquaButton--scoreboard:active {
+        transform: scale(0.95);
+        opacity: 0.8;
     }
     
     .aquaButton--gameTable {
@@ -1286,6 +1491,15 @@ body {
     .domino-window.selected {
         transform: scale(1.03);
         filter: drop-shadow(0 0 6px rgba(255, 235, 59, 0.8));
+    }
+    
+    /* Mobile adjustments for hand scoreboard domino images */
+    .domino-small {
+        width: 60px !important;
+        height: 120px !important;
+        padding: 0 !important;
+        border: none !important;
+        transform: rotate(90deg) !important;
     }
     
     /* Enhanced mobile accessibility for bidding prompt */
@@ -1455,8 +1669,90 @@ body {
          transform: scale(1.02) !important;
      }
      
-     .player-confirm-trump-btn:active {
-         transform: scale(0.98) !important;
-         background: #ccff00 !important;
-     }
+         .player-confirm-trump-btn:active {
+        transform: scale(0.98) !important;
+        background: #ccff00 !important;
+    }
+    
+    /* Mobile adjustments for hand scoreboard window */
+    .hand-scoreboard-window {
+        width: 90vw !important;
+        height: 70vh !important;
+        left: 5vw !important;
+        top: 15vh !important;
+    }
+    
+    .window-controls-container {
+        top: 10px !important;
+        right: 10px !important;
+        gap: 8px !important;
+    }
+    
+    .hand-scoreboard-reopen-btn {
+        font-size: 12px !important;
+        padding: 8px 16px !important;
+    }
+    
+    .history-btn {
+        font-size: 12px !important;
+        padding: 8px 16px !important;
+    }
+    
+    .player-play {
+        width: 60px !important;
+        height: 120px !important;
+    }
+    
+    .trick-dominoes {
+        min-height: 140px !important;
+        gap: 3px !important;
+    }
+    
+    /* Mobile adjustments for hand display in history modal */
+    .hand-display {
+        padding: 8px !important;
+        margin-top: 8px !important;
+    }
+    
+    .hand-display-header {
+        margin-bottom: 6px !important;
+        font-size: 11px !important;
+    }
+    
+    .player-label {
+        min-width: 80px !important;
+        margin-right: 5px !important;
+        font-size: 10px !important;
+    }
+    
+    .play-number {
+        font-size: 10px !important;
+        margin: 0 1px !important;
+    }
+    
+    .hand-display-row {
+        margin-bottom: 4px !important;
+        font-size: 10px !important;
+    }
+    
+    .hand-display-row .player-name {
+        min-width: 80px !important;
+        margin-right: 5px !important;
+        font-size: 10px !important;
+    }
+    
+    .hand-display-row .domino-display {
+        margin: 0 1px !important;
+    }
+    
+    .hand-display-row .domino-display img {
+        width: 120px !important;
+        height: 60px !important;
+        border: none !important;
+        background: transparent !important;
+    }
+    
+    .hand-display-row .domino-fallback {
+        font-size: 9px !important;
+    }
 }
