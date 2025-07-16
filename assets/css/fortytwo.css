@@ -1285,6 +1285,8 @@ body {
         color: lime !important;
         text-align: center !important;
         margin-bottom: 10px !important;
+        touch-action: manipulation !important; /* Optimize for mobile touch */
+        -webkit-appearance: none !important; /* Remove iOS styling */
     }
     
     .player-bid-input:focus {

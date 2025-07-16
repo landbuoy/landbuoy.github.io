@@ -673,7 +673,10 @@ class GameTableWindowManager {
         
         // Touch event handlers for mobile
         window.addEventListener('touchstart', (e) => {
-            e.preventDefault();
+            // Only prevent default if not touching an interactive element
+            if (!e.target.closest('button, input, select, textarea, .interactive-element')) {
+                e.preventDefault();
+            }
             isDragging = true;
             this.bringWindowToFront(window);
             
@@ -1127,6 +1130,16 @@ class GameTableWindowManager {
         const bidInput = document.getElementById(`player-bid-input-${playerIndex}`);
         if (bidInput) {
             bidInput.style.display = 'block';
+            
+            // Focus the input field after a short delay to ensure it's visible
+            setTimeout(() => {
+                const inputField = document.getElementById(`player-bid-input-field-${playerIndex}`);
+                if (inputField) {
+                    inputField.focus();
+                    // On mobile, also ensure the input is scrolled into view
+                    inputField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
         }
     }
     
@@ -1262,6 +1275,17 @@ class GameTableWindowManager {
                 if (e.key === 'Enter') {
                     handleBidSubmit();
                 }
+            });
+            
+            // Add mobile-specific input field event handling
+            bidInputField.addEventListener('touchstart', (e) => {
+                // Ensure the input field can receive focus on mobile
+                e.stopPropagation();
+            });
+            
+            bidInputField.addEventListener('focus', (e) => {
+                // Ensure the input stays focused and visible on mobile
+                e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
             });
         }
         
@@ -4246,7 +4270,10 @@ class Game {
         
         // Touch event handlers for mobile
         window.addEventListener('touchstart', (e) => {
-            e.preventDefault();
+            // Only prevent default if not touching an interactive element
+            if (!e.target.closest('button, input, select, textarea, .interactive-element')) {
+                e.preventDefault();
+            }
             isDragging = true;
             this.bringWindowToFront(window);
             
