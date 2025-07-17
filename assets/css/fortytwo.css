@@ -523,12 +523,18 @@ body {
 }
 
 .hand-display-row .domino-display {
-    flex: 1;
+    flex: 0 0 auto;
     text-align: center;
     margin: 0 2px;
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    min-height: auto;
+    aspect-ratio: auto;
 }
 
 .hand-display-row .domino-display img {
@@ -1402,6 +1408,10 @@ body {
     .domino-window {
         width: 150px;
         height: 75px;
+        transition: all 0.3s ease, transform 0.2s ease;
+        transform-origin: center center;
+        --domino-rotation: 0deg;
+        transform: rotate(var(--domino-rotation));
     }
     
     .domino-window:hover {
@@ -1426,7 +1436,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease, transform 0.2s ease;
     /* Prevent text selection during drag */
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -1435,14 +1445,19 @@ body {
     /* Better touch handling */
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    /* Smooth rotation */
+    transform-origin: center center;
+    /* Initialize rotation custom property */
+    --domino-rotation: 0deg;
+    transform: rotate(var(--domino-rotation));
 }
 
 .domino-window:hover {
-    transform: scale(1.05);
+    transform: rotate(var(--domino-rotation)) scale(1.05);
 }
 
 .domino-window.selected {
-    transform: scale(1.1);
+    transform: rotate(var(--domino-rotation)) scale(1.1);
     filter: drop-shadow(0 0 10px rgba(255, 235, 59, 0.8));
 }
 
@@ -1485,11 +1500,11 @@ body {
     }
     
     .domino-window:hover {
-        transform: scale(1.01);
+        transform: rotate(var(--domino-rotation)) scale(1.01);
     }
     
     .domino-window.selected {
-        transform: scale(1.03);
+        transform: rotate(var(--domino-rotation)) scale(1.03);
         filter: drop-shadow(0 0 6px rgba(255, 235, 59, 0.8));
     }
     
@@ -1743,6 +1758,13 @@ body {
     
     .hand-display-row .domino-display {
         margin: 0 1px !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        min-height: auto !important;
+        aspect-ratio: auto !important;
+        flex: 0 0 auto !important;
     }
     
     .hand-display-row .domino-display img {

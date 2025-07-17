@@ -4690,9 +4690,17 @@ class Game {
         window.dataset.dominoIndex = index;
         window.dataset.dominoEnds = `${domino.ends[0]}-${domino.ends[1]}`;
         
+        // Initialize rotation state
+        window.dataset.rotation = '0';
+        
         // Add click handler for selection (separate from drag)
         let wasDragging = false;
         let startX, startY;
+        
+        // Double-click/tap detection variables
+        let clickCount = 0;
+        let clickTimer = null;
+        const doubleClickDelay = 200; // Reduced from 300ms to 150ms for better responsiveness
         
         // Mouse event handlers for desktop
         window.addEventListener('mousedown', (e) => {
@@ -4712,15 +4720,43 @@ class Game {
         });
         
         window.addEventListener('click', (e) => {
-            // Only select if we didn't just drag
-            if (!wasDragging) {
-                this.selectDomino(index);
+            // Handle double-click for rotation
+            clickCount++;
+            if (clickCount === 1) {
+                // Immediately register single click for better responsiveness
+                if (!wasDragging) {
+                    this.selectDomino(index);
+                }
+                
+                // Set up timer to reset click count
+                clickTimer = setTimeout(() => {
+                    clickCount = 0;
+                }, doubleClickDelay);
+            } else if (clickCount === 2) {
+                // Double click detected - cancel the single click and rotate
+                clearTimeout(clickTimer);
+                clickCount = 0;
+                
+                // Cancel the previous selection by deselecting and reselecting
+                // This prevents the double-click from triggering both selection and rotation
+                const currentSelection = this.selectedDominoIndex;
+                if (currentSelection === index) {
+                    // If this domino was just selected, deselect it first
+                    this.selectDomino(-1); // Deselect
+                    setTimeout(() => {
+                        this.selectDomino(index); // Reselect
+                    }, 10);
+                }
+                
+                this.rotateDomino(window);
             }
         });
         
         // Touch event handlers for mobile
         let touchStartX, touchStartY;
         let wasTouchDragging = false;
+        let touchClickCount = 0;
+        let touchClickTimer = null;
         
         window.addEventListener('touchstart', (e) => {
             // Don't prevent default here - let the global handler decide
@@ -4742,11 +4778,40 @@ class Game {
         });
         
         window.addEventListener('touchend', (e) => {
-            // Only select if we didn't just drag and this was a single touch
-            if (!wasTouchDragging && e.changedTouches.length === 1) {
-                e.preventDefault();
-                e.stopPropagation();
-                this.selectDomino(index);
+            // Handle double-tap for rotation
+            if (e.changedTouches.length === 1) {
+                touchClickCount++;
+                if (touchClickCount === 1) {
+                    // Immediately register single tap for better responsiveness
+                    if (!wasTouchDragging) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.selectDomino(index);
+                    }
+                    
+                    // Set up timer to reset click count
+                    touchClickTimer = setTimeout(() => {
+                        touchClickCount = 0;
+                    }, doubleClickDelay);
+                } else if (touchClickCount === 2) {
+                    // Double tap detected - cancel the single tap and rotate
+                    clearTimeout(touchClickTimer);
+                    touchClickCount = 0;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Cancel the previous selection by deselecting and reselecting
+                    const currentSelection = this.selectedDominoIndex;
+                    if (currentSelection === index) {
+                        // If this domino was just selected, deselect it first
+                        this.selectDomino(-1); // Deselect
+                        setTimeout(() => {
+                            this.selectDomino(index); // Reselect
+                        }, 10);
+                    }
+                    
+                    this.rotateDomino(window);
+                }
             }
             // Reset touch tracking
             touchStartX = undefined;
@@ -4777,6 +4842,29 @@ class Game {
             });
             this.dominoWindows = [];
         }
+    }
+    
+    rotateDomino(window) {
+        // Get current rotation
+        const currentRotation = parseInt(window.dataset.rotation) || 0;
+        // Rotate 180 degrees
+        const newRotation = (currentRotation + 180) % 360;
+        
+        // Update the rotation state
+        window.dataset.rotation = newRotation.toString();
+        
+        // Store rotation as a CSS custom property for CSS to use
+        window.style.setProperty('--domino-rotation', `${newRotation}deg`);
+        
+        // Add a subtle visual feedback with brief scale animation
+        window.style.filter = 'drop-shadow(0 0 5px rgba(0, 255, 0, 0.5))';
+        window.style.transform = `rotate(${newRotation}deg) scale(1.1)`;
+        setTimeout(() => {
+            window.style.filter = '';
+            window.style.transform = `rotate(${newRotation}deg)`;
+        }, 100); // Reduced from 150ms to 100ms for faster feedback
+        
+        console.log(`Rotated domino ${window.dataset.dominoIndex} to ${newRotation} degrees`);
     }
     
     makeDraggable(window) {
