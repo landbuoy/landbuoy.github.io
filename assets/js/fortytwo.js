@@ -242,7 +242,7 @@ class HandScoreboardWindowManager {
         // Create window content with header and close button
         this.handScoreboardWindow.innerHTML = `
             <div class="modalHeader">
-                <h2 class="modalTitle">Hand Scorecard</h2>
+                <h2 class="modalTitle">Collected Tricks - US: ${this.game.usHandPoints || 0} | THEM: ${this.game.themHandPoints || 0}</h2>
                 <div class="aquaButton aquaButton--scoreboard" style="background: ${this.handScoreboardWindow.dataset.aquaButtonColor}; box-shadow: 0px 5px 10px ${this.handScoreboardWindow.dataset.boxShadowColor};">×</div>
             </div>
         `;
@@ -267,12 +267,12 @@ class HandScoreboardWindowManager {
         const content = document.createElement('div');
         content.className = 'hand-scoreboard-content';
         
-        const grid = document.createElement('div');
-        grid.className = 'hand-scoreboard-grid';
+        const container = document.createElement('div');
+        container.className = 'hand-scoreboard-container';
         
-        // Create US team column
-        const usColumn = document.createElement('div');
-        usColumn.className = 'team-column';
+        // Create US team row
+        const usRow = document.createElement('div');
+        usRow.className = 'team-row';
         
         const usHeader = document.createElement('div');
         usHeader.className = 'team-header';
@@ -280,13 +280,14 @@ class HandScoreboardWindowManager {
         
         const usTricks = document.createElement('div');
         usTricks.id = 'us-tricks';
+        usTricks.className = 'team-tricks';
         
-        usColumn.appendChild(usHeader);
-        usColumn.appendChild(usTricks);
+        usRow.appendChild(usHeader);
+        usRow.appendChild(usTricks);
         
-        // Create THEM team column
-        const themColumn = document.createElement('div');
-        themColumn.className = 'team-column';
+        // Create THEM team row
+        const themRow = document.createElement('div');
+        themRow.className = 'team-row';
         
         const themHeader = document.createElement('div');
         themHeader.className = 'team-header';
@@ -294,13 +295,14 @@ class HandScoreboardWindowManager {
         
         const themTricks = document.createElement('div');
         themTricks.id = 'them-tricks';
+        themTricks.className = 'team-tricks';
         
-        themColumn.appendChild(themHeader);
-        themColumn.appendChild(themTricks);
+        themRow.appendChild(themHeader);
+        themRow.appendChild(themTricks);
         
-        grid.appendChild(usColumn);
-        grid.appendChild(themColumn);
-        content.appendChild(grid);
+        container.appendChild(usRow);
+        container.appendChild(themRow);
+        content.appendChild(container);
         
         this.handScoreboardWindow.appendChild(content);
         
@@ -360,12 +362,28 @@ class HandScoreboardWindowManager {
         document.addEventListener('mouseup', handleMouseUp);
         
         // Touch events for mobile
+        let touchStartTime = 0;
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let hasMoved = false;
+        
         const handleTouchStart = (e) => {
             if (e.target.closest('.aquaButton') || e.target.closest('input') || e.target.closest('button')) {
                 return;
             }
             
-            isDragging = true;
+            // Check if the touch is on a scrollable element
+            const scrollableElement = e.target.closest('.hand-scoreboard-content');
+            if (scrollableElement) {
+                // Allow scrolling on scrollable content - don't prevent default
+                return;
+            }
+            
+            touchStartTime = Date.now();
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            hasMoved = false;
+            
             startX = e.touches[0].clientX;
             startY = e.touches[0].clientY;
             startLeft = parseInt(window.style.left) || 0;
@@ -375,19 +393,54 @@ class HandScoreboardWindowManager {
         };
         
         const handleTouchMove = (e) => {
-            if (!isDragging) return;
+            if (e.target.closest('.aquaButton') || e.target.closest('input') || e.target.closest('button')) {
+                return;
+            }
             
-            const deltaX = e.touches[0].clientX - startX;
-            const deltaY = e.touches[0].clientY - startY;
+            // Check if the touch is on a scrollable element
+            const scrollableElement = e.target.closest('.hand-scoreboard-content');
+            if (scrollableElement) {
+                // Allow scrolling on scrollable content - don't prevent default
+                return;
+            }
             
-            window.style.left = (startLeft + deltaX) + 'px';
-            window.style.top = (startTop + deltaY) + 'px';
+            const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
+            const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
+            
+            // If moved more than 5px, consider it a drag
+            if (deltaX > 5 || deltaY > 5) {
+                hasMoved = true;
+                isDragging = true;
+            }
+            
+            if (isDragging) {
+                const moveDeltaX = e.touches[0].clientX - startX;
+                const moveDeltaY = e.touches[0].clientY - startY;
+            
+                window.style.left = (startLeft + moveDeltaX) + 'px';
+                window.style.top = (startTop + moveDeltaY) + 'px';
+            }
             
             e.preventDefault();
         };
         
-        const handleTouchEnd = () => {
+        const handleTouchEnd = (e) => {
+            // Check if the touch is on a scrollable element
+            const scrollableElement = e.target.closest('.hand-scoreboard-content');
+            if (scrollableElement) {
+                // Allow scrolling on scrollable content
+                return;
+            }
+            
+            const touchDuration = Date.now() - touchStartTime;
+            
+            // If it was a short tap (less than 200ms) and didn't move much, bring to front
+            if (touchDuration < 200 && !hasMoved) {
+                bringWindowToFrontWithLayering(window, 'game-window');
+            }
+            
             isDragging = false;
+            hasMoved = false;
         };
         
         window.addEventListener('touchstart', handleTouchStart, { passive: false });
@@ -425,7 +478,7 @@ class HandScoreboardWindowManager {
         // Create new reopen button
         const reopenButton = document.createElement('button');
         reopenButton.className = 'hand-scoreboard-reopen-btn';
-        reopenButton.textContent = 'Hand Scorecard';
+        reopenButton.textContent = 'Collected Tricks';
         reopenButton.style.cursor = 'pointer';
         reopenButton.style.pointerEvents = 'auto';
         // Add click event listener
@@ -470,103 +523,86 @@ class HandScoreboardWindowManager {
         if (usTricks) usTricks.innerHTML = '';
         if (themTricks) themTricks.innerHTML = '';
         
+        // Helper function to get abbreviated player name
+        const getAbbreviatedPlayerName = (playerIdx) => {
+            const relationship = this.game.getPlayerRelationship(playerIdx);
+            switch (relationship) {
+                case 'Human': return 'U';
+                case 'Partner': return 'P';
+                case 'Opponent 1': return 'O1';
+                case 'Opponent 2': return 'O2';
+                default: return relationship;
+            }
+        };
+        
+        // Helper function to create hand display for a set of tricks
+        const createHandDisplay = (tricksData, teamName) => {
+            if (tricksData.length === 0) {
+                return '<p>No tricks collected yet.</p>';
+            }
+            
+            // Create the header row with play numbers
+            let display = '<div class="hand-display-header">';
+            display += '<span class="player-label">Player</span>';
+            for (let i = 1; i <= tricksData.length; i++) {
+                display += `<span class="play-number">[   ${i}   ]</span>`;
+            }
+            display += '</div>';
+            
+            // Create a row for each player showing their dominoes in play order
+            this.game.players.forEach((player, playerIndex) => {
+                const playerName = getAbbreviatedPlayerName(playerIndex);
+                
+                display += '<div class="hand-display-row">';
+                display += `<span class="player-name">${playerName}:</span>`;
+                
+                // Find all plays by this player in these tricks
+                const playerPlays = [];
+                tricksData.forEach(trick => {
+                    trick.playerPlays.forEach(play => {
+                        if (play.playerIdx === playerIndex) {
+                            playerPlays.push({
+                                domino: play.domino,
+                                trickNum: trick.trickNum
+                            });
+                        }
+                    });
+                });
+                
+                // Sort plays by trick number to get chronological order
+                playerPlays.sort((a, b) => a.trickNum - b.trickNum);
+                
+                // Display dominoes in play order
+                for (let i = 0; i < tricksData.length; i++) {
+                    if (i < playerPlays.length) {
+                        const play = playerPlays[i];
+                        const mod = play.domino.modulate(this.game.trump, null);
+                const dominoKey = `${mod[0]}-${mod[1]}`;
+                        display += `<span class="domino-display"><img src="../assets/img/dominoes/${dominoKey}.png" alt="${dominoKey}" class="domino-small" style="transform: none;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"><span class="domino-fallback" style="display:none;">[ ${dominoKey} ]</span></span>`;
+                    } else {
+                        display += '<span class="domino-display">[     ]</span>';
+                    }
+                }
+                
+                display += '</div>';
+            });
+            
+            return display;
+        };
+        
         // Group tricks by team
         const usTricksData = this.game.currentHandTricks.filter(t => t.team === 'Us');
         const themTricksData = this.game.currentHandTricks.filter(t => t.team === 'Them');
         
         // Display US tricks
-        usTricksData.forEach((trick, index) => {
-            const trickGroup = document.createElement('div');
-            trickGroup.className = 'trick-group';
-            
-            const trickLabel = document.createElement('div');
-            trickLabel.className = 'trick-label';
-            trickLabel.textContent = `Trick ${trick.trickNum}`;
-            trickGroup.appendChild(trickLabel);
-            
-            const trickDominoes = document.createElement('div');
-            trickDominoes.className = 'trick-dominoes';
-            
-            // Display plays in the order they were made
-            trick.playerPlays.forEach((play, playIndex) => {
-                const playerPlay = document.createElement('div');
-                playerPlay.className = 'player-play';
-                
-                const playerName = document.createElement('div');
-                playerName.className = 'player-name';
-                playerName.textContent = this.game.getPlayerRelationship(play.playerIdx);
-                playerPlay.appendChild(playerName);
-                
-                const dominoElement = document.createElement('img');
-                dominoElement.className = 'domino-small';
-                const mod = play.domino.modulate(this.game.trump, trick.ledSuit);
-                const dominoKey = `${mod[0]}-${mod[1]}`;
-                dominoElement.src = `../assets/img/dominoes/${dominoKey}.png`;
-                dominoElement.alt = dominoKey;
-                dominoElement.onerror = () => {
-                    console.warn(`Failed to load domino image: ${dominoKey}.png`);
-                    // Fallback to text if image fails to load
-                    dominoElement.style.display = 'none';
-                    const fallbackElement = document.createElement('div');
-                    fallbackElement.className = 'domino-small';
-                    fallbackElement.textContent = dominoKey;
-                    playerPlay.appendChild(fallbackElement);
-                };
-                playerPlay.appendChild(dominoElement);
-                
-                trickDominoes.appendChild(playerPlay);
-            });
-            
-            trickGroup.appendChild(trickDominoes);
-            if (usTricks) usTricks.appendChild(trickGroup);
-        });
+        if (usTricks) {
+            usTricks.innerHTML = createHandDisplay(usTricksData, 'Us');
+        }
         
         // Display THEM tricks
-        themTricksData.forEach((trick, index) => {
-            const trickGroup = document.createElement('div');
-            trickGroup.className = 'trick-group';
-            
-            const trickLabel = document.createElement('div');
-            trickLabel.className = 'trick-label';
-            trickLabel.textContent = `Trick ${trick.trickNum}`;
-            trickGroup.appendChild(trickLabel);
-            
-            const trickDominoes = document.createElement('div');
-            trickDominoes.className = 'trick-dominoes';
-            
-            // Display plays in the order they were made
-            trick.playerPlays.forEach((play, playIndex) => {
-                const playerPlay = document.createElement('div');
-                playerPlay.className = 'player-play';
-                
-                const playerName = document.createElement('div');
-                playerName.className = 'player-name';
-                playerName.textContent = this.game.getPlayerRelationship(play.playerIdx);
-                playerPlay.appendChild(playerName);
-                
-                const dominoElement = document.createElement('img');
-                dominoElement.className = 'domino-small';
-                const mod = play.domino.modulate(this.game.trump, trick.ledSuit);
-                const dominoKey = `${mod[0]}-${mod[1]}`;
-                dominoElement.src = `../assets/img/dominoes/${dominoKey}.png`;
-                dominoElement.alt = dominoKey;
-                dominoElement.onerror = () => {
-                    console.warn(`Failed to load domino image: ${dominoKey}.png`);
-                    // Fallback to text if image fails to load
-                    dominoElement.style.display = 'none';
-                    const fallbackElement = document.createElement('div');
-                    fallbackElement.className = 'domino-small';
-                    fallbackElement.textContent = dominoKey;
-                    playerPlay.appendChild(fallbackElement);
-                };
-                playerPlay.appendChild(dominoElement);
-                
-                trickDominoes.appendChild(playerPlay);
-            });
-            
-            trickGroup.appendChild(trickDominoes);
-            if (themTricks) themTricks.appendChild(trickGroup);
-        });
+        if (themTricks) {
+            themTricks.innerHTML = createHandDisplay(themTricksData, 'Them');
+        }
         
         // Update points
         const usPointsElement = document.getElementById('us-hand-points');
@@ -574,6 +610,12 @@ class HandScoreboardWindowManager {
         
         if (usPointsElement) usPointsElement.textContent = this.game.usHandPoints || 0;
         if (themPointsElement) themPointsElement.textContent = this.game.themHandPoints || 0;
+        
+        // Update main header title with current scores
+        const modalTitle = this.handScoreboardWindow.querySelector('.modalTitle');
+        if (modalTitle) {
+            modalTitle.textContent = `Collected Tricks - US: ${this.game.usHandPoints || 0} | THEM: ${this.game.themHandPoints || 0}`;
+        }
     }
     
     updateButtonContainerVisibility() {
@@ -1107,6 +1149,8 @@ class GameTableWindowManager {
             bringWindowToFrontWithLayering(window, 'game-window');
         });
         
+
+        
         // Mouse event handlers - make entire window draggable
         window.addEventListener('mousedown', (e) => {
             // Only start dragging if not clicking on a child element that should handle its own events
@@ -1148,15 +1192,23 @@ class GameTableWindowManager {
         });
         
         // Touch event handlers for mobile
+        let touchStartTime = 0;
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let hasMoved = false;
+        
         window.addEventListener('touchstart', (e) => {
             // Only prevent default if not touching an interactive element or domino window
             if (!e.target.closest('button, input, select, textarea, .interactive-element, .domino-window, .domino-window-content')) {
                 e.preventDefault();
             }
-            isDragging = true;
-            bringWindowToFrontWithLayering(window, 'game-window');
             
-            // Disable transitions during drag for smoother movement
+            touchStartTime = Date.now();
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            hasMoved = false;
+            
+            // Disable transitions during potential drag for smoother movement
             window.style.transition = 'none';
             
             const touch = e.touches[0];
@@ -1166,6 +1218,15 @@ class GameTableWindowManager {
         });
         
         document.addEventListener('touchmove', (e) => {
+            const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
+            const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
+            
+            // If moved more than 5px, consider it a drag
+            if (deltaX > 5 || deltaY > 5) {
+                hasMoved = true;
+                isDragging = true;
+            }
+            
             if (isDragging) {
                 e.preventDefault();
                 const touch = e.touches[0];
@@ -1179,15 +1240,22 @@ class GameTableWindowManager {
             }
         });
         
-        document.addEventListener('touchend', () => {
+        document.addEventListener('touchend', (e) => {
+            const touchDuration = Date.now() - touchStartTime;
+            
+            // If it was a short tap (less than 200ms) and didn't move much, bring to front
+            if (touchDuration < 200 && !hasMoved) {
+                bringWindowToFrontWithLayering(window, 'game-window');
+            }
+            
             if (isDragging) {
                 initialX = currentX;
                 initialY = currentY;
                 isDragging = false;
+            }
                 
                 // Re-enable transitions after drag
                 window.style.transition = 'all 0.3s ease';
-            }
         });
         
         document.addEventListener('touchcancel', () => {
@@ -4474,7 +4542,7 @@ class Game {
         // Create new history button
         const historyButton = document.createElement('button');
         historyButton.className = 'history-btn';
-        historyButton.textContent = 'Hand History';
+        historyButton.textContent = 'Scorecard';
         historyButton.style.cursor = 'pointer';
         historyButton.style.pointerEvents = 'auto';
         
@@ -4909,6 +4977,13 @@ class Game {
         
         // Add click handler to bring window to front
         window.addEventListener('mousedown', (e) => {
+            bringWindowToFrontWithLayering(window, 'domino');
+        });
+        
+        // Add touch support for mobile
+        window.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             bringWindowToFrontWithLayering(window, 'domino');
         });
         
@@ -6044,7 +6119,7 @@ class Game {
     
     showScoreboardHistory() {
         console.log('Show scoreboard history called');
-        console.log('Hand history length:', this.handHistory.length);
+        console.log('Scorecard history length:', this.handHistory.length);
         
         // Remove existing modal if any
         if (this.scoreboardHistoryModal) {
@@ -6110,7 +6185,7 @@ class Game {
         // Create modal content
         this.scoreboardHistoryModal.innerHTML = `
             <header class="modalHeader">
-                <h2 class="modalTitle">Hand History</h2>
+                <h2 class="modalTitle">Scorecard</h2>
                 <div class="aquaButton aquaButton--scoreboard" style="background: ${complementaryColor}; box-shadow: 0px 5px 10px ${randomColor};">×</div>
             </header>
             <div class="modalInnerContainer">
@@ -6151,7 +6226,7 @@ class Game {
         if (this.historyContent) this.historyContent.innerHTML = '';
         
         if (this.handHistory.length === 0) {
-            if (this.historyContent) this.historyContent.innerHTML = '<p>No hand history available yet.</p>';
+            if (this.historyContent) this.historyContent.innerHTML = '<p>No scorecard history available yet.</p>';
         } else {
             this.handHistory.forEach((hand, index) => {
                 const handDiv = document.createElement('div');
@@ -6311,12 +6386,28 @@ class Game {
         document.addEventListener('mouseup', handleMouseUp);
         
         // Touch events for mobile
+        let touchStartTime = 0;
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let hasMoved = false;
+        
         const handleTouchStart = (e) => {
             if (e.target.closest('.aquaButton') || e.target.closest('input') || e.target.closest('button')) {
                 return;
             }
             
-            isDragging = true;
+            // Check if the touch is on a scrollable element
+            const scrollableElement = e.target.closest('.modalInnerContainer');
+            if (scrollableElement) {
+                // Allow scrolling on scrollable content - don't prevent default
+                return;
+            }
+            
+            touchStartTime = Date.now();
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            hasMoved = false;
+            
             startX = e.touches[0].clientX;
             startY = e.touches[0].clientY;
             startLeft = parseInt(this.scoreboardHistoryModal.style.left) || 0;
@@ -6326,29 +6417,62 @@ class Game {
         };
         
         const handleTouchMove = (e) => {
-            if (!isDragging) return;
+            // Check if the touch is on a scrollable element
+            const scrollableElement = e.target.closest('.modalInnerContainer');
+            if (scrollableElement) {
+                // Allow scrolling on scrollable content - don't prevent default
+                return;
+            }
             
-            const deltaX = e.touches[0].clientX - startX;
-            const deltaY = e.touches[0].clientY - startY;
+            const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
+            const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
             
-            this.scoreboardHistoryModal.style.left = (startLeft + deltaX) + 'px';
-            this.scoreboardHistoryModal.style.top = (startTop + deltaY) + 'px';
+            // If moved more than 5px, consider it a drag
+            if (deltaX > 5 || deltaY > 5) {
+                hasMoved = true;
+                isDragging = true;
+            }
+            
+            if (isDragging) {
+                const moveDeltaX = e.touches[0].clientX - startX;
+                const moveDeltaY = e.touches[0].clientY - startY;
+                
+                this.scoreboardHistoryModal.style.left = (startLeft + moveDeltaX) + 'px';
+                this.scoreboardHistoryModal.style.top = (startTop + moveDeltaY) + 'px';
+            }
             
             e.preventDefault();
         };
         
-        const handleTouchEnd = () => {
+        const handleTouchEnd = (e) => {
+            // Check if the touch is on a scrollable element
+            const scrollableElement = e.target.closest('.modalInnerContainer');
+            if (scrollableElement) {
+                // Allow scrolling on scrollable content
+                return;
+            }
+            
+            const touchDuration = Date.now() - touchStartTime;
+            
+            // If it was a short tap (less than 200ms) and didn't move much, bring to front
+            if (touchDuration < 200 && !hasMoved) {
+                bringWindowToFrontWithLayering(this.scoreboardHistoryModal, 'game-window');
+            }
+            
             isDragging = false;
+            hasMoved = false;
         };
         
         this.scoreboardHistoryModal.addEventListener('touchstart', handleTouchStart, { passive: false });
         this.scoreboardHistoryModal.addEventListener('touchmove', handleTouchMove, { passive: false });
         this.scoreboardHistoryModal.addEventListener('touchend', handleTouchEnd);
         
-        // Bring to front on click
+        // Bring to front on click and touch
         this.scoreboardHistoryModal.addEventListener('click', () => {
             bringWindowToFrontWithLayering(this.scoreboardHistoryModal, 'game-window');
         });
+        
+
     }
     
     updateButtonContainerVisibility() {

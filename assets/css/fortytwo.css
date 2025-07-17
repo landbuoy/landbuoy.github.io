@@ -217,9 +217,14 @@ body {
     padding: 15px;
 }
 
-.team-column {
-    flex: 1;
-    margin: 0 10px;
+.team-row {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 10px;
+    border: 1px solid #333;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
 }
 
 .team-header {
@@ -230,59 +235,82 @@ body {
     text-align: center;
 }
 
-.trick-group {
-    margin-bottom: 15px;
+.team-tricks {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* Hand display styles for collected tricks window */
+.hand-display {
+    margin-top: 10px;
     padding: 10px;
-    border: 1px solid #333;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid #0000ff;
+    border-radius: 4px;
 }
 
-.trick-label {
-    color: lime;
-    font-weight: bold;
-    margin-bottom: 5px;
-    text-align: center;
-}
-
-.trick-dominoes {
+.hand-display-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    min-height: 220px;
-    gap: 5px;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #0000ff;
 }
 
-.player-play {
+.player-label {
+    min-width: 120px;
+    margin-right: 10px;
+}
+
+.play-number {
     flex: 1;
     text-align: center;
+    font-size: 12px;
+    color: #0000ff;
     margin: 0 2px;
-    width: 100px;
-    height: 200px;
+}
+
+.hand-display-row {
     display: flex;
-    flex-direction: column;
     align-items: center;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #0000ff;
+}
+
+.hand-display-row .player-name {
+    min-width: 120px;
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.hand-display-row .domino-display {
+    flex: 0 0 auto;
+    text-align: center;
+    margin: 0 2px;
+    display: flex;
     justify-content: center;
-}
-
-.player-name {
-    font-size: 10px;
-    color: #666;
-    margin-bottom: 3px;
-}
-
-.domino-small {
-    display: inline-block;
+    align-items: center;
+    padding: 0;
     background: transparent;
     border: none;
-    padding: 0;
-    font-size: 12px;
-    color: lime;
-    width: 100px;
-    height: 200px;
-    text-align: center;
+    border-radius: 0;
+    min-height: auto;
+    aspect-ratio: auto;
+}
+
+.hand-display-row .domino-display img {
+    width: 200px;
+    height: 100px;
     object-fit: contain;
-    transition: opacity 0.6s ease;
-    transform: rotate(90deg);
+    border: none;
+    background: transparent;
+}
+
+.hand-display-row .domino-fallback {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: #0000ff;
 }
 
 .hidden {
@@ -471,11 +499,11 @@ body {
     background: rgba(0, 0, 0, 0.95);
 }
 
-.hand-scoreboard-grid {
+.hand-scoreboard-container {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     flex: 1;
-    gap: 15px;
+    gap: 20px;
 }
 
 /* Hand display styling for history modal */
@@ -1189,7 +1217,7 @@ body {
     box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
 }
 
-/* Hand History Button - moved to top right with other buttons */
+/* Scorecard Button - moved to top right with other buttons */
 .history-btn {
     background: black;
     color: lime;
@@ -1713,14 +1741,58 @@ body {
         padding: 8px 16px !important;
     }
     
-    .player-play {
-        width: 60px !important;
-        height: 120px !important;
+    .hand-display {
+        padding: 8px !important;
+        margin-top: 8px !important;
     }
     
-    .trick-dominoes {
-        min-height: 140px !important;
-        gap: 3px !important;
+    .hand-display-header {
+        margin-bottom: 6px !important;
+        font-size: 11px !important;
+    }
+    
+    .player-label {
+        min-width: 80px !important;
+        margin-right: 5px !important;
+        font-size: 10px !important;
+    }
+    
+    .play-number {
+        font-size: 10px !important;
+        margin: 0 1px !important;
+    }
+    
+    .hand-display-row {
+        margin-bottom: 4px !important;
+        font-size: 10px !important;
+    }
+    
+    .hand-display-row .player-name {
+        min-width: 80px !important;
+        margin-right: 5px !important;
+        font-size: 10px !important;
+    }
+    
+    .hand-display-row .domino-display {
+        margin: 0 1px !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        min-height: auto !important;
+        aspect-ratio: auto !important;
+        flex: 0 0 auto !important;
+    }
+    
+    .hand-display-row .domino-display img {
+        width: 120px !important;
+        height: 60px !important;
+        border: none !important;
+        background: transparent !important;
+    }
+    
+    .hand-display-row .domino-fallback {
+        font-size: 9px !important;
     }
     
     /* Mobile adjustments for hand display in history modal */
@@ -1776,5 +1848,20 @@ body {
     
     .hand-display-row .domino-fallback {
         font-size: 9px !important;
+    }
+    
+    /* Mobile adjustments for team rows in collected tricks window */
+    .team-row {
+        margin: 0 0 10px 0 !important;
+        padding: 8px !important;
+    }
+    
+    .team-header {
+        font-size: 16px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .team-tricks {
+        max-height: 200px !important;
     }
 }
