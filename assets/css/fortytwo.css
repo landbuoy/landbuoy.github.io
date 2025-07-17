@@ -225,6 +225,7 @@ body {
     border: 1px solid #333;
     background: rgba(0, 0, 0, 0.3);
     border-radius: 4px;
+    min-height: 180px; /* Height for team row with content */
 }
 
 .team-header {
@@ -279,9 +280,10 @@ body {
 }
 
 .hand-display-row .player-name {
-    min-width: 120px;
+    width: 120px;
     margin-right: 10px;
     font-weight: bold;
+    flex-shrink: 0;
 }
 
 .hand-display-row .domino-display {
@@ -300,8 +302,8 @@ body {
 }
 
 .hand-display-row .domino-display img {
-    width: 200px;
-    height: 100px;
+    width: 100px;
+    height: 50px;
     object-fit: contain;
     border: none;
     background: transparent;
@@ -389,8 +391,8 @@ body {
     top: 10%;
     bottom: 10%;
     right: 10%;
-    width: 40%;
-    height: 80vh;
+    width: 900px;
+    height: 320px;
     box-shadow: 0px 0px 32px #ff6347;
     animation: morph 180s infinite;
     background: rgba(0, 0, 0, 0.95);
@@ -472,8 +474,8 @@ body {
 /* Hand Scoreboard Window Styles */
 .hand-scoreboard-window {
     position: absolute;
-    width: 600px;
-    height: 400px;
+    width: 900px;
+    height: 700px;
     background: rgba(0, 0, 0, 0.95);
     border: 3px solid lime;
     border-radius: 8px;
@@ -490,20 +492,76 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
+/* Collected Tricks Modal Container */
+.modalContainer--collectedTricks {
+    position: fixed;
+    top: 10%;
+    left: 10%;
+    width: auto;
+    height: auto;
+    min-width: 900px;
+    min-height: 500px; /* Reduced to account for team rows + header */
+    max-width: 90vw;
+    max-height: 80vh;
+    box-shadow: 0px 0px 32px #ff6347;
+    animation: morph 180s infinite;
+    background: rgba(0, 0, 0, 0.95);
+    border: 3px solid lime;
+    border-radius: 8px;
+    color: #0000ff;
+    z-index: 1000;
+    font-family: 'Courier New', monospace;
+    /* Prevent text selection during drag */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /* Better touch handling */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    /* Flex layout */
+    display: flex;
+    flex-direction: column;
+}
+
 .hand-scoreboard-content {
     padding: 15px;
     height: calc(100% - 60px);
-    overflow-y: auto;
+    overflow-y: visible;
     display: flex;
     flex-direction: column;
     background: rgba(0, 0, 0, 0.95);
 }
 
-.hand-scoreboard-container {
+.collected-tricks-container {
     display: flex;
     flex-direction: column;
-    flex: 1;
+    height: auto;
+    min-height: 400px; /* Height for two team rows */
     gap: 20px;
+}
+
+/* Hide hand display headers in the scorecard window */
+.hand-scoreboard-window .hand-display-header {
+    display: none;
+}
+
+/* Hide hand display headers in the scorecard modal */
+.modalContainer--scoreboard .hand-display-header {
+    display: none;
+}
+
+/* Hide hand display headers in the collected tricks modal */
+.modalContainer--collectedTricks .hand-display-header {
+    display: none;
+}
+
+/* Collected tricks modal specific styling */
+.modalContainer--collectedTricks .modalInnerContainer {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
 }
 
 /* Hand display styling for history modal */
@@ -545,9 +603,10 @@ body {
 }
 
 .hand-display-row .player-name {
-    min-width: 120px;
+    width: 120px;
     margin-right: 10px;
     font-weight: bold;
+    flex-shrink: 0;
 }
 
 .hand-display-row .domino-display {
@@ -566,8 +625,8 @@ body {
 }
 
 .hand-display-row .domino-display img {
-    width: 200px;
-    height: 100px;
+    width: 100px;
+    height: 50px;
     object-fit: contain;
     border: none;
     background: transparent;
@@ -1242,7 +1301,7 @@ body {
 }
 
 /* Responsive adjustments */
-@media (max-width: 900px) {
+@media (max-width: 768px) {
     .game-table-window {
         width: 90vw;
         height: 80vh;
@@ -1310,11 +1369,25 @@ body {
     }
     
     .modalContainer--scoreboard {
-        width: 90vw !important;
-        height: 80vh !important;
-        left: 5vw !important;
+        width: 95vw !important;
+        height: 280px !important;
+    }
+    
+    .modalContainer--collectedTricks {
+        min-width: 95vw !important;
+        min-height: 60vh !important;
+        max-width: 95vw !important;
+        max-height: 80vh !important;
+        left: 2.5vw !important;
         top: 10vh !important;
-        right: auto !important;
+    }
+    
+    .collected-tricks-container {
+        min-height: 300px !important; /* Reduced for mobile */
+    }
+    
+    .team-row {
+        min-height: 140px !important; /* Reduced for mobile */
     }
     
     .modalHeader {
@@ -1515,7 +1588,7 @@ body {
 }
 
 /* Improved mobile responsiveness for domino windows */
-@media (max-width: 900px) {
+@media (max-width: 768px) {
     .domino-window {
         width: 120px !important;
         height: 60px !important;
@@ -1719,10 +1792,23 @@ body {
     
     /* Mobile adjustments for hand scoreboard window */
     .hand-scoreboard-window {
-        width: 90vw !important;
-        height: 70vh !important;
-        left: 5vw !important;
-        top: 15vh !important;
+        width: 580px !important;
+        height: 480px !important;
+    }
+    
+    /* Hide hand display headers in the scorecard window on mobile */
+    .hand-scoreboard-window .hand-display-header {
+        display: none !important;
+    }
+    
+    /* Hide hand display headers in the scorecard modal on mobile */
+    .modalContainer--scoreboard .hand-display-header {
+        display: none !important;
+    }
+    
+    /* Hide hand display headers in the collected tricks modal on mobile */
+    .modalContainer--collectedTricks .hand-display-header {
+        display: none !important;
     }
     
     .window-controls-container {
@@ -1768,9 +1854,10 @@ body {
     }
     
     .hand-display-row .player-name {
-        min-width: 80px !important;
+        width: 80px !important;
         margin-right: 5px !important;
         font-size: 10px !important;
+        flex-shrink: 0;
     }
     
     .hand-display-row .domino-display {
@@ -1785,8 +1872,8 @@ body {
     }
     
     .hand-display-row .domino-display img {
-        width: 120px !important;
-        height: 60px !important;
+        width: 60px !important;
+        height: 30px !important;
         border: none !important;
         background: transparent !important;
     }
@@ -1840,8 +1927,8 @@ body {
     }
     
     .hand-display-row .domino-display img {
-        width: 120px !important;
-        height: 60px !important;
+        width: 60px !important;
+        height: 30px !important;
         border: none !important;
         background: transparent !important;
     }

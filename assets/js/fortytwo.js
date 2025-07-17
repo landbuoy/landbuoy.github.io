@@ -149,7 +149,7 @@ function bringWindowToFrontWithLayering(window, windowType = 'general') {
     // For game windows (hand scoreboard, game table, history), manage their own layer
     if (windowType === 'game-window') {
         // Find the highest z-index among game windows
-        const gameWindows = document.querySelectorAll('.hand-scoreboard-window, .game-table-window, .modalContainer--scoreboard');
+        const gameWindows = document.querySelectorAll('.hand-scoreboard-window, .game-table-window, .modalContainer--scoreboard, .modalContainer--collectedTricks');
         let maxGameZIndex = 1000;
         
         gameWindows.forEach(gameWindow => {
@@ -180,9 +180,9 @@ class HandScoreboardWindowManager {
             this.handScoreboardWindow.remove();
         }
         
-        // Create the window container
+        // Create the window container using modalContainer pattern
         this.handScoreboardWindow = document.createElement('div');
-        this.handScoreboardWindow.className = 'hand-scoreboard-window';
+        this.handScoreboardWindow.className = 'modalContainer modalContainer--collectedTricks';
         
         // Generate random color for this window
         const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3', '#ff9f43'];
@@ -239,11 +239,16 @@ class HandScoreboardWindowManager {
         this.handScoreboardWindow.style.top = `${baseTop}px`;
         this.handScoreboardWindow.style.zIndex = getNextGameWindowZIndex();
         
-        // Create window content with header and close button
+        // Create window content with header and close button using modalContainer pattern
         this.handScoreboardWindow.innerHTML = `
-            <div class="modalHeader">
-                <h2 class="modalTitle">Collected Tricks - US: ${this.game.usHandPoints || 0} | THEM: ${this.game.themHandPoints || 0}</h2>
+            <header class="modalHeader">
+                <h2 class="modalTitle">Collected Tricks - US: ${this.game.usHandPoints || 0} | THEM: ${this.game.themHandPoints || 0} | Bid to Beat: ${this.game.winningBid || 'None'}</h2>
                 <div class="aquaButton aquaButton--scoreboard" style="background: ${this.handScoreboardWindow.dataset.aquaButtonColor}; box-shadow: 0px 5px 10px ${this.handScoreboardWindow.dataset.boxShadowColor};">×</div>
+            </header>
+            <div class="modalInnerContainer">
+                <div class="collected-tricks-container">
+                    <!-- Content will be populated here -->
+                </div>
             </div>
         `;
         
@@ -263,12 +268,13 @@ class HandScoreboardWindowManager {
             });
         }
         
-        // Create content area
-        const content = document.createElement('div');
-        content.className = 'hand-scoreboard-content';
+        // Get reference to the container in the modalInnerContainer
+        const container = this.handScoreboardWindow.querySelector('.collected-tricks-container');
         
-        const container = document.createElement('div');
-        container.className = 'hand-scoreboard-container';
+        // Determine team roles
+        const bidTeam = this.game.bidWinner ? 
+            (this.game.teams['Us'].some(p => this.game.formatPlayerNameWithRelationship(p) === this.game.bidWinner) ? 'Us' : 'Them') : null;
+        const setTeam = bidTeam ? (bidTeam === 'Us' ? 'Them' : 'Us') : null;
         
         // Create US team row
         const usRow = document.createElement('div');
@@ -276,7 +282,13 @@ class HandScoreboardWindowManager {
         
         const usHeader = document.createElement('div');
         usHeader.className = 'team-header';
-        usHeader.innerHTML = `US - <span id="us-hand-points">${this.game.usHandPoints || 0}</span>`;
+        let usRoleText = '';
+        if (bidTeam === 'Us') {
+            usRoleText = ' (Bid Winner)';
+        } else if (setTeam === 'Us') {
+            usRoleText = ' (Setter)';
+        }
+        usHeader.innerHTML = `US${usRoleText} - <span id="us-hand-points">${this.game.usHandPoints || 0}</span>`;
         
         const usTricks = document.createElement('div');
         usTricks.id = 'us-tricks';
@@ -291,7 +303,13 @@ class HandScoreboardWindowManager {
         
         const themHeader = document.createElement('div');
         themHeader.className = 'team-header';
-        themHeader.innerHTML = `THEM - <span id="them-hand-points">${this.game.themHandPoints || 0}</span>`;
+        let themRoleText = '';
+        if (bidTeam === 'Them') {
+            themRoleText = ' (Bid Winner)';
+        } else if (setTeam === 'Them') {
+            themRoleText = ' (Setter)';
+        }
+        themHeader.innerHTML = `THEM${themRoleText} - <span id="them-hand-points">${this.game.themHandPoints || 0}</span>`;
         
         const themTricks = document.createElement('div');
         themTricks.id = 'them-tricks';
@@ -302,15 +320,12 @@ class HandScoreboardWindowManager {
         
         container.appendChild(usRow);
         container.appendChild(themRow);
-        content.appendChild(container);
-        
-        this.handScoreboardWindow.appendChild(content);
         
         // Add to page
         document.body.appendChild(this.handScoreboardWindow);
         
-        // Make draggable
-        this.makeDraggable(this.handScoreboardWindow);
+        // Make draggable using modal pattern
+        this.makeCollectedTricksModalDraggable();
         
         // Position window
         this.handScoreboardWindow.style.left = '50px';
@@ -611,11 +626,166 @@ class HandScoreboardWindowManager {
         if (usPointsElement) usPointsElement.textContent = this.game.usHandPoints || 0;
         if (themPointsElement) themPointsElement.textContent = this.game.themHandPoints || 0;
         
-        // Update main header title with current scores
+        // Update main header title with current scores and bid information
         const modalTitle = this.handScoreboardWindow.querySelector('.modalTitle');
         if (modalTitle) {
-            modalTitle.textContent = `Collected Tricks - US: ${this.game.usHandPoints || 0} | THEM: ${this.game.themHandPoints || 0}`;
+            modalTitle.textContent = `Collected Tricks - US: ${this.game.usHandPoints || 0} | THEM: ${this.game.themHandPoints || 0} | Bid to Beat: ${this.game.winningBid || 'None'}`;
         }
+        
+        // Update team headers with roles
+        const usHeader = this.handScoreboardWindow.querySelector('.team-row:first-child .team-header');
+        const themHeader = this.handScoreboardWindow.querySelector('.team-row:last-child .team-header');
+        
+        if (usHeader && themHeader) {
+            // Determine team roles
+            const bidTeam = this.game.bidWinner ? 
+                (this.game.teams['Us'].some(p => this.game.formatPlayerNameWithRelationship(p) === this.game.bidWinner) ? 'Us' : 'Them') : null;
+            const setTeam = bidTeam ? (bidTeam === 'Us' ? 'Them' : 'Us') : null;
+            
+            // Update US header
+            let usRoleText = '';
+            if (bidTeam === 'Us') {
+                usRoleText = ' (Bid Winner)';
+            } else if (setTeam === 'Us') {
+                usRoleText = ' (Setter)';
+            }
+            usHeader.innerHTML = `US${usRoleText} - <span id="us-hand-points">${this.game.usHandPoints || 0}</span>`;
+            
+            // Update THEM header
+            let themRoleText = '';
+            if (bidTeam === 'Them') {
+                themRoleText = ' (Bid Winner)';
+            } else if (setTeam === 'Them') {
+                themRoleText = ' (Setter)';
+            }
+            themHeader.innerHTML = `THEM${themRoleText} - <span id="them-hand-points">${this.game.themHandPoints || 0}</span>`;
+        }
+    }
+    
+    makeCollectedTricksModalDraggable() {
+        let isDragging = false;
+        let startX, startY, startLeft, startTop;
+        
+        const handleMouseDown = (e) => {
+            // Don't start drag if clicking on interactive elements
+            if (e.target.closest('.aquaButton') || e.target.closest('input') || e.target.closest('button')) {
+                return;
+            }
+            
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            startLeft = parseInt(this.handScoreboardWindow.style.left) || 0;
+            startTop = parseInt(this.handScoreboardWindow.style.top) || 0;
+            
+            e.preventDefault();
+        };
+        
+        const handleMouseMove = (e) => {
+            if (!isDragging) return;
+            
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            
+            this.handScoreboardWindow.style.left = (startLeft + deltaX) + 'px';
+            this.handScoreboardWindow.style.top = (startTop + deltaY) + 'px';
+        };
+        
+        const handleMouseUp = () => {
+            isDragging = false;
+        };
+        
+        // Mouse events
+        this.handScoreboardWindow.addEventListener('mousedown', handleMouseDown);
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        
+        // Touch events for mobile
+        let touchStartTime = 0;
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let hasMoved = false;
+        
+        const handleTouchStart = (e) => {
+            if (e.target.closest('.aquaButton') || e.target.closest('input') || e.target.closest('button')) {
+                return;
+            }
+            
+            // Check if the touch is on a scrollable element
+            const scrollableElement = e.target.closest('.modalInnerContainer');
+            if (scrollableElement) {
+                // Allow scrolling on scrollable content - don't prevent default
+                return;
+            }
+            
+            touchStartTime = Date.now();
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            hasMoved = false;
+            
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            startLeft = parseInt(this.handScoreboardWindow.style.left) || 0;
+            startTop = parseInt(this.handScoreboardWindow.style.top) || 0;
+            
+            e.preventDefault();
+        };
+        
+        const handleTouchMove = (e) => {
+            // Check if the touch is on a scrollable element
+            const scrollableElement = e.target.closest('.modalInnerContainer');
+            if (scrollableElement) {
+                // Allow scrolling on scrollable content - don't prevent default
+                return;
+            }
+            
+            const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
+            const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
+            
+            // If moved more than 5px, consider it a drag
+            if (deltaX > 5 || deltaY > 5) {
+                hasMoved = true;
+                isDragging = true;
+            }
+            
+            if (isDragging) {
+                const moveDeltaX = e.touches[0].clientX - startX;
+                const moveDeltaY = e.touches[0].clientY - startY;
+                
+                this.handScoreboardWindow.style.left = (startLeft + moveDeltaX) + 'px';
+                this.handScoreboardWindow.style.top = (startTop + moveDeltaY) + 'px';
+            }
+            
+            e.preventDefault();
+        };
+        
+        const handleTouchEnd = (e) => {
+            // Check if the touch is on a scrollable element
+            const scrollableElement = e.target.closest('.modalInnerContainer');
+            if (scrollableElement) {
+                // Allow scrolling on scrollable content
+                return;
+            }
+            
+            const touchDuration = Date.now() - touchStartTime;
+            
+            // If it was a short tap (less than 200ms) and didn't move much, bring to front
+            if (touchDuration < 200 && !hasMoved) {
+                bringWindowToFrontWithLayering(this.handScoreboardWindow, 'game-window');
+            }
+            
+            isDragging = false;
+            hasMoved = false;
+        };
+        
+        this.handScoreboardWindow.addEventListener('touchstart', handleTouchStart, { passive: false });
+        this.handScoreboardWindow.addEventListener('touchmove', handleTouchMove, { passive: false });
+        this.handScoreboardWindow.addEventListener('touchend', handleTouchEnd);
+        
+        // Bring to front on click and touch
+        this.handScoreboardWindow.addEventListener('click', () => {
+            bringWindowToFrontWithLayering(this.handScoreboardWindow, 'game-window');
+        });
     }
     
     updateButtonContainerVisibility() {
