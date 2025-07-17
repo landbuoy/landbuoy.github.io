@@ -383,6 +383,11 @@ class HandScoreboardWindowManager {
         let hasMoved = false;
         
         const handleTouchStart = (e) => {
+            // Don't start dragging if touching a domino window or its content
+            if (e.target.closest('.domino-window, .domino-window-content')) {
+                return;
+            }
+            
             if (e.target.closest('.aquaButton') || e.target.closest('input') || e.target.closest('button')) {
                 return;
             }
@@ -408,6 +413,11 @@ class HandScoreboardWindowManager {
         };
         
         const handleTouchMove = (e) => {
+            // Don't handle touchmove if touching a domino window
+            if (e.target.closest('.domino-window, .domino-window-content')) {
+                return;
+            }
+            
             if (e.target.closest('.aquaButton') || e.target.closest('input') || e.target.closest('button')) {
                 return;
             }
@@ -440,6 +450,11 @@ class HandScoreboardWindowManager {
         };
         
         const handleTouchEnd = (e) => {
+            // Don't handle touchend if touching a domino window
+            if (e.target.closest('.domino-window, .domino-window-content')) {
+                return;
+            }
+            
             // Check if the touch is on a scrollable element
             const scrollableElement = e.target.closest('.hand-scoreboard-content');
             if (scrollableElement) {
@@ -1368,8 +1383,13 @@ class GameTableWindowManager {
         let hasMoved = false;
         
         window.addEventListener('touchstart', (e) => {
-            // Only prevent default if not touching an interactive element or domino window
-            if (!e.target.closest('button, input, select, textarea, .interactive-element, .domino-window, .domino-window-content')) {
+            // Don't start dragging if touching a domino window or its content
+            if (e.target.closest('.domino-window, .domino-window-content')) {
+                return;
+            }
+            
+            // Only prevent default if not touching an interactive element
+            if (!e.target.closest('button, input, select, textarea, .interactive-element')) {
                 e.preventDefault();
             }
             
@@ -1388,6 +1408,11 @@ class GameTableWindowManager {
         });
         
         document.addEventListener('touchmove', (e) => {
+            // Don't handle touchmove if touching a domino window
+            if (e.target.closest('.domino-window, .domino-window-content')) {
+                return;
+            }
+            
             const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
             const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
             
@@ -1411,6 +1436,11 @@ class GameTableWindowManager {
         });
         
         document.addEventListener('touchend', (e) => {
+            // Don't handle touchend if touching a domino window
+            if (e.target.closest('.domino-window, .domino-window-content')) {
+                return;
+            }
+            
             const touchDuration = Date.now() - touchStartTime;
             
             // If it was a short tap (less than 200ms) and didn't move much, bring to front
@@ -1428,7 +1458,12 @@ class GameTableWindowManager {
                 window.style.transition = 'all 0.3s ease';
         });
         
-        document.addEventListener('touchcancel', () => {
+        document.addEventListener('touchcancel', (e) => {
+            // Don't handle touchcancel if touching a domino window
+            if (e.target && e.target.closest('.domino-window, .domino-window-content')) {
+                return;
+            }
+            
             if (isDragging) {
                 initialX = currentX;
                 initialY = currentY;
@@ -5199,8 +5234,11 @@ class Game {
         
         // Touch event handlers for mobile
         window.addEventListener('touchstart', (e) => {
-            // Only prevent default if not touching an interactive element or domino window
-            if (!e.target.closest('button, input, select, textarea, .interactive-element, .domino-window, .domino-window-content')) {
+            // Stop event propagation to prevent other windows from receiving the event
+            e.stopPropagation();
+            
+            // Only prevent default if not touching an interactive element
+            if (!e.target.closest('button, input, select, textarea, .interactive-element')) {
                 e.preventDefault();
             }
             isDragging = true;
@@ -5218,6 +5256,7 @@ class Game {
         document.addEventListener('touchmove', (e) => {
             if (isDragging) {
                 e.preventDefault();
+                e.stopPropagation(); // Stop propagation to prevent other windows from moving
                 const touch = e.touches[0];
                 currentX = touch.clientX - initialX;
                 currentY = touch.clientY - initialY;
@@ -5229,8 +5268,9 @@ class Game {
             }
         });
         
-        document.addEventListener('touchend', () => {
+        document.addEventListener('touchend', (e) => {
             if (isDragging) {
+                e.stopPropagation(); // Stop propagation to prevent other windows from receiving the event
                 initialX = currentX;
                 initialY = currentY;
                 isDragging = false;
@@ -5240,8 +5280,9 @@ class Game {
             }
         });
         
-        document.addEventListener('touchcancel', () => {
+        document.addEventListener('touchcancel', (e) => {
             if (isDragging) {
+                e.stopPropagation(); // Stop propagation to prevent other windows from receiving the event
                 initialX = currentX;
                 initialY = currentY;
                 isDragging = false;
@@ -6562,6 +6603,11 @@ class Game {
         let hasMoved = false;
         
         const handleTouchStart = (e) => {
+            // Don't start dragging if touching a domino window or its content
+            if (e.target.closest('.domino-window, .domino-window-content')) {
+                return;
+            }
+            
             if (e.target.closest('.aquaButton') || e.target.closest('input') || e.target.closest('button')) {
                 return;
             }
@@ -6587,6 +6633,11 @@ class Game {
         };
         
         const handleTouchMove = (e) => {
+            // Don't handle touchmove if touching a domino window
+            if (e.target.closest('.domino-window, .domino-window-content')) {
+                return;
+            }
+            
             // Check if the touch is on a scrollable element
             const scrollableElement = e.target.closest('.modalInnerContainer');
             if (scrollableElement) {
@@ -6615,6 +6666,11 @@ class Game {
         };
         
         const handleTouchEnd = (e) => {
+            // Don't handle touchend if touching a domino window
+            if (e.target.closest('.domino-window, .domino-window-content')) {
+                return;
+            }
+            
             // Check if the touch is on a scrollable element
             const scrollableElement = e.target.closest('.modalInnerContainer');
             if (scrollableElement) {
