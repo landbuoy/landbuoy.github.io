@@ -112,6 +112,60 @@ const DOMINO_BIRD_MAP = {
     "0-0": "Alpine Chough"
 };
 
+// Two-layer z-index management system
+let dominoMaxZIndex = 10000; // Domino layer starts at 10000
+let gameWindowMaxZIndex = 1000; // Game window layer starts at 1000
+
+// Function to get the next available z-index for dominoes
+function getNextDominoZIndex() {
+    dominoMaxZIndex += 1;
+    return dominoMaxZIndex;
+}
+
+// Function to get the next available z-index for game windows
+function getNextGameWindowZIndex() {
+    gameWindowMaxZIndex += 1;
+    return gameWindowMaxZIndex;
+}
+
+// Function to bring a window to the front with proper layering
+function bringWindowToFrontWithLayering(window, windowType = 'general') {
+    // Domino windows have their own high-priority layer
+    if (windowType === 'domino') {
+        // Find the highest z-index among all domino windows
+        const allDominoWindows = document.querySelectorAll('.domino-window');
+        let maxDominoZIndex = 10000;
+        
+        allDominoWindows.forEach(dominoWindow => {
+            const zIndex = parseInt(dominoWindow.style.zIndex) || 10000;
+            maxDominoZIndex = Math.max(maxDominoZIndex, zIndex);
+        });
+        
+        window.style.zIndex = maxDominoZIndex + 1;
+        dominoMaxZIndex = Math.max(dominoMaxZIndex, maxDominoZIndex + 1);
+        return;
+    }
+    
+    // For game windows (hand scoreboard, game table, history), manage their own layer
+    if (windowType === 'game-window') {
+        // Find the highest z-index among game windows
+        const gameWindows = document.querySelectorAll('.hand-scoreboard-window, .game-table-window, .modalContainer--scoreboard');
+        let maxGameZIndex = 1000;
+        
+        gameWindows.forEach(gameWindow => {
+            const zIndex = parseInt(gameWindow.style.zIndex) || 1000;
+            maxGameZIndex = Math.max(maxGameZIndex, zIndex);
+        });
+        
+        window.style.zIndex = maxGameZIndex + 1;
+        gameWindowMaxZIndex = Math.max(gameWindowMaxZIndex, maxGameZIndex + 1);
+        return;
+    }
+    
+    // For other windows, use the game window layer
+    window.style.zIndex = getNextGameWindowZIndex();
+}
+
 // Hand Scoreboard Window Manager
 class HandScoreboardWindowManager {
     constructor(game) {
@@ -183,7 +237,7 @@ class HandScoreboardWindowManager {
         
         this.handScoreboardWindow.style.left = `${baseLeft}px`;
         this.handScoreboardWindow.style.top = `${baseTop}px`;
-        this.handScoreboardWindow.style.zIndex = '1000';
+        this.handScoreboardWindow.style.zIndex = getNextGameWindowZIndex();
         
         // Create window content with header and close button
         this.handScoreboardWindow.innerHTML = `
@@ -342,20 +396,8 @@ class HandScoreboardWindowManager {
         
         // Bring to front on click
         window.addEventListener('click', () => {
-            this.bringWindowToFront(window);
+            bringWindowToFrontWithLayering(window, 'game-window');
         });
-    }
-    
-    bringWindowToFront(clickedWindow) {
-        const allWindows = document.querySelectorAll('.hand-scoreboard-window');
-        let maxZIndex = 1000;
-        
-        allWindows.forEach(window => {
-            const zIndex = parseInt(window.style.zIndex) || 1000;
-            maxZIndex = Math.max(maxZIndex, zIndex);
-        });
-        
-        clickedWindow.style.zIndex = maxZIndex + 1;
     }
     
     closeHandScoreboardWindow() {
@@ -877,7 +919,7 @@ class GameTableWindowManager {
         
         this.gameTableWindow.style.left = `${baseLeft}px`;
         this.gameTableWindow.style.top = `${baseTop}px`;
-        this.gameTableWindow.style.zIndex = '1000';
+        this.gameTableWindow.style.zIndex = getNextGameWindowZIndex();
         
         // Get player names and relationships
         const playerNames = [];
@@ -1062,7 +1104,7 @@ class GameTableWindowManager {
         
         // Add click handler to bring window to front
         window.addEventListener('mousedown', (e) => {
-            this.bringWindowToFront(window);
+            bringWindowToFrontWithLayering(window, 'game-window');
         });
         
         // Mouse event handlers - make entire window draggable
@@ -1070,7 +1112,7 @@ class GameTableWindowManager {
             // Only start dragging if not clicking on a child element that should handle its own events
             if (e.target === window || window.contains(e.target)) {
                 isDragging = true;
-                this.bringWindowToFront(window);
+                bringWindowToFrontWithLayering(window, 'game-window');
                 
                 // Disable transitions during drag for smoother movement
                 window.style.transition = 'none';
@@ -1112,7 +1154,7 @@ class GameTableWindowManager {
                 e.preventDefault();
             }
             isDragging = true;
-            this.bringWindowToFront(window);
+            bringWindowToFrontWithLayering(window, 'game-window');
             
             // Disable transitions during drag for smoother movement
             window.style.transition = 'none';
@@ -1158,22 +1200,6 @@ class GameTableWindowManager {
                 window.style.transition = 'all 0.3s ease';
             }
         });
-    }
-    
-    bringWindowToFront(clickedWindow) {
-        // Find the highest z-index among all domino windows
-        const allWindows = document.querySelectorAll('.domino-window');
-        let maxZIndex = 1000;
-        
-        allWindows.forEach(window => {
-            const zIndex = parseInt(window.style.zIndex) || 1000;
-            if (zIndex > maxZIndex) {
-                maxZIndex = zIndex;
-            }
-        });
-        
-        // Set the clicked window to the front
-        clickedWindow.style.zIndex = maxZIndex + 1;
     }
     
     closeGameTableWindow() {
@@ -4656,6 +4682,9 @@ class Game {
         window.style.top = `${topPosition}px`;
         window.style.left = `${leftPosition}px`;
         
+        // Set initial z-index for domino window
+        window.style.zIndex = getNextDominoZIndex();
+        
         // Set explicit dimensions for mobile
         if (isMobile) {
             window.style.width = `${dominoWidth}px`;
@@ -4880,7 +4909,7 @@ class Game {
         
         // Add click handler to bring window to front
         window.addEventListener('mousedown', (e) => {
-            this.bringWindowToFront(window);
+            bringWindowToFrontWithLayering(window, 'domino');
         });
         
         // Mouse event handlers - make entire window draggable
@@ -4888,7 +4917,7 @@ class Game {
             // Only start dragging if not clicking on a child element that should handle its own events
             if (e.target === window || window.contains(e.target)) {
                 isDragging = true;
-                this.bringWindowToFront(window);
+                bringWindowToFrontWithLayering(window, 'domino');
                 
                 // Disable transitions during drag for smoother movement
                 window.style.transition = 'none';
@@ -4930,7 +4959,7 @@ class Game {
                 e.preventDefault();
             }
             isDragging = true;
-            this.bringWindowToFront(window);
+            bringWindowToFrontWithLayering(window, 'domino');
             
             // Disable transitions during drag for smoother movement
             window.style.transition = 'none';
@@ -4978,22 +5007,6 @@ class Game {
         });
     }
     
-    bringWindowToFront(clickedWindow) {
-        // Find the highest z-index among all domino windows
-        const allWindows = document.querySelectorAll('.domino-window');
-        let maxZIndex = 1000;
-        
-        allWindows.forEach(window => {
-            const zIndex = parseInt(window.style.zIndex) || 1000;
-            if (zIndex > maxZIndex) {
-                maxZIndex = zIndex;
-            }
-        });
-        
-        // Set the clicked window to the front
-        clickedWindow.style.zIndex = maxZIndex + 1;
-    }
-    
     selectDomino(index) {
         // Remove previous selection from domino windows
         document.querySelectorAll('.domino-window').forEach(w => {
@@ -5004,6 +5017,8 @@ class Game {
         const dominoWindow = document.querySelector(`.domino-window[data-domino-index="${index}"]`);
         if (dominoWindow) {
             dominoWindow.classList.add('selected');
+            // Bring selected domino to the very front
+            bringWindowToFrontWithLayering(dominoWindow, 'domino');
         }
         
         this.selectedDomino = index;
@@ -6090,7 +6105,7 @@ class Game {
         
         this.scoreboardHistoryModal.style.left = `${baseLeft}px`;
         this.scoreboardHistoryModal.style.top = `${baseTop}px`;
-        this.scoreboardHistoryModal.style.zIndex = '9999';
+        this.scoreboardHistoryModal.style.zIndex = getNextGameWindowZIndex();
         
         // Create modal content
         this.scoreboardHistoryModal.innerHTML = `
@@ -6332,22 +6347,8 @@ class Game {
         
         // Bring to front on click
         this.scoreboardHistoryModal.addEventListener('click', () => {
-            this.bringHistoryModalToFront();
+            bringWindowToFrontWithLayering(this.scoreboardHistoryModal, 'game-window');
         });
-    }
-    
-    bringHistoryModalToFront() {
-        if (this.scoreboardHistoryModal) {
-            const allModals = document.querySelectorAll('.modalContainer--scoreboard');
-            let maxZIndex = 9999;
-            
-            allModals.forEach(modal => {
-                const zIndex = parseInt(modal.style.zIndex) || 9999;
-                maxZIndex = Math.max(maxZIndex, zIndex);
-            });
-            
-            this.scoreboardHistoryModal.style.zIndex = maxZIndex + 1;
-        }
     }
     
     updateButtonContainerVisibility() {
