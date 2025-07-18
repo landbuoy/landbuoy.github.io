@@ -553,16 +553,11 @@ class HandScoreboardWindowManager {
         if (usTricks) usTricks.innerHTML = '';
         if (themTricks) themTricks.innerHTML = '';
         
-        // Helper function to get abbreviated player name
-        const getAbbreviatedPlayerName = (playerIdx) => {
+        // Helper function to get full player name with relationship (same as game table and scorecard)
+        const getFullPlayerName = (playerIdx) => {
+            const player = this.game.players[playerIdx];
             const relationship = this.game.getPlayerRelationship(playerIdx);
-            switch (relationship) {
-                case 'Human': return 'U';
-                case 'Partner': return 'P';
-                case 'Opponent 1': return 'O1';
-                case 'Opponent 2': return 'O2';
-                default: return relationship;
-            }
+            return `${player.name} (${relationship})`;
         };
         
         // Helper function to create hand display for a set of tricks
@@ -581,7 +576,7 @@ class HandScoreboardWindowManager {
             
             // Create a row for each player showing their dominoes in play order
             this.game.players.forEach((player, playerIndex) => {
-                const playerName = getAbbreviatedPlayerName(playerIndex);
+                const playerName = getFullPlayerName(playerIndex);
                 
                 display += '<div class="hand-display-row">';
                 display += `<span class="player-name">${playerName}:</span>`;
@@ -6390,7 +6385,7 @@ class Game {
         // Create modal content
         this.scoreboardHistoryModal.innerHTML = `
             <header class="modalHeader">
-                <h2 class="modalTitle">Scorecard - Us: <span id="scorecard-us-score">0</span> Them: <span id="scorecard-them-score">0</span></h2>
+                <h2 class="modalTitle">Scorecard - Us: <span id="scorecard-us-score">${this.scores[0]}</span> Them: <span id="scorecard-them-score">${this.scores[1]}</span></h2>
                 <div class="aquaButton aquaButton--scoreboard" style="background: ${complementaryColor}; box-shadow: 0px 5px 10px ${randomColor};">×</div>
             </header>
             <div class="modalInnerContainer">
