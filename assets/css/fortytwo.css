@@ -1317,7 +1317,7 @@ body {
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .game-table-window {
-        width: 90vw;
+        width: 70vw;
         min-width: 400px;
         height: 80vh;
         left: 5vw !important;
