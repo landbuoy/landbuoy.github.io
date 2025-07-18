@@ -287,7 +287,7 @@ body {
 }
 
 .hand-display-row .domino-display {
-    flex: 0 0 auto;
+    flex: 1 1 300px;
     text-align: center;
     margin: 0 2px;
     display: flex;
@@ -297,16 +297,19 @@ body {
     background: transparent;
     border: none;
     border-radius: 0;
-    min-height: auto;
-    aspect-ratio: auto;
+    min-height: 300px;
+    aspect-ratio: 1;
+    overflow: hidden;
 }
 
 .hand-display-row .domino-display img {
-    width: 100px;
-    height: 50px;
+    width: 300px;
+    height: 300px;
     object-fit: contain;
     border: none;
     background: transparent;
+    max-width: 100%;
+    max-height: 100%;
 }
 
 .hand-display-row .domino-fallback {
@@ -641,8 +644,8 @@ body {
 /* Game Table Window Styles */
 .game-table-window {
     position: absolute;
-    width: 800px;
-    height: 600px;
+    width: 570px;
+    height: 700px;
     background: rgba(0, 0, 0, 0.95);
     border: 3px solid lime;
     border-radius: 8px;
@@ -769,7 +772,10 @@ body {
     padding: 10px;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: visible;
+    width: 230px;
+    max-width: 230px;
+    min-height: 270px;
 }
 
 .role-label {
@@ -834,32 +840,11 @@ body {
     color: black;
 }
 
-.game-table-score-display {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-right: 10px;
-}
-
-.score-item {
+/* Scorecard score display styles */
+#scorecard-us-score,
+#scorecard-them-score {
     color: lime;
-    font-size: 14px;
     font-weight: bold;
-}
-
-.game-table-score-display .history-btn {
-    background: black;
-    color: lime;
-    border: 1px solid lime;
-    padding: 4px 8px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.game-table-score-display .history-btn:hover {
-    background: lime;
-    color: black;
 }
 
 /* Aqua button styles for game table */
@@ -926,10 +911,13 @@ body {
     background: rgba(0, 0, 0, 0.7);
     border: 2px solid lime;
     border-radius: 6px;
-    padding: 10px;
+    padding: 15px;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: visible;
+    min-height: 270px;
+    width: 230px;
+    max-width: 230px;
 }
 
 .player-slot-header {
@@ -962,14 +950,15 @@ body {
 
 .player-slot-content {
     flex: 1;
-    overflow-y: auto;
+    overflow: visible;
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
 .domino-display {
-    margin: 10px;
-    padding: 5px;
+    margin: 4px;
+    padding: 4px;
     background: transparent;
     border: none;
     border-radius: 0;
@@ -978,11 +967,13 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: auto;
+    min-height: 220px;
+    min-width: 200px;
+    width: 200px;
+    height: auto;
     cursor: pointer;
     position: relative;
     overflow: visible;
-    aspect-ratio: auto;
     /* Better touch handling for mobile */
     touch-action: manipulation;
     -webkit-tap-highlight-color: rgba(0, 255, 0, 0.2);
@@ -1005,35 +996,42 @@ body {
 
 .domino-image-container {
     position: relative;
-    width: auto;
-    height: auto;
+    width: 200px;
+    height: 200px;
     display: flex;
     align-items: center;
     justify-content: center;
     perspective: 1000px;
     flex: 0 0 auto;
-    min-height: 0;
+    min-height: 200px;
+    min-width: 200px;
+    max-width: 200px;
+    max-height: 200px;
 }
 
 .domino-image {
-    width: auto;
-    height: auto;
+    width: 200px;
+    height: 200px;
     object-fit: contain;
     border: none;
     background: transparent;
     transition: opacity 0.6s ease;
+    max-width: 100%;
+    max-height: 100%;
 }
 
 .bird-image {
     position: absolute;
     top: 0;
     left: 0;
-    width: auto;
-    height: auto;
+    width: 200px;
+    height: 200px;
     object-fit: cover;
     border: none;
     transition: opacity 0.6s ease;
     background: transparent;
+    max-width: 100%;
+    max-height: 100%;
 }
 
 .domino-label {
@@ -1042,20 +1040,22 @@ body {
     font-weight: bold;
     text-align: center;
     line-height: 1.2;
-    margin-top: 5px;
+    margin-top: 8px;
     z-index: 10;
     position: relative;
     flex: 0 0 auto;
-    min-height: auto;
+    min-height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
 }
 
 .player-status-messages {
     flex: 1;
-    overflow-y: auto;
+    overflow: hidden;
     margin-bottom: 10px;
+    width: 100%;
 }
 
 .player-status-message {
@@ -1095,6 +1095,9 @@ body {
     background: rgba(0, 0, 0, 0.5);
     border: 1px solid lime;
     border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .player-bid-input-area label {
@@ -1114,6 +1117,8 @@ body {
     color: lime;
     font-family: 'Courier New', monospace;
     margin-bottom: 5px;
+    box-sizing: border-box;
+    max-width: 100%;
 }
 
 .player-bid-input:focus {
@@ -1137,6 +1142,9 @@ body {
     z-index: 5;
     min-height: 36px;
     min-width: 36px;
+    width: 100%;
+    box-sizing: border-box;
+    max-width: 100%;
 }
 
 .player-submit-bid-btn:hover {
@@ -1150,6 +1158,9 @@ body {
     background: rgba(0, 0, 0, 0.5);
     border: 1px solid lime;
     border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .player-trump-selection-area label {
@@ -1164,6 +1175,8 @@ body {
     flex-wrap: wrap;
     gap: 4px;
     margin-bottom: 8px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .player-trump-option {
@@ -1213,6 +1226,9 @@ body {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    width: 100%;
+    box-sizing: border-box;
+    max-width: 100%;
 }
 
 .player-confirm-trump-btn:hover {
@@ -1304,6 +1320,7 @@ body {
 @media (max-width: 768px) {
     .game-table-window {
         width: 90vw;
+        min-width: 400px;
         height: 80vh;
         left: 5vw !important;
         top: 10vh !important;
@@ -1315,6 +1332,10 @@ body {
     
     .role-slot {
         padding: 5px;
+        width: 180px;
+        max-width: 180px;
+        min-height: 200px;
+        overflow: visible;
     }
     
     .role-label {
@@ -1328,6 +1349,10 @@ body {
     
     .player-slot {
         padding: 5px;
+        width: 180px;
+        max-width: 180px;
+        overflow: visible;
+        min-height: 200px;
     }
     
     .player-name {
@@ -1341,11 +1366,15 @@ body {
     .domino-image {
         width: auto;
         height: auto;
+        max-width: 100%;
+        max-height: 100%;
     }
     
     .bird-image {
         width: auto;
         height: auto;
+        max-width: 100%;
+        max-height: 100%;
     }
     
     .domino-label {
@@ -1360,6 +1389,9 @@ body {
         margin: 5px;
         padding: 3px;
         min-height: auto;
+        width: auto;
+        height: auto;
+        overflow: visible;
         /* Enhanced touch handling for mobile */
         touch-action: manipulation;
         -webkit-tap-highlight-color: rgba(0, 255, 0, 0.3);
@@ -1485,24 +1517,10 @@ body {
         padding: 6px 10px;
     }
     
-    .game-table-score-display {
-        gap: 8px;
-        margin-right: 5px;
-    }
-    
-    .score-item {
-        font-size: 12px;
-    }
-    
-    .game-table-score-display .history-btn {
-        min-width: 44px;
-        min-height: 44px;
-        font-size: 10px;
-        padding: 4px 6px;
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: rgba(0,0,0,0.1);
-        position: relative;
-        z-index: 10;
+    /* Mobile adjustments for scorecard score display */
+    #scorecard-us-score,
+    #scorecard-them-score {
+        font-size: 14px;
     }
     
     /* Domino Window Styles for Mobile */
@@ -1868,12 +1886,12 @@ body {
         border-radius: 0 !important;
         min-height: auto !important;
         aspect-ratio: auto !important;
-        flex: 0 0 auto !important;
+        flex: 1 1 300px !important;
     }
     
     .hand-display-row .domino-display img {
-        width: 60px !important;
-        height: 30px !important;
+        width: 300px !important;
+        height: 300px !important;
         border: none !important;
         background: transparent !important;
     }

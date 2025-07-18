@@ -1141,7 +1141,7 @@ class GameTableWindowManager {
         const screenWidth = viewportWidth || 1200;
         const screenHeight = viewportHeight || 800;
         
-        const baseLeft = screenWidth / 2 - 300; // Center horizontally
+        const baseLeft = screenWidth / 2 - 260; // Center horizontally
         const baseTop = screenHeight / 2 - 300; // Center vertically
         
         this.gameTableWindow.style.left = `${baseLeft}px`;
@@ -1167,10 +1167,6 @@ class GameTableWindowManager {
         this.gameTableWindow.innerHTML = `
             <div class="game-table-header modalHeader">
                 <h3 class="game-table-title modalTitle" style="font-size: 14px;">Game Table</h3>
-                <div class="game-table-score-display">
-                    <div class="score-item" style="font-size: 12px;">Us: <span id="game-table-us-score">0</span></div>
-                    <div class="score-item" style="font-size: 12px;">Them: <span id="game-table-them-score">0</span></div>
-                </div>
                 <button id="play-domino" class="btn" disabled style="font-size: 11px; margin-left: 10px;">Play Domino</button>
                 <button id="game-table-play-next-trick-btn" class="btn game-table-play-next-trick-btn" style="display: none; font-size: 11px;">Next Trick</button>
                 <button id="game-table-shuffle-next-hand-btn" class="btn game-table-shuffle-next-hand-btn" style="display: none; font-size: 11px;">New Hand</button>
@@ -3662,7 +3658,7 @@ class Player {
             return doubles[0]; // Highest double
         }
         
-        // Second priority: trump dominoes (but avoid if higher trumps are out there)
+        // Second priority: trump dominoes (but avoid if higher trumps are still out there)
         const trumpPlays = this.hand.filter(d => d.isTrump(trickState.trump));
         if (trumpPlays.length > 0) {
             console.log(`LEADER: Found trumps:`, trumpPlays.map(d => d.toString()));
@@ -4662,13 +4658,11 @@ class Game {
         if (this.themScore) this.themScore.textContent = this.scores[1];
         this.showElement(this.scoreDisplay);
         
-        // Update game table window score display
-        if (this.gameTableManager) {
-            const gameTableUsScore = document.getElementById('game-table-us-score');
-            const gameTableThemScore = document.getElementById('game-table-them-score');
-            if (gameTableUsScore) gameTableUsScore.textContent = this.scores[0];
-            if (gameTableThemScore) gameTableThemScore.textContent = this.scores[1];
-        }
+        // Update scorecard window score display
+        const scorecardUsScore = document.getElementById('scorecard-us-score');
+        const scorecardThemScore = document.getElementById('scorecard-them-score');
+        if (scorecardUsScore) scorecardUsScore.textContent = this.scores[0];
+        if (scorecardThemScore) scorecardThemScore.textContent = this.scores[1];
     }
     
     updateHandScoreboard() {
@@ -6396,7 +6390,7 @@ class Game {
         // Create modal content
         this.scoreboardHistoryModal.innerHTML = `
             <header class="modalHeader">
-                <h2 class="modalTitle">Scorecard</h2>
+                <h2 class="modalTitle">Scorecard - Us: <span id="scorecard-us-score">0</span> Them: <span id="scorecard-them-score">0</span></h2>
                 <div class="aquaButton aquaButton--scoreboard" style="background: ${complementaryColor}; box-shadow: 0px 5px 10px ${randomColor};">×</div>
             </header>
             <div class="modalInnerContainer">
