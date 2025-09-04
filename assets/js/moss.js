@@ -28,7 +28,9 @@ $(".modalContainer--marchComp3-6").css("box-shadow", "0px 0px 32px" + c2);
 $(".modalContainer--marchComp3-8").css("box-shadow", "0px 0px 32px" + c2);
 $(".modalContainer--marchComp3-18").css("box-shadow", "0px 0px 32px" + c2);
 $(".modalContainer--marchComp3-31").css("box-shadow", "0px 0px 32px" + c2);
-$(".mossComposites").css("background", "linear-gradient(to right, transparent, " + c2 );
+$(".modalContainer--beees01").css("box-shadow", "0px 0px 32px" + c2);
+$(".modalContainer--beees02").css("box-shadow", "0px 0px 32px" + c2);
+$(".modalContainer--beees03").css("box-shadow", "0px 0px 32px" + c2);
 
 //dancing triangle scripts
 
@@ -168,3 +170,20 @@ function shuffle36(array) {
 
   return array;
 }
+
+// beees modal click handlers
+
+$(".glyph--beees01").click(function () {
+  $(".modalContainer").css("zIndex", "0");
+  $(".modalContainer--beees01").fadeToggle().css("zIndex", "9999");
+});
+
+$(".glyph--beees02").click(function () {
+  $(".modalContainer").css("zIndex", "0");
+  $(".modalContainer--beees02").fadeToggle().css("zIndex", "9999");
+});
+
+$(".glyph--beees03").click(function () {
+  $(".modalContainer").css("zIndex", "0");
+  $(".modalContainer--beees03").fadeToggle().css("zIndex", "9999");
+});
