@@ -36,17 +36,6 @@
 <body>
   <!-- Main container -->
   <div class="mainContainer">
-    <canvas id="shaderCanvas" class="shader-background"></canvas>
-    
-    <!-- Title Bar -->
-    <div class="titleBar">
-      <div class="logoContainer">
-        <div class="logoContainer__inner">
-          LAND BUOY
-        </div>
-      </div>
-    </div>
-    
     <!-- Navigation -->
     <nav class="nav">
       <div class="button button--resume">
@@ -55,117 +44,23 @@
       <div class="button button--info">
         List of Works
       </div>
-      <div class="button button--hausaufgabeInfo">
-        Hausaufgabe
+      <div class="button button--portal">
+        <a href="pages/portalfinder.html">
+          Portal Finder
+        </a>
       </div>
-      <div class="button button--shaderControl">
-        Shader Control
-      </div>
-    </nav>
-
-    <!-- Research Navigation -->
-    <nav class="nav nav--research">
-      <div class="button button--references">
-        References
-      </div>
-      <div class="button button--linguistics">
-        Linguistics
-      </div>
-      <div class="button button--movementAnalysis">
-        Movement Analysis
-      </div>
-      <div class="button button--machineLearning">
-        Machine Learning
-      </div>
-      <div class="button button--musicEngine">
-        Music Engine
-      </div>
-      <div class="button button--symbolicLanguage">
-        Symbolic Language
-      </div>
-      <div class="button button--materialStudies">
-        Material Studies
+      <div class="logoContainer">
+        <div class="logoContainer__inner">
+          Mask Oker Land Buoy
+        </div>
       </div>
     </nav>
 
     <!-- Project containers -->
     <div class="landbuoyContainers">
-
-
-
-      <!-- Land Buoy projects -->
+      <!-- Bandcamp links -->
       <div class="landbuoy">
-        <div class="landbuoyProjects">
-          <div class="glyph glyph--dancingTriangle">
-            <img
-              class="glyphIcon"
-              src="assets/img/project icons/mossComposites/dancingTriangle.gif"
-              alt="dancing triangle"
-            />  
-          </div>
-          <div class="glyph glyph--marchComp3-6">
-            <img
-              class="glyphIcon"
-              src="assets/img/project icons/mossComposites/marchComp3-6.gif"
-              alt="extra happy triangle"
-            />         
-          </div>
-          <div class="glyph glyph--marchComp3-8">
-            <img
-              class="glyphIcon"
-              src="assets/img/project icons/mossComposites/marchComp3-8.gif"
-              alt="grass"
-            />         
-          </div>
-          <div class="glyph glyph--marchComp3-18">
-            <img
-              class="glyphIcon"
-              src="assets/img/project icons/mossComposites/marchComp3-18.gif"
-              alt="dancing faces"
-            />         
-          </div>
-          <div class="glyph glyph--marchComp3-31">
-            <img
-              class="glyphIcon"
-              src="assets/img/project icons/mossComposites/marchComp3-31.gif"
-              alt="moving lines and a plastic bag"
-            />         
-          </div>
-          <div class="glyph glyph--mossComposite">
-            <img
-              class="glyphIcon"
-              src="assets/img/project icons/mossComposites/mossComposite.gif"
-              alt="moss"
-            />         
-          </div>
-          <div class="glyph glyph--beees01">
-            <img
-              class="glyphIcon"
-              src="assets/img/gifs/Bees/Bees 1.gif"
-              alt="bees 1"
-            />         
-          </div>
-          <div class="glyph glyph--beees02">
-            <img
-              class="glyphIcon"
-              src="assets/img/gifs/Bees/Bees 2.gif"
-              alt="bees 2"
-            />         
-          </div>
-          <div class="glyph glyph--beees03">
-            <img
-              class="glyphIcon"
-              src="assets/img/gifs/Bees/Bees 3.gif"
-              alt="bees 3"
-            />         
-          </div>
-          <div class="glyph glyph--photonPlayground">
-            <img
-              class="glyphIcon"
-              src="assets/img/gifs/photonPlaygroundGlyph.gif"
-              alt="Photon Playground"
-            />         
-          </div>
+        <div class="bandcampLinks">
           <div class="glyph glyph--uploadIThought">
             <img
               class="glyphIcon"
@@ -180,20 +75,73 @@
               alt="Upload II Thoughts - Album B"
             />  
           </div> 
+          <div class="label">
+            Bandcamp Links
+          </div>
+        </div>  
+      </div>
 
-          <div class="glyph glyph--hausaufgabe">
+      <!-- External links -->
+      <div class="landbuoy">
+        <div class="friendsLinks">
+          <div class="glyph glyph--portalFinder">
+            <a href="pages/portalfinder.html">
+              <img
+                class="glyphIcon"
+                src="assets/img/button/a.png"
+                alt="Portal Finder"
+              />
+            </a>         
+          </div>
+          <div class="label">
+            Links
+          </div>
+        </div>
+      </div>
+
+      <!-- Land Buoy projects -->
+      <div class="landbuoy">
+        <div class="landbuoyProjects">
+          <div class="glyph glyph--mossComposites">
+            <a href="pages/mosscomposites.html">
+              <img
+                class="glyphIcon"
+                src="assets/img/project icons/mossComposites/dancingTriangle.gif"
+                alt="Moss Composites - Dancing Triangle"
+              />
+            </a>
+          </div>
+          <div class="glyph glyph--photonPlayground">
             <img
               class="glyphIcon"
-              src="assets/img/gifs/Hausaufgabe.GIF"
-              alt="Hausaufgabe"
-            />                 
+              src="assets/img/gifs/photonPlaygroundGlyph.gif"
+              alt="Photon Playground"
+            />         
+          </div>
+          <div class="glyph glyph--beees">
+            <a href="pages/beees.html">
+              <img
+                class="glyphIcon"
+                src="assets/img/gifs/beees.gif"
+                alt="Beeees Project"
+              />
+            </a>         
+          </div>
+          <div class="glyph glyph--hausaufgabe">
+            <a href="pages/hausaufgabe.html">
+              <img
+                class="glyphIcon"
+                src="assets/img/gifs/email-send-icon.gif"
+                alt="Hausaufgabe"
+              />
+            </a>                 
           </div>
 
           <div class="glyph glyph--fortytwo">
             <a href="pages/fortytwo.html">
               <img
                 class="glyphIcon"
-                src="assets/img/dominoes/5-5.png"
+                src="assets/img/gifs/taavi-icon.gif"
                 alt="42 Domino Game"
               />
             </a>                 
@@ -521,485 +469,8 @@
         <source src="assets/vid/photonPlaygroundDoc.mp4" type="video/mp4">
       </video>        
     </div>
-
-    <!-- Moss composites modals -->
-    <div class="modalContainer modalContainer--dancingTriangle">
-      <video autoplay loop>
-        <source src="assets/vid/20210300 March Composites/Happy Triangle web.mp4" type="video/mp4">
-      </video>    
-      <div class="dancingTrianglePlayer">
-        <audio id="dancingTriangle" autoplay="false" controls></audio>   
-      </div> 
-    </div>
-    <div class="modalContainer modalContainer--marchComp3-6">
-      <video autoplay loop muted>
-        <source src="assets/vid/20210300 March Composites/Comp3-6 web.mp4" type="video/mp4">
-      </video>   
-      <div class="comp3-6Player">
-        <audio id="comp3-6" autoplay="false" controls></audio>   
-      </div>      
-    </div>
-    <div class="modalContainer modalContainer--marchComp3-8">
-      <video autoplay loop muted>
-        <source src="assets/vid/20210300 March Composites/Comp3-8 web.mp4" type="video/mp4">
-      </video>        
-    </div>
-    <div class="modalContainer modalContainer--marchComp3-18">
-      <video autoplay loop muted>
-        <source src="assets/vid/20210300 March Composites/Comp3-18 web.mp4" type="video/mp4">
-      </video>        
-    </div>
-    <div class="modalContainer modalContainer--marchComp3-31">
-      <video autoplay loop muted>
-        <source src="assets/vid/20210300 March Composites/Comp3-31 web.mp4" type="video/mp4">
-      </video>        
-    </div>
-    <div class="modalContainer modalContainer--mossComposite">
-      <video autoplay loop muted>
-        <source src="assets/vid/20210300 March Composites/Moss Composite web.mp4" type="video/mp4">
-      </video>        
-    </div>
-    <div class="modalContainer modalContainer--beees01">
-      <video autoplay loop muted>
-        <source src="assets/vid/beees/beees01.mp4" type="video/mp4">
-      </video>        
-    </div>
-    <div class="modalContainer modalContainer--beees02">
-      <video autoplay loop muted>
-        <source src="assets/vid/beees/beees02.mp4" type="video/mp4">
-      </video>        
-    </div>
-    <div class="modalContainer modalContainer--beees03">
-      <video autoplay loop muted>
-        <source src="assets/vid/beees/beees03.mp4" type="video/mp4">
-      </video>        
-    </div>
-
-    <!-- Hausaufgabe modals -->
-    <div class="modalContainer modalContainer--hausaufgabe" style="display: none;">
-      <video autoplay loop>
-        <source src="assets/vid/hausaufgabe upload.mp4" type="video/mp4">
-      </video> 
-    </div> 
-    <div class="modalContainer modalContainer--hausaufgabeInfo">
-      <header class="modalHeader">
-        <div class="aquaButton aquaButton--hausaufgabeInfo">X</div>
-        <h2 class="modalTitle">Information</h2>
-      </header>
-      <div class="modalInnerContainer">
-        <p class="c0">
-          <span class="c5">hausaufgabe: Energie</span>
-        </p>
-        </br></br>
-        <span class="c7 c11">
-          tying visual loops and sound loops to the same timeframe. 
-        </span>
-        </br></br>
-        <span class="c7 c11">
-          a 3D environment and sample mixing system.
-        </span>
-        </br></br>
-        <span class="c7 c11">
-          I want to produce a piece of integrated software that allows me to play with virtual cameras, light and objects in space with a connected audio synthesis engine. mixing is tied to the space via a 3D audio render system. sound emanates from objects in space with distance attenuation. the space has reverb qualities. each object can be interacted with, opening a menu for sample manipulation.
-        </span>
-        </br></br>
-        <span class="c7 c11">
-          I have a process in touchdesigner for arranging objects, cameras, and lights and compositing with a background. I can move a camera around in first person to find the best angles and position a more static camera to be my capture frame. I can move objects around independently with toggleable controls. it is very straightforward in touchdesigner to make a 3D sound rendering.
-        </span>
-        </br></br>
-        <span class="c7 c11">
-          I am still working with tape material I created over several months last year in New York. These are intricate improvised sound collages recorded to audio cassette of samples from earlier recordings I'd made of acoustic instruments and live samples of some records and synth modules in my studio at Phase Space in Brooklyn. in all I'd produced between 20 and 25 tapes or roughly 27 hours of material. 
-        </span>
-        </br></br>
-        <span class="c7 c11">
-          I tried to mix it down to a 90 minute tape of around 60 tracks, which mix I have uploaded to bandcamp and my website, but I am still not satisfied to let the material rest. I think many of the recordings work better as longer explorations than the 1 - 2 minutes I allow them on the tape release. I also think they would be enhanced by a video accompaniment, which has inspired the idea of producing sound and video simultaneously and additionally led me to try making a video for one recording for this homework. 
-        </span>
-        </br></br>
-        <span class="c7 c11">
-          Recently, I've become convinced that energy gives rise to form. or maybe I've been convinced of the depth of this insight. When reading 'die Blaue Reiter' I came across a reference from Kandinsky to El Greco. I learned that he gives his attention first to color when he begins a piece as he believes that color has primacy over form, a very abstract concept for a renaissance painter. I've also felt this way since I was young since I was always imagining colors and form emanating from the sounds of music. I figured that the way something sounds and looks was directly related to the way it moves and interacts in its environment and it's design whether human or natural (arguably an irrelevant distinction), was in response to a need for something to sound and appear that way. Which is to say that it looks and sounds the way it does because of a need to exist in this environment. The properties of matter are all subject to a framework of energy and some force of will and the things that energy has arranged to be must dance and sing in accordance to what caused them to be. 
-        </span>
-        </br></br>
-        <span class="c7 c11">
-          so I guess I'm interested in modeling a small system with rules that are set and objects that can be changed and have behaviours purely for the organic spectacle of what natural interactions happen when different actors and objects are introduced. 
-        </span>
-      </div>
-    </div>
-
-    <!-- Research Modals -->
-    <!-- References modal -->
-    <div class="modalContainer modalContainer--references">
-      <header class="modalHeader">
-        <div class="aquaButton aquaButton--references">X</div>
-        <h2 class="modalTitle">References</h2>
-      </header>
-      <div class="modalInnerContainer">
-        <p class="c0">
-          <span class="c5">Research References</span>
-        </p>
-        <br><br>
-        <span class="c7 c11">
-          Content will be added here.
-        </span>
-      </div>
-    </div>
-
-    <!-- Linguistics modal -->
-    <div class="modalContainer modalContainer--linguistics">
-      <header class="modalHeader">
-        <div class="aquaButton aquaButton--linguistics">X</div>
-        <h2 class="modalTitle">Linguistics</h2>
-      </header>
-      <div class="modalInnerContainer">
-        <p class="c0">
-          <span class="c5">Linguistics Research</span>
-        </p>
-        <br><br>
-        <span class="c7 c11">
-          Content will be added here.
-        </span>
-      </div>
-    </div>
-
-    <!-- Movement Analysis modal -->
-    <div class="modalContainer modalContainer--movementAnalysis">
-      <header class="modalHeader">
-        <div class="aquaButton aquaButton--movementAnalysis">X</div>
-        <h2 class="modalTitle">Movement Analysis</h2>
-      </header>
-      <div class="modalInnerContainer">
-        <p class="c0">
-          <span class="c5">Movement Analysis Research</span>
-        </p>
-        <br><br>
-        <span class="c7 c11">
-          Content will be added here.
-        </span>
-      </div>
-    </div>
-
-    <!-- Machine Learning modal -->
-    <div class="modalContainer modalContainer--machineLearning">
-      <header class="modalHeader">
-        <div class="aquaButton aquaButton--machineLearning">X</div>
-        <h2 class="modalTitle">Machine Learning</h2>
-      </header>
-      <div class="modalInnerContainer">
-        <p class="c0">
-          <span class="c5">Machine Learning Research</span>
-        </p>
-        <br><br>
-        <span class="c7 c11">
-          Content will be added here.
-        </span>
-      </div>
-    </div>
-
-    <!-- Music Engine modal -->
-    <div class="modalContainer modalContainer--musicEngine">
-      <header class="modalHeader">
-        <div class="aquaButton aquaButton--musicEngine">X</div>
-        <h2 class="modalTitle">Music Engine</h2>
-      </header>
-      <div class="modalInnerContainer">
-        <p class="c0">
-          <span class="c5">Music Engine Research</span>
-        </p>
-        <br><br>
-        <span class="c7 c11">
-          Content will be added here.
-        </span>
-      </div>
-    </div>
-
-    <!-- Symbolic Language modal -->
-    <div class="modalContainer modalContainer--symbolicLanguage">
-      <header class="modalHeader">
-        <div class="aquaButton aquaButton--symbolicLanguage">X</div>
-        <h2 class="modalTitle">Symbolic Language</h2>
-      </header>
-      <div class="modalInnerContainer">
-        <p class="c0">
-          <span class="c5">Symbolic Language Research</span>
-        </p>
-        <br><br>
-        <span class="c7 c11">
-          Content will be added here.
-        </span>
-      </div>
-    </div>
-
-    <!-- Material Studies modal -->
-    <div class="modalContainer modalContainer--materialStudies">
-      <header class="modalHeader">
-        <div class="aquaButton aquaButton--materialStudies">X</div>
-        <h2 class="modalTitle">Material Studies</h2>
-      </header>
-      <div class="modalInnerContainer">
-        <p class="c0">
-          <span class="c5">Material Studies Research</span>
-        </p>
-        <br><br>
-        <span class="c7 c11">
-          Content will be added here.
-        </span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Shader Control Modal -->
-  <div class="modalContainer modalContainer--shaderControl" style="display: none;">
-    <div class="modalContent waaavesControlContent">
-      <div class="modalHeader">
-        <h2>Shader Control Panel</h2>
-        <button class="modalClose">×</button>
-      </div>
-      <div class="modalBody">
-        <div class="waaavesControls">
-          
-          <!-- Channel 1 Controls -->
-          <div class="controlSection">
-            <h3 class="sectionTitle">Channel 1</h3>
-            <div class="controlGrid">
-              <div class="controlGroup">
-                <label for="ch1Scale">Scale</label>
-                <input type="range" id="ch1Scale" min="0.1" max="3" step="0.1" value="1.0">
-                <span class="controlValue" id="ch1ScaleValue">1.0</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="ch1Hue">Hue</label>
-                <input type="range" id="ch1Hue" min="-1" max="1" step="0.1" value="0.0">
-                <span class="controlValue" id="ch1HueValue">0.0</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="ch1Saturation">Saturation</label>
-                <input type="range" id="ch1Saturation" min="-1" max="1" step="0.1" value="0.0">
-                <span class="controlValue" id="ch1SaturationValue">0.0</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="ch1Brightness">Brightness</label>
-                <input type="range" id="ch1Brightness" min="-1" max="1" step="0.1" value="0.0">
-                <span class="controlValue" id="ch1BrightnessValue">0.0</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="ch1Quantize">Quantize</label>
-                <input type="range" id="ch1Quantize" min="1" max="32" step="1" value="8">
-                <span class="controlValue" id="ch1QuantizeValue">8</span>
-              </div>
-            </div>
-            
-            <div class="toggleGroup">
-              <label class="toggleLabel">
-                <input type="checkbox" id="ch1QuantizeSwitch">
-                <span class="toggleText">Quantize</span>
-              </label>
-              <label class="toggleLabel">
-                <input type="checkbox" id="ch1HMirror">
-                <span class="toggleText">H Mirror</span>
-              </label>
-              <label class="toggleLabel">
-                <input type="checkbox" id="ch1VMirror">
-                <span class="toggleText">V Mirror</span>
-              </label>
-              <label class="toggleLabel">
-                <input type="checkbox" id="ch1VideoEnabled">
-                <span class="toggleText">Video Texture</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Geometry Effects -->
-          <div class="controlSection">
-            <h3 class="sectionTitle">Geometry</h3>
-            <div class="controlGrid">
-              <div class="controlGroup">
-                <label for="fisheyeAmount">Fisheye</label>
-                <input type="range" id="fisheyeAmount" min="0" max="1" step="0.01" value="0.0">
-                <span class="controlValue" id="fisheyeAmountValue">0.0</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="spiralAmount">Spiral</label>
-                <input type="range" id="spiralAmount" min="0" max="2" step="0.01" value="0.0">
-                <span class="controlValue" id="spiralAmountValue">0.0</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="spiralAngle">Spiral Angle</label>
-                <input type="range" id="spiralAngle" min="0" max="6.28" step="0.1" value="0.0">
-                <span class="controlValue" id="spiralAngleValue">0.0</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="kaleidoscopeSegments">Kaleidoscope</label>
-                <input type="range" id="kaleidoscopeSegments" min="0" max="20" step="1" value="0">
-                <span class="controlValue" id="kaleidoscopeSegmentsValue">0</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="kaleidoscopeSlice">Kaleidoscope Slice</label>
-                <input type="range" id="kaleidoscopeSlice" min="0" max="6.28" step="0.1" value="0.0">
-                <span class="controlValue" id="kaleidoscopeSliceValue">0.0</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="rotate">Rotate</label>
-                <input type="range" id="rotate" min="0" max="6.28" step="0.1" value="0.0">
-                <span class="controlValue" id="rotateValue">0.0</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Color Processing -->
-          <div class="controlSection">
-            <h3 class="sectionTitle">Color Processing</h3>
-            <div class="controlGrid">
-              <div class="controlGroup">
-                <label for="hueOffset">Hue Offset</label>
-                <input type="range" id="hueOffset" min="-1" max="1" step="0.01" value="0.0">
-                <span class="controlValue" id="hueOffsetValue">0.0</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="saturationOffset">Saturation Offset</label>
-                <input type="range" id="saturationOffset" min="-1" max="1" step="0.01" value="0.0">
-                <span class="controlValue" id="saturationOffsetValue">0.0</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="brightnessOffset">Brightness Offset</label>
-                <input type="range" id="brightnessOffset" min="-1" max="1" step="0.01" value="0.0">
-                <span class="controlValue" id="brightnessOffsetValue">0.0</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="hueAttenuate">Hue Attenuate</label>
-                <input type="range" id="hueAttenuate" min="0" max="5" step="0.1" value="1.0">
-                <span class="controlValue" id="hueAttenuateValue">1.0</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="saturationAttenuate">Saturation Attenuate</label>
-                <input type="range" id="saturationAttenuate" min="0" max="5" step="0.1" value="1.0">
-                <span class="controlValue" id="saturationAttenuateValue">1.0</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="brightnessAttenuate">Brightness Attenuate</label>
-                <input type="range" id="brightnessAttenuate" min="0" max="5" step="0.1" value="1.0">
-                <span class="controlValue" id="brightnessAttenuateValue">1.0</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="hueShaper">Hue Shaper</label>
-                <input type="range" id="hueShaper" min="0" max="2" step="0.01" value="0.0">
-                <span class="controlValue" id="hueShaperValue">0.0</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- LFO System -->
-          <div class="controlSection">
-            <h3 class="sectionTitle">LFO System</h3>
-            <div class="controlGrid">
-              <div class="controlGroup">
-                <label for="lfo1Rate">LFO1 Rate</label>
-                <input type="range" id="lfo1Rate" min="0" max="5" step="0.1" value="0.5">
-                <span class="controlValue" id="lfo1RateValue">0.5</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="lfo1Amp">LFO1 Amplitude</label>
-                <input type="range" id="lfo1Amp" min="0" max="1" step="0.01" value="0.1">
-                <span class="controlValue" id="lfo1AmpValue">0.1</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="lfo2Rate">LFO2 Rate</label>
-                <input type="range" id="lfo2Rate" min="0" max="5" step="0.1" value="0.3">
-                <span class="controlValue" id="lfo2RateValue">0.3</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="lfo2Amp">LFO2 Amplitude</label>
-                <input type="range" id="lfo2Amp" min="0" max="1" step="0.01" value="0.1">
-                <span class="controlValue" id="lfo2AmpValue">0.1</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="lfo3Rate">LFO3 Rate</label>
-                <input type="range" id="lfo3Rate" min="0" max="5" step="0.1" value="0.7">
-                <span class="controlValue" id="lfo3RateValue">0.7</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="lfo3Amp">LFO3 Amplitude</label>
-                <input type="range" id="lfo3Amp" min="0" max="1" step="0.01" value="0.1">
-                <span class="controlValue" id="lfo3AmpValue">0.1</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Global Controls -->
-          <div class="controlSection">
-            <h3 class="sectionTitle">Global Controls</h3>
-            <div class="controlGrid">
-              <div class="controlGroup">
-                <label for="pixelScale">Pixel Scale</label>
-                <input type="range" id="pixelScale" min="1" max="200" step="1" value="64">
-                <span class="controlValue" id="pixelScaleValue">64</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="feedbackMix">Feedback Mix</label>
-                <input type="range" id="feedbackMix" min="0" max="1" step="0.01" value="0.1">
-                <span class="controlValue" id="feedbackMixValue">0.1</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="blurAmount">Blur Amount</label>
-                <input type="range" id="blurAmount" min="0" max="1" step="0.01" value="0.0">
-                <span class="controlValue" id="blurAmountValue">0.0</span>
-              </div>
-              
-              <div class="controlGroup">
-                <label for="sharpenAmount">Sharpen Amount</label>
-                <input type="range" id="sharpenAmount" min="0" max="1" step="0.01" value="0.0">
-                <span class="controlValue" id="sharpenAmountValue">0.0</span>
-              </div>
-            </div>
-            
-            <div class="toggleGroup">
-              <label class="toggleLabel">
-                <input type="checkbox" id="pixelSwitch">
-                <span class="toggleText">Pixelation</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Presets and Actions -->
-          <div class="controlSection">
-            <h3 class="sectionTitle">Presets & Actions</h3>
-            <div class="presetGrid">
-              <button class="presetBtn" data-preset="default">Default</button>
-              <button class="presetBtn" data-preset="geometric">Geometric</button>
-              <button class="presetBtn" data-preset="colorful">Colorful</button>
-              <button class="presetBtn" data-preset="chaotic">Chaotic</button>
-              <button class="presetBtn" data-preset="minimal">Minimal</button>
-              <button class="presetBtn" data-preset="feedback">Feedback</button>
-              <button class="presetBtn" data-preset="reset">Reset All</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 
   <script type="text/javascript" src="assets/js/scripts.js"></script>
-  <script type="text/javascript" src="assets/js/moss.js"></script>
-  <script type="text/javascript" src="assets/js/hausaufgabe.js"></script>
 </body>
 </html>

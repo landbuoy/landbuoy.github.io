@@ -22,4 +22,5 @@ function randomColor() {
 
     var c2 = invertColor(c1);
 
+$(".hausaufgabe").css("background", "linear-gradient(to right, transparent, " + c2 );
 $(".modalContainer--hausaufgabeInfo").css("box-shadow", "0px 0px 32px" + c2);
