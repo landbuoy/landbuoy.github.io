@@ -55,6 +55,7 @@ $(document).ready(function () {
     $(".modalContainer--uploadIIThoughts").fadeOut();
   });
   
+  
   // Research modal aqua buttons
   setupAquaButton(".aquaButton--references", function() {
     $(".modalContainer--references").fadeOut();

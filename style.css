@@ -287,6 +287,41 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   margin: 8px;
 }
 
+.glyph--horses {
+  display: inline-block;
+  margin: 8px;
+}
+
+.glyph--wesleyanBirds {
+  display: inline-block;
+  margin: 8px;
+}
+
+.glyph--ballet {
+  display: inline-block;
+  margin: 8px;
+}
+
+.glyph--dancyArms {
+  display: inline-block;
+  margin: 8px;
+}
+
+.glyph--dancers {
+  display: inline-block;
+  margin: 8px;
+}
+
+.glyph--mercuralia {
+  display: inline-block;
+  margin: 8px;
+}
+
+.glyph--grass {
+  display: inline-block;
+  margin: 8px;
+}
+
 
 
 /* land buoy containers */
@@ -685,6 +720,23 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   /*box-shadow: 0px 0px 32px #ff6347;*/
 }
 
+.modalContainer--ballet {
+  display: none;
+  top: 20%;
+  left: 50%;
+  margin-left: -200px; /* Half of width to center */
+  width: 400px; /* Fixed width */
+  height: 300px; /* Fixed height */
+  background-color: transparent;
+  box-shadow: 0px 0px 32px #ff6347;
+}
+
+.modalContainer--ballet video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 .modalContainer--hausaufgabeInfo {
   display:none;
   top: 10%;
@@ -772,6 +824,49 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   height: 80vh;
   animation: morph 180s infinite;
   box-shadow: 0px 0px 32px #ff6347;
+  overflow-y: auto; /* Allow scrolling for content */
+}
+
+/* Material Studies content styling */
+.materialStudiesVideo {
+  margin: 10px 0;
+  text-align: center;
+}
+
+.materialStudiesVideo video {
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.rugsGallery {
+  margin: 20px 0;
+}
+
+.rugsGallery h3 {
+  color: #ff6347;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.rugsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.rugImage {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.rugImage:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .modalContainer--marchComp3-6 {
@@ -808,20 +903,53 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 
 .modalContainer--beees01 {
   display:none;
+  top: 20%;
+  left: 50%;
+  margin-left: -200px; /* Half of width to center */
+  width: 400px; /* Fixed width */
+  height: 300px; /* Fixed height */
   background-color: transparent;
   box-shadow: 0px 0px 32px #ff6347;
+}
+
+.modalContainer--beees01 video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .modalContainer--beees02 {
   display:none;
+  top: 20%;
+  left: 50%;
+  margin-left: -200px; /* Half of width to center */
+  width: 400px; /* Fixed width */
+  height: 300px; /* Fixed height */
   background-color: transparent;
   box-shadow: 0px 0px 32px #ff6347;
 }
 
+.modalContainer--beees02 video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 .modalContainer--beees03 {
   display:none;
+  top: 20%;
+  left: 50%;
+  margin-left: -200px; /* Half of width to center */
+  width: 400px; /* Fixed width */
+  height: 300px; /* Fixed height */
   background-color: transparent;
   box-shadow: 0px 0px 32px #ff6347;
+}
+
+.modalContainer--beees03 video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 /* photon playground modals*/
@@ -831,6 +959,176 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   background-color: transparent;
   box-shadow: 0px 0px 32px #ff6347;
 }
+
+/* horses modal*/
+
+.modalContainer--horses {
+  display:none;
+  top: 20%;
+  left: 50%;
+  margin-left: -280px; /* Half of width to center */
+  width: 580px; /* Slightly wider to prevent tightness */
+  height: 420px; /* Slightly taller to prevent tightness */
+  background-color: #eaeaea;
+  box-shadow: 0px 0px 32px #ff6347;
+  animation: morph 180s infinite;
+}
+
+.modalContainer--horses iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 8px;
+}
+
+/* wesleyan birds modal*/
+
+.modalContainer--wesleyanBirds {
+  display:none;
+  top: 20%;
+  left: 50%;
+  margin-left: -280px; /* Half of width to center */
+  width: 580px; /* Slightly wider to prevent tightness */
+  height: 420px; /* Slightly taller to prevent tightness */
+  background-color: #eaeaea;
+  box-shadow: 0px 0px 32px #ff6347;
+  animation: morph 180s infinite;
+}
+
+.modalContainer--wesleyanBirds iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 8px;
+}
+
+/* dancy arms modal*/
+
+.modalContainer--dancyArms {
+  display:none;
+  top: 20%;
+  left: 50%;
+  margin-left: -280px; /* Half of width to center */
+  width: 580px; /* Slightly wider to prevent tightness */
+  height: 420px; /* Slightly taller to prevent tightness */
+  background-color: #eaeaea;
+  box-shadow: 0px 0px 32px #ff6347;
+  animation: morph 180s infinite;
+}
+
+.modalContainer--dancyArms iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 8px;
+}
+
+/* dancers modal - optimized for vertical video */
+
+.modalContainer--dancers {
+  display:none;
+  top: 15%;
+  left: 50%;
+  margin-left: -200px; /* Half of width to center */
+  width: 400px; /* Narrower for vertical video */
+  height: 600px; /* Taller for vertical video */
+  background-color: #eaeaea;
+  box-shadow: 0px 0px 32px #ff6347;
+  animation: morph 180s infinite;
+}
+
+.modalContainer--dancers iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 8px;
+  aspect-ratio: 9 / 16; /* Maintain vertical aspect ratio */
+}
+
+/* mercuralia modal - self-referential GIF */
+
+.modalContainer--mercuralia {
+  display: none;
+  top: 20%;
+  left: 50%;
+  margin-left: -200px; /* Half of width to center */
+  width: 400px;
+  height: 300px;
+  background-color: transparent;
+  box-shadow: 0px 0px 32px #ff6347;
+  animation: morph 180s infinite;
+}
+
+.modalContainer--mercuralia img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* grass modal*/
+
+.modalContainer--grass {
+  display:none;
+  top: 20%;
+  left: 50%;
+  margin-left: -280px; /* Half of width to center */
+  width: 580px; /* Slightly wider to prevent tightness */
+  height: 420px; /* Slightly taller to prevent tightness */
+  background-color: #eaeaea;
+  box-shadow: 0px 0px 32px #ff6347;
+  animation: morph 180s infinite;
+}
+
+.modalContainer--grass iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 8px;
+}
+
+/* Music Engine PDF modal styling - larger for better PDF viewing */
+.modalContainer--musicEngine {
+  width: 90vw; /* Much wider - 90% of viewport width */
+  max-width: 1200px; /* Maximum width for very large screens */
+  height: 80vh; /* Taller - 80% of viewport height */
+  top: 10%;
+  left: 50%;
+  margin-left: -45vw; /* Half of 90vw to center */
+  max-height: 80vh;
+}
+
+@media (min-width: 1200px) {
+  .modalContainer--musicEngine {
+    margin-left: -600px; /* Half of max-width for larger screens */
+  }
+}
+
+.modalContainer--musicEngine .modalInnerContainer {
+  padding: 0;
+  height: calc(100% - 60px); /* Account for header height */
+  overflow: hidden;
+}
+
+.modalContainer--musicEngine iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 0;
+}
+
+/* YouTube drag handle */
+.youtubeDragHandle {
+  height: 8px;
+  width: 100%;
+  background: transparent;
+  cursor: move;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+
 
 .modalHeader {
   display: flex;
@@ -1133,6 +1431,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   background: #06c506;
 }
 
+
 /* For screens smaller than 640px */
 
 @media only screen and (max-width: 640px) {
@@ -1217,5 +1516,204 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   /* Prevent touch events from bubbling to parent elements */
   .modalHeader {
     touch-action: pan-x pan-y;
+  }
+  
+  /* Responsive horses modal for mobile */
+  .modalContainer--horses {
+    width: 90vw;
+    max-width: 580px;
+    height: auto;
+    min-height: 420px;
+    top: 10%;
+    left: 50%;
+    margin-left: -45vw; /* Half of 90vw */
+  }
+  
+  @media (min-width: 580px) {
+    .modalContainer--horses {
+      margin-left: -290px; /* Half of max-width for larger screens */
+    }
+  }
+  
+  .modalContainer--horses iframe {
+    width: calc(100% - 20px);
+    height: 56.25vw; /* 16:9 aspect ratio */
+    max-height: 315px;
+    max-width: 560px;
+    margin: 10px;
+  }
+  
+  /* Responsive wesleyan birds modal for mobile */
+  .modalContainer--wesleyanBirds {
+    width: 90vw;
+    max-width: 580px;
+    height: auto;
+    min-height: 420px;
+    top: 10%;
+    left: 50%;
+    margin-left: -45vw; /* Half of 90vw */
+  }
+  
+  @media (min-width: 580px) {
+    .modalContainer--wesleyanBirds {
+      margin-left: -290px; /* Half of max-width for larger screens */
+    }
+  }
+  
+  .modalContainer--wesleyanBirds iframe {
+    width: calc(100% - 20px);
+    height: 56.25vw; /* 16:9 aspect ratio */
+    max-height: 315px;
+    max-width: 560px;
+    margin: 10px;
+  }
+  
+  /* Responsive dancy arms modal for mobile */
+  .modalContainer--dancyArms {
+    width: 90vw;
+    max-width: 580px;
+    height: auto;
+    min-height: 420px;
+    top: 10%;
+    left: 50%;
+    margin-left: -45vw; /* Half of 90vw */
+  }
+  
+  @media (min-width: 580px) {
+    .modalContainer--dancyArms {
+      margin-left: -290px; /* Half of max-width for larger screens */
+    }
+  }
+  
+  .modalContainer--dancyArms iframe {
+    width: calc(100% - 20px);
+    height: 56.25vw; /* 16:9 aspect ratio */
+    max-height: 315px;
+    max-width: 560px;
+    margin: 10px;
+  }
+  
+  /* Responsive dancers modal for mobile - vertical video */
+  .modalContainer--dancers {
+    width: 80vw;
+    max-width: 400px;
+    height: auto;
+    min-height: 600px;
+    top: 5%;
+    left: 50%;
+    margin-left: -40vw; /* Half of 80vw */
+  }
+  
+  @media (min-width: 400px) {
+    .modalContainer--dancers {
+      margin-left: -200px; /* Half of max-width for larger screens */
+    }
+  }
+  
+  .modalContainer--dancers iframe {
+    width: calc(100% - 20px);
+    height: calc(100% - 20px);
+    aspect-ratio: 9 / 16; /* Maintain vertical aspect ratio */
+    margin: 10px;
+  }
+  
+  /* Responsive mercuralia modal for mobile */
+  .modalContainer--mercuralia {
+    width: 80vw;
+    max-width: 400px;
+    height: auto;
+    min-height: 300px;
+    top: 10%;
+    left: 50%;
+    margin-left: -40vw; /* Half of 80vw */
+  }
+  
+  @media (min-width: 400px) {
+    .modalContainer--mercuralia {
+      margin-left: -200px; /* Half of max-width for larger screens */
+    }
+  }
+  
+  .modalContainer--mercuralia img {
+    width: calc(100% - 20px);
+    height: calc(100% - 20px);
+    margin: 10px;
+  }
+  
+  /* Responsive grass modal for mobile */
+  .modalContainer--grass {
+    width: 90vw;
+    max-width: 580px;
+    height: auto;
+    min-height: 420px;
+    top: 10%;
+    left: 50%;
+    margin-left: -45vw; /* Half of 90vw */
+  }
+  
+  @media (min-width: 580px) {
+    .modalContainer--grass {
+      margin-left: -290px; /* Half of max-width for larger screens */
+    }
+  }
+  
+  .modalContainer--grass iframe {
+    width: calc(100% - 20px);
+    height: 56.25vw; /* 16:9 aspect ratio */
+    max-height: 315px;
+    max-width: 560px;
+    margin: 10px;
+  }
+  
+  /* Responsive Music Engine PDF modal for mobile */
+  .modalContainer--musicEngine {
+    width: 95vw; /* Nearly full width on mobile */
+    max-width: none;
+    height: 85vh; /* Nearly full height on mobile */
+    top: 7.5%;
+    left: 50%;
+    margin-left: -47.5vw; /* Half of 95vw */
+  }
+  
+  .modalContainer--musicEngine .modalInnerContainer {
+    height: calc(100% - 50px); /* Account for smaller header on mobile */
+  }
+  
+  /* Responsive ballet modal for mobile */
+  .modalContainer--ballet {
+    width: 80vw;
+    max-width: 400px;
+    height: 60vw;
+    max-height: 300px;
+    top: 15%;
+    left: 50%;
+    margin-left: -40vw; /* Half of 80vw */
+  }
+  
+  @media (min-width: 500px) {
+    .modalContainer--ballet {
+      margin-left: -200px; /* Half of max-width for larger screens */
+    }
+  }
+  
+  /* Responsive beees modals for mobile */
+  .modalContainer--beees01,
+  .modalContainer--beees02,
+  .modalContainer--beees03 {
+    width: 80vw;
+    max-width: 400px;
+    height: 60vw;
+    max-height: 300px;
+    top: 15%;
+    left: 50%;
+    margin-left: -40vw; /* Half of 80vw */
+  }
+  
+  @media (min-width: 500px) {
+    .modalContainer--beees01,
+    .modalContainer--beees02,
+    .modalContainer--beees03 {
+      margin-left: -200px; /* Half of max-width for larger screens */
+    }
   }
 }
