@@ -39,10 +39,6 @@ $(document).ready(function () {
     $(".modalContainer--resume").fadeOut();
   });
   
-  setupAquaButton(".aquaButton--info", function() {
-    $(".modalContainer--info").fadeOut();
-  });
-  
   setupAquaButton(".aquaButton--uploadIThought", function() {
     $(".modalContainer--uploadIThought").fadeOut();
   });
@@ -51,12 +47,6 @@ $(document).ready(function () {
     $(".modalContainer--uploadIIThoughts").fadeOut();
   });
   
-  
-  // Info modal
-  $(".button--info").click(function () {
-    $(".modalContainer").css("zIndex", "0");
-    $(".modalContainer--info").fadeIn().css("zIndex", "9999");
-  });
   
   // UploadiThought glyph
   $(".glyph--uploadIThought").click(function () {
@@ -69,58 +59,6 @@ $(document).ready(function () {
     $(".modalContainer").css("zIndex", "0");
     $(".modalContainer--uploadIIThoughts").fadeIn().css("zIndex", "9999");
   });  
-
-  // Hausaufgabe glyph: video (and its sound) plays only while the modal is visible
-  var hausaufgabeVideo = document.getElementById("hausaufgabeVideo");
-  hausaufgabeVideo.pause();
-
-  $(".glyph--hausaufgabe").click(function () {
-    var $modal = $(".modalContainer--hausaufgabe");
-    var opening = $modal.is(":hidden");
-    $(".modalContainer").css("zIndex", "0");
-    $modal.fadeToggle().css("zIndex", "9999");
-    if (opening) {
-      hausaufgabeVideo.play().catch(function (e) {
-        console.log("Hausaufgabe playback prevented:", e);
-      });
-    } else {
-      hausaufgabeVideo.pause();
-    }
-  });
-
-    // glyphs in march composite landbuoy
-
-  $(".glyph--marchComp3-8").click(function () {
-    $(".modalContainer").css("zIndex", "0");
-    $(".modalContainer--marchComp3-8").fadeToggle().css("zIndex", "9999");
-  });
-  $(".glyph--marchComp3-18").click(function () {
-    $(".modalContainer").css("zIndex", "0");
-    $(".modalContainer--marchComp3-18").fadeToggle().css("zIndex", "9999");
-  });
-  $(".glyph--marchComp3-31").click(function () {
-    $(".modalContainer").css("zIndex", "0");
-    $(".modalContainer--marchComp3-31").fadeToggle().css("zIndex", "9999");
-  });
-  $(".glyph--mossComposite").click(function () {
-    $(".modalContainer").css("zIndex", "0");
-    $(".modalContainer--mossComposite").fadeToggle().css("zIndex", "9999");
-  });
-
-// photon playground scripts
-
-  var photonPlayground = document.getElementById("photonPlayground");
-  photonPlayground.pause();
-
-  $(".glyph--photonPlayground").click(function () {
-    $(".modalContainer").css("zIndex", "0");
-    $(".modalContainer--photonPlayground").fadeToggle().css("zIndex", "9999");
-    if (photonPlayground.paused == false) {
-      photonPlayground.pause();
-    } else {
-      photonPlayground.play();
-    }
-  });
 
   // Random GIF scraping system
   var localGifs = [
@@ -267,7 +205,6 @@ $(document).ready(function () {
   }
 
   // Load random GIFs on page load
-  loadRandomGif(".landbuoyProjects", "landbuoy projects");
   loadRandomGif(".titleBar", "title bar");
   loadRandomGif(".nav", "navigation");
 
@@ -357,26 +294,17 @@ $(document).ready(function () {
     $(".mainContainer").css("background-color", c1);
     // Logo color is now handled by dynamic contrast system
     // $(".logoContainer").css("color", c2);
-    $(".modalContainer--info").css("box-shadow", "0px 0px 32px" + c2);
     $(".modalContainer--resume").css("box-shadow", "0px 0px 32px" + c2);
     $(".modalContainer--uploadIThought").css("box-shadow", "0px 0px 32px" + c2);
     $(".modalContainer--uploadIIThoughts").css("box-shadow", "0px 0px 32px" + c2);
-    $(".modalContainer--photonPlayground").css("box-shadow", "0px 0px 32px" + c2);
-    //$(".modalContainer--hausaufgabe").css("box-shadow", "0px 0px 32px" + c2);
-    $(".landbuoyProjects").css("background", "linear-gradient(to right, transparent, " + c2 );
 
     
     
         //$(".landBuoyInnerContainer").css("border", "5px" + c2);
-    $(".aquaButton--info").css("background", c2);
     $(".aquaButton--resume").css("background", c2);
     $(".aquaButton--uploadIThought").css("background", c2);
     $(".aquaButton--uploadIIThoughts").css("background", c2);
 
-    //DIV BOX STUFF
-    var navBoxHeight = document.querySelector('.nav').offsetHeight;
-    $(".landBuoyContainer1").css("top", navBoxHeight + 32 +"px");
-    
     // MOBILE DRAG IMPROVEMENTS
     // Add hold-to-drag functionality for better mobile UX
     let holdTimer;
