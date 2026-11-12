@@ -93,11 +93,6 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   width: 100%;
 }
 
-.nav--research {
-  top: 168px; /* Position below the main nav with more space */
-}
-
-
 
 .button--info {
   display: inline-block;
@@ -106,6 +101,24 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   color: lime;
   background-color: black;   
   text-align: center; 
+}
+
+.button--fortytwo {
+  display: inline-block;
+  margin: 8px;
+  vertical-align: top;
+  cursor: pointer;
+}
+
+.button--fortytwo img {
+  display: block;
+  width: 200px;
+  height: 100px;
+  transition: 0.5s;
+}
+
+.button--fortytwo:hover img {
+  transform: rotate3d(0, 1, 0, 180deg);
 }
 
 .button--resume {
@@ -120,88 +133,6 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 
 
 .back {
-  display: inline-block;
-  margin: 8px;
-  border: 1px solid lime;
-  color: lime;
-  background-color: black;   
-  text-align: center; 
-}
-
-.button--hausaufgabeInfo {
-  display: inline-block;
-  margin: 8px;
-  border: 1px solid lime;
-  color: lime;
-  background-color: black;
-  text-align: center;
-}
-
-.button--shaderControl {
-  display: inline-block;
-  margin: 8px;
-  border: 1px solid lime;
-  color: lime;
-  background-color: black;   
-  text-align: center; 
-}
-
-/* Research navigation buttons */
-.button--references {
-  display: inline-block;
-  margin: 8px;
-  border: 1px solid lime;
-  color: lime;
-  background-color: black;   
-  text-align: center; 
-}
-
-.button--linguistics {
-  display: inline-block;
-  margin: 8px;
-  border: 1px solid lime;
-  color: lime;
-  background-color: black;   
-  text-align: center; 
-}
-
-.button--movementAnalysis {
-  display: inline-block;
-  margin: 8px;
-  border: 1px solid lime;
-  color: lime;
-  background-color: black;   
-  text-align: center; 
-}
-
-.button--machineLearning {
-  display: inline-block;
-  margin: 8px;
-  border: 1px solid lime;
-  color: lime;
-  background-color: black;   
-  text-align: center; 
-}
-
-.button--musicEngine {
-  display: inline-block;
-  margin: 8px;
-  border: 1px solid lime;
-  color: lime;
-  background-color: black;   
-  text-align: center; 
-}
-
-.button--symbolicLanguage {
-  display: inline-block;
-  margin: 8px;
-  border: 1px solid lime;
-  color: lime;
-  background-color: black;   
-  text-align: center; 
-}
-
-.button--materialStudies {
   display: inline-block;
   margin: 8px;
   border: 1px solid lime;
@@ -282,11 +213,6 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   margin: 8px;
 }
 
-.glyph--fortytwo {
-  display: inline-block;
-  margin: 8px;
-}
-
 .glyph--horses {
   display: inline-block;
   margin: 8px;
@@ -329,7 +255,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 .landbuoyContainers{
   image-rendering: smooth;
   position: fixed;
-  top: 328px; /* Adjusted for two navigation bars with more space */
+  top: 184px; /* Below the title bar and navigation bar */
   left: 0;
   right: 0;
   bottom: 0;
@@ -351,224 +277,6 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   background: blue;
   position: relative;
   overflow: hidden;
-}
-
-.shader-background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: -1;
-  pointer-events: none;
-}
-
-/* VIDEO_WAAAVES Style Shader Control Modal */
-.waaavesControlContent {
-  max-width: 800px;
-  width: 95vw;
-  max-height: 90vh;
-  overflow-y: auto;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  color: #ffffff;
-  border: 2px solid #00d4ff;
-  box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
-}
-
-.waaavesControlContent .modalHeader {
-  background: linear-gradient(90deg, #00d4ff 0%, #0099cc 100%);
-  color: #000;
-  border-bottom: 2px solid #00d4ff;
-}
-
-.waaavesControlContent .modalHeader h2 {
-  color: #000;
-  font-family: 'Courier New', monospace;
-  font-weight: bold;
-  text-shadow: 1px 1px 2px rgba(255,255,255,0.3);
-}
-
-.waaavesControls {
-  padding: 20px;
-}
-
-.controlSection {
-  margin-bottom: 25px;
-  padding: 15px;
-  background: rgba(0, 212, 255, 0.05);
-  border: 1px solid rgba(0, 212, 255, 0.2);
-  border-radius: 8px;
-}
-
-.sectionTitle {
-  color: #00d4ff;
-  font-family: 'Courier New', monospace;
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 15px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  border-bottom: 1px solid rgba(0, 212, 255, 0.3);
-  padding-bottom: 5px;
-}
-
-.controlGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  margin-bottom: 15px;
-}
-
-.controlGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.controlGroup label {
-  font-weight: bold;
-  color: #ffffff;
-  font-size: 12px;
-  font-family: 'Courier New', monospace;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.controlGroup input[type="range"] {
-  width: 100%;
-  height: 8px;
-  border-radius: 4px;
-  background: linear-gradient(90deg, #333 0%, #555 100%);
-  outline: none;
-  -webkit-appearance: none;
-  appearance: none;
-  border: 1px solid #00d4ff;
-}
-
-.controlGroup input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
-  cursor: pointer;
-  border: 2px solid #ffffff;
-  box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
-  transition: all 0.2s ease;
-}
-
-.controlGroup input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 15px rgba(0, 212, 255, 0.8);
-}
-
-.controlGroup input[type="range"]::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
-  cursor: pointer;
-  border: 2px solid #ffffff;
-  box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
-}
-
-.controlValue {
-  font-size: 11px;
-  color: #00d4ff;
-  text-align: center;
-  background: rgba(0, 212, 255, 0.1);
-  padding: 4px 8px;
-  border-radius: 4px;
-  min-width: 50px;
-  display: inline-block;
-  font-family: 'Courier New', monospace;
-  border: 1px solid rgba(0, 212, 255, 0.3);
-}
-
-.toggleGroup {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin-top: 10px;
-}
-
-.toggleLabel {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font-size: 12px;
-  color: #ffffff;
-  font-family: 'Courier New', monospace;
-}
-
-.toggleLabel input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: #00d4ff;
-  cursor: pointer;
-}
-
-.toggleText {
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.presetGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 10px;
-}
-
-.presetBtn {
-  background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
-  color: #000;
-  border: 2px solid #00d4ff;
-  padding: 10px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  font-family: 'Courier New', monospace;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 212, 255, 0.3);
-}
-
-.presetBtn:hover {
-  background: linear-gradient(135deg, #0099cc 0%, #00d4ff 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0, 212, 255, 0.5);
-}
-
-.presetBtn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(0, 212, 255, 0.3);
-}
-
-/* Scrollbar styling for the modal */
-.waaavesControlContent::-webkit-scrollbar {
-  width: 8px;
-}
-
-.waaavesControlContent::-webkit-scrollbar-track {
-  background: rgba(0, 212, 255, 0.1);
-  border-radius: 4px;
-}
-
-.waaavesControlContent::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
-  border-radius: 4px;
-}
-
-.waaavesControlContent::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #0099cc 0%, #00d4ff 100%);
-}
-
-.presetBtn:active {
-  background: #3d8b40;
 }
 
 
@@ -735,138 +443,6 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   width: 100%;
   height: 100%;
   object-fit: contain;
-}
-
-.modalContainer--hausaufgabeInfo {
-  display:none;
-  top: 10%;
-  bottom: 5%;
-  right: 20%;
-  width: 30%;
-  height: 80vh;
-  animation: morph 180s infinite;
-  box-shadow: 0px 0px 32px #ff6347;
-}
-
-/* Research modals */
-.modalContainer--references {
-  display: none;
-  top: 10%;
-  bottom: 5%;
-  right: 20%;
-  width: 30%;
-  height: 80vh;
-  animation: morph 180s infinite;
-  box-shadow: 0px 0px 32px #ff6347;
-}
-
-.modalContainer--linguistics {
-  display: none;
-  top: 10%;
-  bottom: 5%;
-  right: 20%;
-  width: 30%;
-  height: 80vh;
-  animation: morph 180s infinite;
-  box-shadow: 0px 0px 32px #ff6347;
-}
-
-.modalContainer--movementAnalysis {
-  display: none;
-  top: 10%;
-  bottom: 5%;
-  right: 20%;
-  width: 30%;
-  height: 80vh;
-  animation: morph 180s infinite;
-  box-shadow: 0px 0px 32px #ff6347;
-}
-
-.modalContainer--machineLearning {
-  display: none;
-  top: 10%;
-  bottom: 5%;
-  right: 20%;
-  width: 30%;
-  height: 80vh;
-  animation: morph 180s infinite;
-  box-shadow: 0px 0px 32px #ff6347;
-}
-
-.modalContainer--musicEngine {
-  display: none;
-  top: 10%;
-  bottom: 5%;
-  right: 20%;
-  width: 30%;
-  height: 80vh;
-  animation: morph 180s infinite;
-  box-shadow: 0px 0px 32px #ff6347;
-}
-
-.modalContainer--symbolicLanguage {
-  display: none;
-  top: 10%;
-  bottom: 5%;
-  right: 20%;
-  width: 30%;
-  height: 80vh;
-  animation: morph 180s infinite;
-  box-shadow: 0px 0px 32px #ff6347;
-}
-
-.modalContainer--materialStudies {
-  display: none;
-  top: 10%;
-  bottom: 5%;
-  right: 20%;
-  width: 30%;
-  height: 80vh;
-  animation: morph 180s infinite;
-  box-shadow: 0px 0px 32px #ff6347;
-  overflow-y: auto; /* Allow scrolling for content */
-}
-
-/* Material Studies content styling */
-.materialStudiesVideo {
-  margin: 10px 0;
-  text-align: center;
-}
-
-.materialStudiesVideo video {
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-.rugsGallery {
-  margin: 20px 0;
-}
-
-.rugsGallery h3 {
-  color: #ff6347;
-  margin-bottom: 15px;
-  font-size: 18px;
-}
-
-.rugsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
-  margin-top: 15px;
-}
-
-.rugImage {
-  width: 100%;
-  height: auto;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
-}
-
-.rugImage:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .modalContainer--marchComp3-6 {
@@ -1087,36 +663,6 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   border-radius: 8px;
 }
 
-/* Music Engine PDF modal styling - larger for better PDF viewing */
-.modalContainer--musicEngine {
-  width: 90vw; /* Much wider - 90% of viewport width */
-  max-width: 1200px; /* Maximum width for very large screens */
-  height: 80vh; /* Taller - 80% of viewport height */
-  top: 10%;
-  left: 50%;
-  margin-left: -45vw; /* Half of 90vw to center */
-  max-height: 80vh;
-}
-
-@media (min-width: 1200px) {
-  .modalContainer--musicEngine {
-    margin-left: -600px; /* Half of max-width for larger screens */
-  }
-}
-
-.modalContainer--musicEngine .modalInnerContainer {
-  padding: 0;
-  height: calc(100% - 60px); /* Account for header height */
-  overflow: hidden;
-}
-
-.modalContainer--musicEngine iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-  border-radius: 0;
-}
-
 /* YouTube drag handle */
 .youtubeDragHandle {
   height: 8px;
@@ -1298,18 +844,6 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   background: #06c506;
 }
 
-.aquaButton--hausaufgabeInfo {
-  background: #04c204;
-}
-
-.aquaButton--hausaufgabeInfo:hover {
-  background: #12ee12;
-}
-
-.aquaButton--hausaufgabeInfo:active {
-  background: #06c506;
-}
-
 .aquaButton--uploadIThought {
   background: #04c204;
 }
@@ -1343,91 +877,6 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 }
 
 .aquaButton--moss:active {
-  background: #06c506;
-}
-
-/* Research aqua buttons */
-.aquaButton--references {
-  background: #04c204;
-}
-
-.aquaButton--references:hover {
-  background: #12ee12;
-}
-
-.aquaButton--references:active {
-  background: #06c506;
-}
-
-.aquaButton--linguistics {
-  background: #04c204;
-}
-
-.aquaButton--linguistics:hover {
-  background: #12ee12;
-}
-
-.aquaButton--linguistics:active {
-  background: #06c506;
-}
-
-.aquaButton--movementAnalysis {
-  background: #04c204;
-}
-
-.aquaButton--movementAnalysis:hover {
-  background: #12ee12;
-}
-
-.aquaButton--movementAnalysis:active {
-  background: #06c506;
-}
-
-.aquaButton--machineLearning {
-  background: #04c204;
-}
-
-.aquaButton--machineLearning:hover {
-  background: #12ee12;
-}
-
-.aquaButton--machineLearning:active {
-  background: #06c506;
-}
-
-.aquaButton--musicEngine {
-  background: #04c204;
-}
-
-.aquaButton--musicEngine:hover {
-  background: #12ee12;
-}
-
-.aquaButton--musicEngine:active {
-  background: #06c506;
-}
-
-.aquaButton--symbolicLanguage {
-  background: #04c204;
-}
-
-.aquaButton--symbolicLanguage:hover {
-  background: #12ee12;
-}
-
-.aquaButton--symbolicLanguage:active {
-  background: #06c506;
-}
-
-.aquaButton--materialStudies {
-  background: #04c204;
-}
-
-.aquaButton--materialStudies:hover {
-  background: #12ee12;
-}
-
-.aquaButton--materialStudies:active {
   background: #06c506;
 }
 
@@ -1663,20 +1112,6 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
     max-height: 315px;
     max-width: 560px;
     margin: 10px;
-  }
-  
-  /* Responsive Music Engine PDF modal for mobile */
-  .modalContainer--musicEngine {
-    width: 95vw; /* Nearly full width on mobile */
-    max-width: none;
-    height: 85vh; /* Nearly full height on mobile */
-    top: 7.5%;
-    left: 50%;
-    margin-left: -47.5vw; /* Half of 95vw */
-  }
-  
-  .modalContainer--musicEngine .modalInnerContainer {
-    height: calc(100% - 50px); /* Account for smaller header on mobile */
   }
   
   /* Responsive ballet modal for mobile */
