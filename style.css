@@ -118,6 +118,22 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   vertical-align: top;
 }
 
+.button--videogallery,
+.button--touchdesigner {
+  display: inline-block;
+  margin: 8px;
+  vertical-align: top;
+  cursor: pointer;
+}
+
+.button--videogallery img,
+.button--touchdesigner img {
+  display: block;
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+}
+
 .button--fortytwo {
   display: inline-block;
   margin: 8px;

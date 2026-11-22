@@ -1,4 +1,4 @@
-// Shared behavior for gallery pages (videogallery.html and future gallery pages).
+// Shared behavior for gallery pages (videoFeedback.html and future gallery pages).
 // Glyph click handlers for each gallery go in the "GALLERY GLYPHS" section below.
 
 $(document).ready(function () {
@@ -45,8 +45,8 @@ $(document).ready(function () {
   // ---------------------------------------------------------------------
   // GALLERY GLYPHS
   // Simple show/hide glyphs. Glyphs with audio or YouTube players
-  // (dancing triangle, march composite 3-6, bees, horses, wesleyan birds,
-  // dancy arms, dancers, mercuralia, grass, ballet) are handled in moss.js.
+  // (dancing triangle, march composite 3-6, bees) are handled in moss.js.
+  // The TouchDesigner page's glyphs are handled in touchdesigner.js.
   // ---------------------------------------------------------------------
 
   // March composite glyphs
@@ -65,38 +65,6 @@ $(document).ready(function () {
   $(".glyph--mossComposite").click(function () {
     $(".modalContainer").css("zIndex", "0");
     $(".modalContainer--mossComposite").fadeToggle().css("zIndex", "9999");
-  });
-
-  // Photon playground: video plays only while the modal is visible
-  var photonPlayground = document.getElementById("photonPlayground");
-  photonPlayground.pause();
-
-  $(".glyph--photonPlayground").click(function () {
-    $(".modalContainer").css("zIndex", "0");
-    $(".modalContainer--photonPlayground").fadeToggle().css("zIndex", "9999");
-    if (photonPlayground.paused == false) {
-      photonPlayground.pause();
-    } else {
-      photonPlayground.play();
-    }
-  });
-
-  // Hausaufgabe glyph: video (and its sound) plays only while the modal is visible
-  var hausaufgabeVideo = document.getElementById("hausaufgabeVideo");
-  hausaufgabeVideo.pause();
-
-  $(".glyph--hausaufgabe").click(function () {
-    var $modal = $(".modalContainer--hausaufgabe");
-    var opening = $modal.is(":hidden");
-    $(".modalContainer").css("zIndex", "0");
-    $modal.fadeToggle().css("zIndex", "9999");
-    if (opening) {
-      hausaufgabeVideo.play().catch(function (e) {
-        console.log("Hausaufgabe playback prevented:", e);
-      });
-    } else {
-      hausaufgabeVideo.pause();
-    }
   });
 
   // ---------------------------------------------------------------------
@@ -169,7 +137,7 @@ $(document).ready(function () {
 
   $(".mainContainer").css("background-color", c1);
   $(".modalContainer--info").css("box-shadow", "0px 0px 32px" + c2);
-  $(".modalContainer--photonPlayground").css("box-shadow", "0px 0px 32px" + c2);
+  window.galleryColors = { c1: c1, c2: c2 }; // lets page-specific scripts match the page colors
   $(".landbuoyProjects").css("background", "linear-gradient(to right, transparent, " + c2);
   $(".aquaButton--info").css("background", c2);
 
