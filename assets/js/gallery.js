@@ -37,9 +37,24 @@ $(document).ready(function () {
     $(".modalContainer--info").fadeOut();
   });
 
+  // Shrink a modal title's font until it fits inside its header (modal must be visible)
+  function fitModalTitles() {
+    $(".modalTitle:visible").each(function () {
+      var el = this;
+      el.style.fontSize = "";
+      var size = parseFloat(window.getComputedStyle(el).fontSize);
+      while (el.scrollWidth > el.clientWidth && size > 10) {
+        size -= 1;
+        el.style.fontSize = size + "px";
+      }
+    });
+  }
+  $(window).on("resize orientationchange", fitModalTitles);
+
   $(".button--info").click(function () {
     $(".modalContainer").css("zIndex", "0");
     $(".modalContainer--info").fadeIn().css("zIndex", "9999");
+    fitModalTitles();
   });
 
   // ---------------------------------------------------------------------
@@ -67,56 +82,38 @@ $(document).ready(function () {
     $(".modalContainer--mossComposite").fadeToggle().css("zIndex", "9999");
   });
 
-  // ---------------------------------------------------------------------
-  // Random backgrounds for title bar, nav and glyph container
-  // ---------------------------------------------------------------------
-  var localGifs = [
-    "assets/img/background/grape.gif",
-    "assets/img/background/pink.gif",
-    "assets/img/background/red.gif",
-    "assets/img/background/wood.gif",
-    "assets/img/background/grid.gif"
-  ];
 
-  function useLocalGif(targetElement) {
-    var randomLocal = localGifs[Math.floor(Math.random() * localGifs.length)];
-    $(targetElement).css("background-image", "url(" + randomLocal + ")");
+  // ---------------------------------------------------------------------
+  // Header layout. The title uses the same logo style as the main page, so:
+  //   1. shrink the title font if a long title would be wider than the window,
+  //   2. put the nav just below the title box,
+  //   3. put the glyph container (green box) just below the nav.
+  // Everything is fixed-position, so this reruns on load and on resize.
+  // ---------------------------------------------------------------------
+  function layoutHeader() {
+    var logo = document.querySelector(".logoContainer");
+    var bar = document.querySelector(".titleBar");
+    var nav = document.querySelector(".nav");
+    var container = document.querySelector(".landbuoyContainers");
+
+    if (logo) {
+      logo.style.fontSize = ""; // start from the CSS size (50px)
+      var size = parseFloat(window.getComputedStyle(logo).fontSize);
+      while (logo.getBoundingClientRect().width > window.innerWidth - 24 && size > 12) {
+        size -= 1;
+        logo.style.fontSize = size + "px";
+      }
+    }
+    if (bar && nav) {
+      nav.style.top = Math.ceil(bar.getBoundingClientRect().bottom + 10) + "px";
+    }
+    if (nav && container) {
+      container.style.top = Math.ceil(nav.getBoundingClientRect().bottom + 10) + "px";
+    }
   }
 
-  function loadRandomGif(targetElement) {
-    var gifSources = [
-      "https://picsum.photos/50/50?random=" + Math.random(),
-      "https://source.unsplash.com/50x50/?pattern,texture,abstract&sig=" + Math.random(),
-      "https://picsum.photos/50/50?random=" + Math.random() + "&blur=1"
-    ];
-    var randomSource = gifSources[Math.floor(Math.random() * gifSources.length)];
-    var settled = false;
-
-    var testImg = new Image();
-    testImg.onload = function () {
-      if (settled) return;
-      settled = true;
-      $(targetElement).css("background-image", "url(" + randomSource + ")");
-    };
-    testImg.onerror = function () {
-      if (settled) return;
-      settled = true;
-      useLocalGif(targetElement);
-    };
-
-    // Don't hang if the external source is slow
-    setTimeout(function () {
-      if (settled) return;
-      settled = true;
-      useLocalGif(targetElement);
-    }, 3000);
-
-    testImg.src = randomSource;
-  }
-
-  loadRandomGif(".landbuoyProjects");
-  loadRandomGif(".titleBar");
-  loadRandomGif(".nav");
+  layoutHeader();
+  $(window).on("load resize orientationchange", layoutHeader);
 
   // ---------------------------------------------------------------------
   // Random color scheme
@@ -138,8 +135,11 @@ $(document).ready(function () {
   $(".mainContainer").css("background-color", c1);
   $(".modalContainer--info").css("box-shadow", "0px 0px 32px" + c2);
   window.galleryColors = { c1: c1, c2: c2 }; // lets page-specific scripts match the page colors
-  $(".landbuoyProjects").css("background", "linear-gradient(to right, transparent, " + c2);
   $(".aquaButton--info").css("background", c2);
+  $(".modalHeader").css("color", c2); // modal header text uses the inverted color
+  $(".logoContainer").css("color", c2); // page title uses the inverted color, like the main page logo
+  // The shifting modal background cycle starts at the inverted color
+  document.documentElement.style.setProperty("--morph-start", c2);
 
   // ---------------------------------------------------------------------
   // Mobile drag improvements (hold-to-drag)

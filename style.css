@@ -1,10 +1,7 @@
 /* Main page styling */
 
 .mainContainer {
-  background-color: #e44644;
-  background-image: url(assets/img/background/grape.gif);
-  background-repeat: repeat;
-  background-size: 50px 50px;
+  background-color: #e44644; /* fallback; the page scripts replace it with a random color */
   /*background-blend-mode: difference;*/
   image-rendering: smooth;
   position: fixed;
@@ -67,15 +64,13 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 
 .titleBar {
   /*border: 5px outset yellowgreen;*/
-  background-color: black;
-  background-image: url(assets/img/background/wood.gif);
-  background-repeat: repeat;
+  background: transparent;
   position: fixed;
   left: 2;
   right: 2;
   top: 20px; /* Added padding from top of screen */
   width: 100%;
-  height: 30px;
+  min-height: 30px; /* grows with the logo box; nav position follows (see scripts.js) */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -83,9 +78,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 
 .nav {
   /*border: 5px outset yellowgreen;*/
-  background-color: black;
-  background-image: url(assets/img/background/wood.gif);
-  background-repeat: repeat;
+  background: transparent;
   position: fixed;
   left: 2;
   right: 2;
@@ -150,6 +143,19 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 
 .button--fortytwo:hover img {
   transform: rotate3d(0, 1, 0, 180deg);
+}
+
+/* Color data icon: a lime-outlined box filled with the inverted color (fill set by scripts.js) */
+.button--colordata {
+  display: inline-block;
+  vertical-align: top;
+  box-sizing: border-box;
+  width: 96px;
+  height: 96px;
+  margin: 8px;
+  border: 1px solid lime;
+  background-color: transparent; /* replaced by the inverted color */
+  cursor: pointer;
 }
 
 .button--resume {
@@ -286,28 +292,36 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 .landbuoyContainers{
   image-rendering: smooth;
   position: fixed;
-  top: 184px; /* Below the title bar and navigation bar */
+  top: 184px; /* Fallback; gallery.js moves this to just below the nav bar */
   left: 0;
   right: 0;
   bottom: 0;
   display: flex;
-  position: fixed;
-  justify-content: end;
+  align-items: flex-start; /* let the green box be only as tall as its content */
+  overflow-y: auto; /* scroll if the glyphs are taller than the window */
+  box-sizing: border-box;
 }
+
+/* The green box: sizes itself to the glyphs inside it */
 .landbuoy{
   border: 1px solid lime;
-  height: 120px;
-  width: 100%;
+  box-sizing: border-box; /* padding and border are included in the width */
+  flex: 1 1 auto;
+  min-width: 0;
+  height: auto;
   padding: 5px;
   margin: 5px;
-  display:inline-block;
-  justify-content: center;
 }
 
 .landbuoyProjects{
-  background: blue;
+  background: transparent;
   position: relative;
   overflow: hidden;
+}
+
+/* Glyphs wrap onto new rows; top-align so rows have no stray baseline gaps */
+.landbuoyProjects .glyph {
+  vertical-align: top;
 }
 
 
@@ -322,10 +336,11 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 .logoContainer {
   display: inline-block;
   align-items: center;
-  /*border: 5px outset yellowgreen;*/
+  border: 1px solid lime; /* the green box, same as the nav buttons */
+  line-height: 1.1;
   transition: opacity 1s;
   opacity: 1;
-  color: #f44644;
+  color: #f44644; /* fallback; scripts.js sets the inverted random color */
   font-size: 50px;
   font-style: italic;
   font-stretch: ultra-expanded;
@@ -333,30 +348,13 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   font-family: "MingLiU", serif;
 }
 
-/* Gallery page title: styled like the nav buttons */
-.logoContainer.logoContainer--gallery {
-  border: 1px solid lime;
-  color: lime;
-  background-color: black;
-  font-family: inherit;
-  font-size: 16px;
-  font-style: normal;
-  font-weight: normal;
-  font-stretch: normal;
-  text-align: center;
-}
-
-.logoContainer--gallery .logoContainer__inner {
-  margin: 0;
-  padding: 2px 24px;
-}
-
 .logoContainer__inner {
   /*border: 5px outset blue;*/
   display: flex;
   flex-direction: row;
   justify-content: center;
-  margin: 8px;
+  margin: 0;
+  padding: 0 16px;
 }
 
 /* Modal styling */
@@ -387,22 +385,24 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   width: 30%;
   height: 80vh;
   box-shadow: 0px 0px 32px #ff6347;
-  animation: morph 180s infinite;
+  animation: morphFromInverse 180s infinite;
 
 }
 
-@keyframes morph {
-  0% { background-color: #ff9966; }
+/* The one shifting-background animation, used by every animated modal. The palette cycle
+   starts (and ends) at the page's inverted color: --morph-start is set on <html> by
+   scripts.js / gallery.js (the orange is only a fallback). */
+@keyframes morphFromInverse {
+  0% { background-color: var(--morph-start, #ff9966); }
   10% { background-color: #9999ff; }
-  20% { background-color:#cc66ff; }
+  20% { background-color: #cc66ff; }
   30% { background-color: #ff99ff; }
   40% { background-color: #ff9966; }
   50% { background-color: #99ff66; }
   60% { background-color: #66ff99; }
   70% { background-color: #33ccff; }
-  90% { background-color: #0066ff; } 
-  100% { background-color: #ff9966; }
-  
+  90% { background-color: #0066ff; }
+  100% { background-color: var(--morph-start, #ff9966); }
 }
 
 @keyframes gradientAnimation {
@@ -419,13 +419,90 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   width: 30%;
   height: 80vh;
   box-shadow: 0px 0px 32px #ff6347;
-  animation: morph 180s infinite;
+  animation: morphFromInverse 180s infinite;
+}
+
+/* color data modal */
+
+.modalContainer--colorData {
+  display: none;
+  top: 20%;
+  left: 50%;
+  margin-left: -170px; /* half of width, to center */
+  width: 340px;
+  min-width: 340px;
+  height: auto;
+  box-shadow: 0px 0px 32px #ff6347;
+  animation: morphFromInverse 180s infinite;
+}
+
+/* On phones other modals fill the screen; this one is small, so keep it compact */
+@media only screen and (max-width: 640px) {
+  .modalContainer.modalContainer--colorData {
+    top: 20%;
+    bottom: auto;
+    left: 5%;
+    right: 5%;
+    width: 90%;
+    min-width: 0;
+    height: auto;
+    margin-left: 0;
+  }
+}
+
+/* Only the header drags this modal (see scripts.js), so the body keeps a normal cursor */
+.modalContainer--colorData:hover {
+  cursor: default;
+}
+
+.modalContainer--colorData .modalInnerContainer {
+  overflow-y: auto; /* only show a scrollbar if the window is very short */
+  padding-bottom: 1.5rem;
+}
+
+/* One row per color: hex text on the left, outlined swatch on the right */
+.colorRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border: 1px solid lime;
+  background: transparent;
+  font-family: "Courier New", monospace;
+  color: #000000;
+}
+
+.colorRow__text {
+  display: flex;
+  flex-direction: column;
+}
+
+.colorRow__label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.colorRow__hex {
+  font-size: 1.5rem;
+  font-weight: bold;
+  user-select: all; /* one click selects the whole code for copying */
+}
+
+/* The swatch: green outline, filled with the example color (set by scripts.js) */
+.colorSwatch {
+  flex: 0 0 auto;
+  width: 64px;
+  height: 64px;
+  border: 1px solid lime;
+  box-sizing: border-box;
 }
 
 /* bandcamp modals*/
 
 .modalContainer--uploadIThought {
-  background-color: transparent;
+  animation: morphFromInverse 180s infinite; /* shifting color background, starting at the inverted color */
   display: none;
   top: 15%;
   bottom: 5%;
@@ -438,7 +515,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 }
 
 .modalContainer--uploadIIThoughts {
-  background-color: transparent;
+  animation: morphFromInverse 180s infinite; /* shifting color background, starting at the inverted color */
   display: none;
   top: 20%;
   bottom: 5%;
@@ -586,7 +663,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   height: 420px; /* Slightly taller to prevent tightness */
   background-color: #eaeaea;
   box-shadow: 0px 0px 32px #ff6347;
-  animation: morph 180s infinite;
+  animation: morphFromInverse 180s infinite;
 }
 
 .modalContainer--horses iframe {
@@ -607,7 +684,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   height: 420px; /* Slightly taller to prevent tightness */
   background-color: #eaeaea;
   box-shadow: 0px 0px 32px #ff6347;
-  animation: morph 180s infinite;
+  animation: morphFromInverse 180s infinite;
 }
 
 .modalContainer--wesleyanBirds iframe {
@@ -628,7 +705,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   height: 420px; /* Slightly taller to prevent tightness */
   background-color: #eaeaea;
   box-shadow: 0px 0px 32px #ff6347;
-  animation: morph 180s infinite;
+  animation: morphFromInverse 180s infinite;
 }
 
 .modalContainer--dancyArms iframe {
@@ -649,7 +726,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   height: 600px; /* Taller for vertical video */
   background-color: #eaeaea;
   box-shadow: 0px 0px 32px #ff6347;
-  animation: morph 180s infinite;
+  animation: morphFromInverse 180s infinite;
 }
 
 .modalContainer--dancers iframe {
@@ -671,7 +748,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   height: 300px;
   background-color: transparent;
   box-shadow: 0px 0px 32px #ff6347;
-  animation: morph 180s infinite;
+  animation: morphFromInverse 180s infinite;
 }
 
 .modalContainer--mercuralia img {
@@ -692,7 +769,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   height: 420px; /* Slightly taller to prevent tightness */
   background-color: #eaeaea;
   box-shadow: 0px 0px 32px #ff6347;
-  animation: morph 180s infinite;
+  animation: morphFromInverse 180s infinite;
 }
 
 .modalContainer--grass iframe {
@@ -715,23 +792,41 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 }
 
 
+/* Header box: transparent with a lime outline. Lime is used for the outline only;
+   the text takes the inverted random color (set on .modalHeader by the page scripts). */
 .modalHeader {
   display: flex;
   align-items: center;
   position: relative;
-  min-height: 4rem;
+  min-height: 3rem;
+  box-sizing: border-box;
+  border: 1px solid lime;
+  background-color: transparent;
+  color: #000000; /* fallback; replaced by the inverted color */
 }
 
 .modalHeader:hover {
   cursor: move;
 }
 
+/* Title: the same font as the LAND BUOY logo, sized to fit inside the header.
+   The page scripts shrink the font further if a long title would overflow. */
 .modalTitle {
-  width: 100%;
-  text-transform: uppercase;
-  text-align: center;
-  font-size: 1.5rem;
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  padding: 0 0.5rem;
+  font-family: "MingLiU", serif;
+  font-style: italic;
+  font-stretch: ultra-expanded;
   font-weight: bold;
+  font-size: 1.5rem;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  color: inherit; /* takes the header's (inverted) color */
+  text-transform: none;
+  text-align: center;
 }
 
 .modalInnerContainer {
@@ -757,7 +852,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 
 .modalInnerContainer iframe {
   position: relative;
-  top: -1rem;
+  top: 0; /* header is now a visible box, so the player sits just beneath it */
 }
 
 .modalText {
@@ -792,6 +887,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 /* Aqua buttons */
 
 .aquaButton {
+  color: lime; /* the X is always lime, whatever color the header text takes */
   width: 1.5rem;
   height: 1.5rem;
   display: inline-block;
@@ -927,6 +1023,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
     right: 32px;
     left: 32px;
     display: flex;
+    flex-wrap: wrap; /* so the nav items drop to a new row instead of squeezing */
     justify-content: space-between;
   }
   .innerContainer {
@@ -965,7 +1062,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
     top: 50%;
     transform: translateY(-50%);
     font-size: 18px;
-    color: #666;
+    color: inherit;
     letter-spacing: 2px;
   }
   

@@ -1,7 +1,23 @@
 $(document).ready(function () {
 
-  // Draggable modals
-  $(".modalContainer").draggable();
+  // Draggable modals (the color data modal can only be dragged by its header)
+  $(".modalContainer").not(".modalContainer--colorData").draggable();
+  $(".modalContainer--colorData").draggable({ handle: ".modalHeader" });
+
+  // Shrink a modal title's font until it fits inside its header.
+  // Must run while the modal is visible, because hidden elements have no width.
+  function fitModalTitles() {
+    $(".modalTitle:visible").each(function () {
+      var el = this;
+      el.style.fontSize = ""; // start from the CSS size
+      var size = parseFloat(window.getComputedStyle(el).fontSize);
+      while (el.scrollWidth > el.clientWidth && size > 10) {
+        size -= 1;
+        el.style.fontSize = size + "px";
+      }
+    });
+  }
+  $(window).on("resize orientationchange", fitModalTitles);
   // Lift up the last clicked modal on vertical stack
   $(".modalContainer").click(function () {
     $(".modalContainer")
@@ -15,6 +31,12 @@ $(document).ready(function () {
   $(".button--resume").click(function () {
     $(".modalContainer").css("zIndex", "0");
     $(".modalContainer--resume").fadeIn().css("zIndex", "9999");
+    fitModalTitles();
+  });
+  // Color data modal
+  $(".button--colordata").click(function () {
+    $(".modalContainer").css("zIndex", "0");
+    $(".modalContainer--colorData").fadeIn().css("zIndex", "9999");
   });
   
   // Enhanced aquaButton event handlers for mobile compatibility
@@ -39,6 +61,10 @@ $(document).ready(function () {
     $(".modalContainer--resume").fadeOut();
   });
   
+  setupAquaButton(".aquaButton--colorData", function() {
+    $(".modalContainer--colorData").fadeOut();
+  });
+  
   setupAquaButton(".aquaButton--uploadIThought", function() {
     $(".modalContainer--uploadIThought").fadeOut();
   });
@@ -48,221 +74,32 @@ $(document).ready(function () {
   });
   
   
+  // Bandcamp players are loaded the first time their modal is opened. Loading them
+  // while the modal is display:none gives the embed a zero-size window, and its album
+  // art may not lay out until something (like pressing play) forces a redraw.
+  function loadBandcampPlayer(modalSelector) {
+    var $frame = $(modalSelector).find("iframe");
+    if (!$frame.attr("src")) {
+      $frame.attr("src", $frame.attr("data-src"));
+    }
+  }
+
   // UploadiThought glyph
   $(".glyph--uploadIThought").click(function () {
     $(".modalContainer").css("zIndex", "0");
     $(".modalContainer--uploadIThought").fadeIn().css("zIndex", "9999");
+    loadBandcampPlayer(".modalContainer--uploadIThought");
+    fitModalTitles();
   });
   
   // UploadIIThought glyph
   $(".glyph--uploadIIThoughts").click(function () {
     $(".modalContainer").css("zIndex", "0");
     $(".modalContainer--uploadIIThoughts").fadeIn().css("zIndex", "9999");
+    loadBandcampPlayer(".modalContainer--uploadIIThoughts");
+    fitModalTitles();
   });  
 
-  // Random GIF scraping system
-  var localGifs = [
-    "assets/img/background/grape.gif",
-    "assets/img/background/pink.gif", 
-    "assets/img/background/red.gif",
-    "assets/img/background/wood.gif",
-    "assets/img/background/grid.gif"
-  ];
-
-  // Function to analyze background and set optimal text color
-  function setOptimalTextColor(targetElement, elementName) {
-    // Create a canvas to analyze the background image
-    var canvas = document.createElement('canvas');
-    var ctx = canvas.getContext('2d');
-    var img = new Image();
-    
-    img.crossOrigin = 'anonymous'; // Enable CORS for external images
-    
-    img.onload = function() {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
-      
-      // Sample pixels from the image to determine average brightness
-      var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      var data = imageData.data;
-      var brightness = 0;
-      var sampleCount = 0;
-      
-      // Sample every 10th pixel for performance
-      for (var i = 0; i < data.length; i += 40) {
-        var r = data[i];
-        var g = data[i + 1];
-        var b = data[i + 2];
-        
-        // Calculate brightness using luminance formula
-        var pixelBrightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-        brightness += pixelBrightness;
-        sampleCount++;
-      }
-      
-      var averageBrightness = brightness / sampleCount;
-      
-      // Set text color based on background brightness
-      var textColor;
-      if (averageBrightness > 0.5) {
-        // Bright background - use dark text
-        textColor = '#000000';
-      } else {
-        // Dark background - use light text
-        textColor = '#ffffff';
-      }
-      
-      // Apply the color to the logo container with !important to override CSS
-      $('.logoContainer').css('color', textColor);
-      $('.logoContainer').attr('style', $('.logoContainer').attr('style') + '; color: ' + textColor + ' !important;');
-      console.log(elementName + " background brightness:", averageBrightness.toFixed(2), "Text color:", textColor);
-    };
-    
-    img.onerror = function() {
-      // Fallback to default color
-      $('.logoContainer').css('color', '#f44644');
-      $('.logoContainer').attr('style', $('.logoContainer').attr('style') + '; color: #f44644 !important;');
-      console.log("Could not analyze " + elementName + " background, using default color");
-    };
-    
-    // Get the current background image URL
-    var bgImage = $(targetElement).css('background-image');
-    if (bgImage && bgImage !== 'none') {
-      // Extract URL from CSS background-image property
-      var urlMatch = bgImage.match(/url\(['"]?([^'"]+)['"]?\)/);
-      if (urlMatch && urlMatch[1]) {
-        img.src = urlMatch[1];
-      }
-    }
-  }
-
-  // Function to load random GIF from various sources
-  function loadRandomGif(targetElement, elementName) {
-    // Try multiple GIF sources
-    var gifSources = [
-      // Giphy API (requires API key - you'd need to get one)
-      // 'https://api.giphy.com/v1/gifs/random?tag=pattern&api_key=YOUR_API_KEY',
-      
-      // Random GIF from Lorem Picsum (static images, but reliable)
-      'https://picsum.photos/50/50?random=' + Math.random(),
-      
-      // Random pattern from Unsplash (static, but good patterns)
-      'https://source.unsplash.com/50x50/?pattern,texture,abstract&sig=' + Math.random(),
-      
-      // Random image from Picsum with blur for pattern effect
-      'https://picsum.photos/50/50?random=' + Math.random() + '&blur=1'
-    ];
-
-    // Try to load from external source first
-    var randomSource = gifSources[Math.floor(Math.random() * gifSources.length)];
-    
-    // Create a test image to check if URL works
-    var testImg = new Image();
-    testImg.onload = function() {
-      // Success! Use the external image
-      $(targetElement).css("background-image", "url(" + randomSource + ")");
-      console.log("Loaded external " + elementName + " background:", randomSource);
-      
-      // Analyze background and set optimal text color
-      if (targetElement === '.mainContainer') {
-        setTimeout(function() {
-          setOptimalTextColor(targetElement, elementName);
-        }, 100); // Small delay to ensure background is applied
-      }
-    };
-    testImg.onerror = function() {
-      // Fallback to local GIFs
-      var randomLocal = localGifs[Math.floor(Math.random() * localGifs.length)];
-      $(targetElement).css("background-image", "url(" + randomLocal + ")");
-      console.log("Using fallback " + elementName + " background:", randomLocal);
-      
-      // Analyze fallback background and set optimal text color
-      if (targetElement === '.mainContainer') {
-        setTimeout(function() {
-          setOptimalTextColor(targetElement, elementName);
-        }, 100);
-      }
-    };
-    
-    // Set a timeout to prevent hanging
-    setTimeout(function() {
-      if (!testImg.complete) {
-        var randomLocal = localGifs[Math.floor(Math.random() * localGifs.length)];
-        $(targetElement).css("background-image", "url(" + randomLocal + ")");
-        console.log("Timeout - using fallback " + elementName + " background:", randomLocal);
-        
-        // Analyze timeout fallback background and set optimal text color
-        if (targetElement === '.mainContainer') {
-          setTimeout(function() {
-            setOptimalTextColor(targetElement, elementName);
-          }, 100);
-        }
-      }
-    }, 3000);
-    
-    testImg.src = randomSource;
-  }
-
-  // Load random GIFs on page load
-  loadRandomGif(".titleBar", "title bar");
-  loadRandomGif(".nav", "navigation");
-
-  // Advanced GIF scraping with multiple APIs
-  function loadAnimatedGif(targetElement, elementName) {
-    // List of free GIF APIs and sources
-    var gifApis = [
-      // Tenor API (free tier available)
-      'https://api.tenor.com/v1/random?key=LIVDSRZULELA&limit=1&q=pattern',
-      
-      // Giphy API (requires free API key)
-      // 'https://api.giphy.com/v1/gifs/random?api_key=YOUR_API_KEY&tag=pattern',
-      
-      // Random animated GIF from various sources
-      'https://httpbin.org/image/gif',
-      
-      // Placeholder animated GIF
-      'https://via.placeholder.com/50x50.gif?text=GIF'
-    ];
-
-    // Try to fetch from APIs
-    var randomApi = gifApis[Math.floor(Math.random() * gifApis.length)];
-    
-    if (randomApi.includes('api.tenor.com')) {
-      // Handle Tenor API response
-      fetch(randomApi)
-        .then(response => response.json())
-        .then(data => {
-          if (data.results && data.results[0] && data.results[0].media[0]) {
-            var gifUrl = data.results[0].media[0].gif.url;
-            $(targetElement).css("background-image", "url(" + gifUrl + ")");
-            console.log("Loaded Tenor GIF for " + elementName + ":", gifUrl);
-          } else {
-            throw new Error("No GIF found");
-          }
-        })
-        .catch(error => {
-          console.log("Tenor API failed for " + elementName + ", using fallback");
-          loadRandomGif(targetElement, elementName);
-        });
-    } else {
-      // Direct image URL
-      var testImg = new Image();
-      testImg.onload = function() {
-        $(targetElement).css("background-image", "url(" + randomApi + ")");
-        console.log("Loaded direct GIF for " + elementName + ":", randomApi);
-      };
-      testImg.onerror = function() {
-        console.log("Direct GIF failed for " + elementName + ", using fallback");
-        loadRandomGif(targetElement, elementName);
-      };
-      testImg.src = randomApi;
-    }
-  }
-
-  // Uncomment the lines below to use animated GIF scraping instead
-  // loadAnimatedGif(".mainContainer", "main container");
-  // loadAnimatedGif(".nav", "navigation");
 
   function randomColor() {
         var color;
@@ -292,9 +129,23 @@ $(document).ready(function () {
 
     //$(".mainContainer").css("background-image", b);
     $(".mainContainer").css("background-color", c1);
-    // Logo color is now handled by dynamic contrast system
-    // $(".logoContainer").css("color", c2);
+    // Logo text takes the inverse of the page's random color so it always contrasts
+    $(".logoContainer").css("color", c2);
+    // Modal header text (titles and the mobile drag hint) uses the inverted color too
+    $(".modalHeader").css("color", c2);
+
+    // The logo box is taller than the old 30px title bar, so keep the nav
+    // just below it (recomputed on load and when the window changes size).
+    function positionNav() {
+      var bar = document.querySelector(".titleBar");
+      var nav = document.querySelector(".nav");
+      if (!bar || !nav) return;
+      nav.style.top = Math.ceil(bar.getBoundingClientRect().bottom + 10) + "px";
+    }
+    positionNav();
+    $(window).on("load resize orientationchange", positionNav);
     $(".modalContainer--resume").css("box-shadow", "0px 0px 32px" + c2);
+    $(".modalContainer--colorData").css("box-shadow", "0px 0px 32px" + c2);
     $(".modalContainer--uploadIThought").css("box-shadow", "0px 0px 32px" + c2);
     $(".modalContainer--uploadIIThoughts").css("box-shadow", "0px 0px 32px" + c2);
 
@@ -302,6 +153,19 @@ $(document).ready(function () {
     
         //$(".landBuoyInnerContainer").css("border", "5px" + c2);
     $(".aquaButton--resume").css("background", c2);
+    $(".aquaButton--colorData").css("background", c2);
+
+    // The Bandcamp modals' shifting background cycle starts at the inverted color
+    document.documentElement.style.setProperty("--morph-start", c2);
+
+    // Color data button: an icon filled with the inverted color
+    $(".button--colordata").css("background-color", c2);
+
+    // Color data modal: print each hex code and fill its swatch with the color
+    $("#colorDataBackgroundHex").text(c1.toUpperCase());
+    $("#colorDataBackgroundSwatch").css("background-color", c1);
+    $("#colorDataInverseHex").text(c2.toUpperCase());
+    $("#colorDataInverseSwatch").css("background-color", c2);
     $(".aquaButton--uploadIThought").css("background", c2);
     $(".aquaButton--uploadIIThoughts").css("background", c2);
 

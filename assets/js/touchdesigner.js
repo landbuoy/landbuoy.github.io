@@ -82,15 +82,18 @@ function onYouTubeIframeAPIReady() {
 function bindYouTubeGlyph(glyphClass, modalClass, getPlayer) {
   $(glyphClass).click(function () {
     var player = getPlayer();
+    // The player object exists as soon as the API loads, but its methods only
+    // appear once the video itself is ready, so check before calling them.
+    var ready = player && typeof player.playVideo === "function";
     $(".modalContainer").css("zIndex", "0");
     $(modalClass).fadeToggle().css("zIndex", "9999");
 
     // Play video when modal opens, pause when it closes
-    if ($(modalClass).is(":visible") && player) {
-      player.playVideo();
+    if ($(modalClass).is(":visible")) {
+      if (ready) player.playVideo();
       playModalAudio(); // Play random audio
-    } else if (player) {
-      player.pauseVideo();
+    } else {
+      if (ready) player.pauseVideo();
       stopModalAudio(); // Stop audio when modal closes
     }
   });

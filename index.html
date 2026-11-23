@@ -50,6 +50,12 @@
       <div class="button button--resume">
         Max Coker CV
       </div>
+      <div
+        class="button--colordata"
+        role="button"
+        title="Color data"
+        aria-label="Color data"
+      ></div>
       <a class="button--videogallery" href="videoFeedback.html">
         <img
           src="assets/img/project icons/mossComposites/marchComp3-6.gif"
@@ -330,16 +336,44 @@
       </div>
     </div>
 
+    <!-- Color data modal: shows this visit's random background color and its inverse -->
+    <div class="modalContainer modalContainer--colorData">
+      <header class="modalHeader">
+        <div class="aquaButton aquaButton--colorData">X</div>
+      </header>
+
+      <div class="modalInnerContainer">
+        <!-- First color: the page background (c1) -->
+        <div class="colorRow colorRow--background">
+          <div class="colorRow__text">
+            <span class="colorRow__label">background color</span>
+            <span class="colorRow__hex" id="colorDataBackgroundHex"></span>
+          </div>
+          <div class="colorSwatch" id="colorDataBackgroundSwatch"></div>
+        </div>
+
+        <!-- Second color: the inverted color (c2), used for the logo text, glows and close buttons -->
+        <div class="colorRow colorRow--inverse">
+          <div class="colorRow__text">
+            <span class="colorRow__label">inverted color</span>
+            <span class="colorRow__hex" id="colorDataInverseHex"></span>
+          </div>
+          <div class="colorSwatch" id="colorDataInverseSwatch"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Bandcamp modals -->
     <div class="modalContainer modalContainer--uploadIThought">
       <header class="modalHeader">
         <script type="text/javascript" src="assets/js/landbuoy.A1.patch.js"></script>
         <div class="aquaButton aquaButton--uploadIThought">X</div>
+        <h2 class="modalTitle">Upload I Thought</h2>
       </header>
       <div class="modalInnerContainer">
         <iframe 
           style="border: 0; width: 350px; height: 853px;" 
-          src="https://bandcamp.com/EmbeddedPlayer/album=3528501299/size=large/bgcol=ffffff/linkcol=0687f5/package=2534258902/transparent=true/" 
+          data-src="https://bandcamp.com/EmbeddedPlayer/album=3528501299/size=large/bgcol=ffffff/linkcol=0687f5/package=2534258902/transparent=true/" 
           seamless
         >
           <a href="https://landboy.bandcamp.com/album/upload-i-thought">upload i thought by LandBuoy</a>
@@ -351,11 +385,12 @@
       <header class="modalHeader">
         <script type="text/javascript" src="assets/js/landBuoy.B1.patch.js"></script>
         <div class="aquaButton aquaButton--uploadIIThoughts">X</div>
+        <h2 class="modalTitle">Upload II Thoughts</h2>
       </header>
       <div class="modalInnerContainer">
         <iframe 
           style="border: 0; width: 350px; height: 853px;" 
-          src="https://bandcamp.com/EmbeddedPlayer/album=3114072364/size=large/bgcol=ffffff/linkcol=0687f5/package=2830932194/transparent=true/" 
+          data-src="https://bandcamp.com/EmbeddedPlayer/album=3114072364/size=large/bgcol=ffffff/linkcol=0687f5/package=2830932194/transparent=true/" 
           seamless
         >
           <a href="https://landboy.bandcamp.com/album/upload-ii-thoughts">upload ii thoughts by LandBuoy</a>
