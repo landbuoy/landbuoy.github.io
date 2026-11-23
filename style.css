@@ -52,12 +52,39 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   cursor: pointer;
 }
 
-.button:hover .buttonIcon {
-  transform: rotate3d(0, 1, 0, 180deg);
+/* Mouse-over halo: the same glow the modals have, in the page's inverted color
+   (--morph-start is set to that color by scripts.js / gallery.js). drop-shadow
+   follows the icon's shape, so transparent PNGs glow around their outline. */
+.button:hover .buttonIcon,
+.glyph:hover .glyphIcon,
+.button--videogallery:hover img,
+.button--touchdesigner:hover img,
+.button--fortytwo:hover img {
+  filter: drop-shadow(0 0 16px var(--morph-start, #ff6347))
+    drop-shadow(0 0 32px var(--morph-start, #ff6347));
 }
 
-.glyph:hover .glyphIcon {
-  transform: rotate3d(0, 1, 0, 180deg);
+.button--colordata:hover {
+  box-shadow: 0px 0px 32px var(--morph-start, #ff6347);
+}
+
+/* Footer box: holds the 42 game's buttons. fortytwo.js shows/hides it by setting
+   display (flex when it has buttons, none when empty). */
+.footer {
+  position: fixed;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  z-index: 9998;
+  box-sizing: border-box;
+  max-width: calc(100% - 20px);
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border: 1px solid lime; /* same outline as the nav buttons and logo box */
+  background-color: transparent;
 }
 
 /* Header and navigation */
@@ -71,9 +98,27 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   top: 20px; /* Added padding from top of screen */
   width: 100%;
   min-height: 30px; /* grows with the logo box; nav position follows (see scripts.js) */
-  display: flex;
+  /* [color data button] [logo] [CV button]: the middle column is the logo, and the two
+     side columns are equal so the logo stays centered on the page */
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: center;
+  column-gap: 16px;
+}
+
+.titleBar .logoContainer {
+  grid-column: 2;
+}
+
+.titleBar .button--colordata {
+  grid-column: 1;
+  justify-self: end; /* sits right next to the logo box */
+}
+
+.titleBar .button--resume {
+  grid-column: 3;
+  justify-self: start; /* sits right next to the logo box */
+  margin: 0;
 }
 
 .nav {
@@ -84,6 +129,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   right: 2;
   top: 60px; /* Position below title bar (20px + 30px height + 10px space) */
   width: 100%;
+  text-align: center; /* icons are centered under the title bar */
 }
 
 
@@ -127,8 +173,13 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   object-fit: cover;
 }
 
+/* The domino back (reverse.png) is a portrait image; it is laid on its side so it
+   fills a 200x100 landscape slot. */
 .button--fortytwo {
   display: inline-block;
+  position: relative;
+  width: 200px;
+  height: 100px;
   margin: 8px;
   vertical-align: top;
   cursor: pointer;
@@ -136,35 +187,80 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 
 .button--fortytwo img {
   display: block;
-  width: 200px;
-  height: 100px;
+  position: absolute;
+  width: 100px;
+  height: 200px;
+  left: 50px;
+  top: -50px;
+  object-fit: contain;
+  transform: rotate(90deg);
   transition: 0.5s;
 }
 
-.button--fortytwo:hover img {
-  transform: rotate3d(0, 1, 0, 180deg);
+/* "Play 42" text box over the domino, styled like the modal headers:
+   transparent, lime outline, logo font, inverted color */
+.button--fortytwo__label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-sizing: border-box;
+  padding: 0 0.75rem;
+  border: 1px solid lime;
+  background-color: transparent;
+  color: var(--morph-start, #000000);
+  font-family: "MingLiU", serif;
+  font-style: italic;
+  font-stretch: ultra-expanded;
+  font-weight: bold;
+  font-size: 1.5rem;
+  line-height: 1.1;
+  white-space: nowrap;
+  pointer-events: none;
 }
+
+
 
 /* Color data icon: a lime-outlined box filled with the inverted color (fill set by scripts.js) */
 .button--colordata {
   display: inline-block;
   vertical-align: top;
   box-sizing: border-box;
-  width: 96px;
-  height: 96px;
-  margin: 8px;
+  width: 44px; /* a little shorter than the logo box beside it */
+  height: 44px;
+  margin: 0;
   border: 1px solid lime;
   background-color: transparent; /* replaced by the inverted color */
   cursor: pointer;
 }
 
-.button--resume {
-  display: inline-block;
+/* CV button: filled with the inverted color (fill and text color set by scripts.js),
+   label styled like "Play 42", box hugs the text with a little side padding */
+.button.button--resume {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: auto;
+  height: 44px; /* same height as the color data button */
   margin: 8px;
+  padding: 0 0.75rem;
   border: 1px solid lime;
-  color: lime;
-  background-color: black;   
-  text-align: center; 
+  background-color: var(--morph-start, black);
+  color: var(--page-bg, #000000);
+  font-family: "MingLiU", serif;
+  font-style: italic;
+  font-stretch: ultra-expanded;
+  font-weight: bold;
+  font-size: 1.5rem;
+  line-height: 1.1;
+  white-space: nowrap;
+  text-align: center;
+  cursor: pointer;
+}
+
+.button--resume:hover {
+  box-shadow: 0px 0px 32px var(--morph-start, #ff6347);
 }
 
 
@@ -507,7 +603,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   top: 15%;
   bottom: 5%;
   right: 15%;
-  width: 30%;
+  width: 400px; /* fixed: frames the 350px Bandcamp player instead of stretching with the window */
   height: 80vh;
   /*border: -5px #ff6347;*/
   box-shadow: 0px 0px 32px #ff6347;
@@ -520,7 +616,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   top: 20%;
   bottom: 5%;
   right: 10%;
-  width: 30%;
+  width: 400px; /* fixed: frames the 350px Bandcamp player instead of stretching with the window */
   height: 80vh;
   /*border: 5px #ff6347;*/
   box-shadow: 0px 0px 32px #ff6347;
@@ -890,6 +986,7 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
   color: lime; /* the X is always lime, whatever color the header text takes */
   width: 1.5rem;
   height: 1.5rem;
+  flex: 0 0 auto; /* stays a circle when a flex header (the game windows) is narrow */
   display: inline-block;
   position: absolute;
   left: 1rem;
@@ -1019,12 +1116,32 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
 /* For screens smaller than 640px */
 
 @media only screen and (max-width: 640px) {
+  /* Phones: the logo gets its own row, the two title-bar buttons sit side by side below it */
+  .titleBar {
+    grid-template-columns: auto auto;
+    justify-content: center;
+    row-gap: 8px;
+  }
+  .titleBar .logoContainer {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    justify-self: center;
+  }
+  .titleBar .button--colordata {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .titleBar .button--resume {
+    grid-column: 2;
+    grid-row: 2;
+  }
   .nav {
     right: 32px;
     left: 32px;
+    width: auto; /* with left/right set, 100% width pushed the row off-center */
     display: flex;
     flex-wrap: wrap; /* so the nav items drop to a new row instead of squeezing */
-    justify-content: space-between;
+    justify-content: center;
   }
   .innerContainer {
     width: 80%;
@@ -1064,38 +1181,6 @@ ol{margin:0;padding:0}table td,table th{padding:0}.c5{color:#0000ff;font-weight:
     font-size: 18px;
     color: inherit;
     letter-spacing: 2px;
-  }
-  
-  /* Make close buttons larger on mobile */
-  .aquaButton {
-    min-width: 44px;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    /* Ensure proper touch handling */
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    /* Prevent text selection */
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    /* Better touch feedback */
-    transition: all 0.15s ease;
-  }
-  
-  /* Enhanced touch feedback for aquaButtons */
-  .aquaButton:active {
-    transform: scale(0.95);
-    opacity: 0.8;
-  }
-  
-  /* Ensure buttons are above other elements */
-  .aquaButton {
-    z-index: 10001;
-    position: relative;
   }
   
   /* Prevent touch events from bubbling to parent elements */

@@ -1,3 +1,8 @@
+// 42 domino game. Loaded by index.html; everything lives inside this closure so
+// the game's class/function names can't collide with the site's scripts.
+// The only global is window.Fortytwo.startNewGame() (see the bottom of the file).
+(function () {
+
 // Songbird names from 7 biomes around the world
 const SONGBIRD_NAMES = [
     // Appalachian Mountains (Upstate New York)
@@ -149,7 +154,7 @@ function bringWindowToFrontWithLayering(window, windowType = 'general') {
     // For game windows (hand scoreboard, game table, history), manage their own layer
     if (windowType === 'game-window') {
         // Find the highest z-index among game windows
-        const gameWindows = document.querySelectorAll('.hand-scoreboard-window, .game-table-window, .modalContainer--scoreboard, .modalContainer--collectedTricks');
+        const gameWindows = document.querySelectorAll('.hand-scoreboard-window, .game-table-window, .ftModalContainer--scoreboard, .ftModalContainer--collectedTricks');
         let maxGameZIndex = 1000;
         
         gameWindows.forEach(gameWindow => {
@@ -180,9 +185,9 @@ class HandScoreboardWindowManager {
             this.handScoreboardWindow.remove();
         }
         
-        // Create the window container using modalContainer pattern
+        // Create the window container using ftModalContainer pattern
         this.handScoreboardWindow = document.createElement('div');
-        this.handScoreboardWindow.className = 'modalContainer modalContainer--collectedTricks';
+        this.handScoreboardWindow.className = 'ftModalContainer ftModalContainer--collectedTricks';
         
         // Generate random color for this window
         const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3', '#ff9f43'];
@@ -239,13 +244,13 @@ class HandScoreboardWindowManager {
         this.handScoreboardWindow.style.top = `${baseTop}px`;
         this.handScoreboardWindow.style.zIndex = getNextGameWindowZIndex();
         
-        // Create window content with header and close button using modalContainer pattern
+        // Create window content with header and close button using ftModalContainer pattern
         this.handScoreboardWindow.innerHTML = `
-            <header class="modalHeader">
-                <h2 class="modalTitle">Collected Tricks - US: ${this.game.usHandPoints || 0} | THEM: ${this.game.themHandPoints || 0} | Bid to Beat: ${this.game.winningBid || 'None'}</h2>
+            <header class="ftModalHeader">
                 <div class="aquaButton aquaButton--scoreboard" style="background: ${this.handScoreboardWindow.dataset.aquaButtonColor}; box-shadow: 0px 5px 10px ${this.handScoreboardWindow.dataset.boxShadowColor};">×</div>
+                <h2 class="ftModalTitle">Collected Tricks - US: ${this.game.usHandPoints || 0} | THEM: ${this.game.themHandPoints || 0} | Bid to Beat: ${this.game.winningBid || 'None'}</h2>
             </header>
-            <div class="modalInnerContainer">
+            <div class="ftModalInner">
                 <div class="collected-tricks-container">
                     <!-- Content will be populated here -->
                 </div>
@@ -268,7 +273,7 @@ class HandScoreboardWindowManager {
             });
         }
         
-        // Get reference to the container in the modalInnerContainer
+        // Get reference to the container in the ftModalInner
         const container = this.handScoreboardWindow.querySelector('.collected-tricks-container');
         
         // Determine team roles
@@ -603,7 +608,7 @@ class HandScoreboardWindowManager {
                         const play = playerPlays[i];
                         const mod = play.domino.modulate(this.game.trump, null);
                 const dominoKey = `${mod[0]}-${mod[1]}`;
-                        display += `<span class="domino-display"><img src="../assets/img/dominoes/${dominoKey}.png" alt="${dominoKey}" class="domino-small" style="transform: none;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"><span class="domino-fallback" style="display:none;">[ ${dominoKey} ]</span></span>`;
+                        display += `<span class="domino-display"><img src="assets/img/dominoes/${dominoKey}.png" alt="${dominoKey}" class="domino-small" style="transform: none;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"><span class="domino-fallback" style="display:none;">[ ${dominoKey} ]</span></span>`;
                     } else {
                         display += '<span class="domino-display">[     ]</span>';
                     }
@@ -637,9 +642,9 @@ class HandScoreboardWindowManager {
         if (themPointsElement) themPointsElement.textContent = this.game.themHandPoints || 0;
         
         // Update main header title with current scores and bid information
-        const modalTitle = this.handScoreboardWindow.querySelector('.modalTitle');
-        if (modalTitle) {
-            modalTitle.textContent = `Collected Tricks - US: ${this.game.usHandPoints || 0} | THEM: ${this.game.themHandPoints || 0} | Bid to Beat: ${this.game.winningBid || 'None'}`;
+        const ftModalTitle = this.handScoreboardWindow.querySelector('.ftModalTitle');
+        if (ftModalTitle) {
+            ftModalTitle.textContent = `Collected Tricks - US: ${this.game.usHandPoints || 0} | THEM: ${this.game.themHandPoints || 0} | Bid to Beat: ${this.game.winningBid || 'None'}`;
         }
         
         // Update team headers with roles
@@ -722,7 +727,7 @@ class HandScoreboardWindowManager {
             }
             
             // Check if the touch is on a scrollable element
-            const scrollableElement = e.target.closest('.modalInnerContainer');
+            const scrollableElement = e.target.closest('.ftModalInner');
             if (scrollableElement) {
                 // Allow scrolling on scrollable content - don't prevent default
                 return;
@@ -743,7 +748,7 @@ class HandScoreboardWindowManager {
         
         const handleTouchMove = (e) => {
             // Check if the touch is on a scrollable element
-            const scrollableElement = e.target.closest('.modalInnerContainer');
+            const scrollableElement = e.target.closest('.ftModalInner');
             if (scrollableElement) {
                 // Allow scrolling on scrollable content - don't prevent default
                 return;
@@ -771,7 +776,7 @@ class HandScoreboardWindowManager {
         
         const handleTouchEnd = (e) => {
             // Check if the touch is on a scrollable element
-            const scrollableElement = e.target.closest('.modalInnerContainer');
+            const scrollableElement = e.target.closest('.ftModalInner');
             if (scrollableElement) {
                 // Allow scrolling on scrollable content
                 return;
@@ -829,63 +834,63 @@ class GameTableWindowManager {
     
     async loadImagePaths() {
         try {
-            const response = await fetch('../assets/img/songbirds/songbird_image_paths.json');
+            const response = await fetch('assets/img/songbirds/songbird_image_paths.json');
             this.imagePaths = await response.json();
             console.log('Successfully loaded image paths from JSON:', Object.keys(this.imagePaths).length, 'entries');
         } catch (error) {
             console.warn('Could not load songbird image paths:', error);
             // Provide fallback image paths for local development
             this.imagePaths = {
-                "Wood Thrush": "../assets/img/songbirds/Wood_Thrush.jpg",
-                "Black-throated Blue Warbler": "../assets/img/songbirds/Black_throated_Blue_Warbler.jpg",
-                "Scarlet Tanager": "../assets/img/songbirds/Scarlet_Tanager.jpg",
-                "Rose-breasted Grosbeak": "../assets/img/songbirds/Rose_breasted_Grosbeak.jpg",
-                "Veery": "../assets/img/songbirds/Veery.jpg",
-                "Hermit Thrush": "../assets/img/songbirds/Hermit_Thrush.jpg",
-                "Black-capped Chickadee": "../assets/img/songbirds/Black_capped_Chickadee.jpg",
-                "Musician Wren": "../assets/img/songbirds/Musician_Wren.jpg",
-                "Screaming Piha": "../assets/img/songbirds/Screaming_Piha.jpg",
-                "White-bellied Antbird": "../assets/img/songbirds/White_bellied_Antbird.jpg",
-                "Amazonian Umbrellabird": "../assets/img/songbirds/Amazonian_Umbrellabird.jpg",
-                "Spix's Guan": "../assets/img/songbirds/Spixs_Guan.jpg",
-                "Hoatzin": "../assets/img/songbirds/Hoatzin.jpg",
-                "Amazonian Royal Flycatcher": "../assets/img/songbirds/Amazonian_Royal_Flycatcher.jpg",
-                "Superb Lyrebird": "../assets/img/songbirds/Superb_Lyrebird.jpg",
-                "Australian Magpie": "../assets/img/songbirds/Australian_Magpie.jpg",
-                "Pied Butcherbird": "../assets/img/songbirds/Pied_Butcherbird.jpg",
-                "Grey Shrike-thrush": "../assets/img/songbirds/Grey_Shrike_thrush.jpg",
-                "Rufous Whistler": "../assets/img/songbirds/Rufous_Whistler.jpg",
-                "Golden Whistler": "../assets/img/songbirds/Golden_Whistler.jpg",
-                "Eastern Whipbird": "../assets/img/songbirds/Eastern_Whipbird.jpg",
-                "African Grey Hornbill": "../assets/img/songbirds/African_Grey_Hornbill.jpg",
-                "Lilac-breasted Roller": "../assets/img/songbirds/Lilac_breasted_Roller.jpg",
-                "Red-billed Oxpecker": "../assets/img/songbirds/Red_billed_Oxpecker.jpg",
-                "Superb Starling": "../assets/img/songbirds/Superb_Starling.jpg",
-                "Fiscal Shrike": "../assets/img/songbirds/Fiscal_Shrike.jpg",
-                "Yellow-billed Hornbill": "../assets/img/songbirds/Yellow_billed_Hornbill.jpg",
-                "Red-chested Cuckoo": "../assets/img/songbirds/Red_chested_Cuckoo.jpg",
-                "Siberian Rubythroat": "../assets/img/songbirds/Siberian_Rubythroat.jpg",
-                "Bluethroat": "../assets/img/songbirds/Bluethroat.jpg",
-                "Pallas's Leaf Warbler": "../assets/img/songbirds/Pallass_Leaf_Warbler.jpg",
-                "Siberian Accentor": "../assets/img/songbirds/Siberian_Accentor.jpg",
-                "Red-flanked Bluetail": "../assets/img/songbirds/Red_flanked_Bluetail.jpg",
-                "Siberian Jay": "../assets/img/songbirds/Siberian_Jay.jpg",
-                "Pine Grosbeak": "../assets/img/songbirds/Pine_Grosbeak.jpg",
-                "Common Nightingale": "../assets/img/songbirds/Common_Nightingale.jpg",
-                "European Robin": "../assets/img/songbirds/European_Robin.jpg",
-                "Blackcap": "../assets/img/songbirds/Blackcap.jpg",
-                "Sardinian Warbler": "../assets/img/songbirds/Sardinian_Warbler.jpg",
-                "Subalpine Warbler": "../assets/img/songbirds/Subalpine_Warbler.jpg",
-                "Cirl Bunting": "../assets/img/songbirds/Cirl_Bunting.jpg",
-                "Thekla Lark": "../assets/img/songbirds/Thekla_Lark.jpg",
-                "Himalayan Monal": "../assets/img/songbirds/Himalayan_Monal.png",
-                "Blood Pheasant": "../assets/img/songbirds/Blood_Pheasant.jpg",
-                "Himalayan Bulbul": "../assets/img/songbirds/Himalayan_Bulbul.jpg",
-                "Rufous-breasted Accentor": "../assets/img/songbirds/Rufous_breasted_Accentor.jpg",
-                "Himalayan Rubythroat": "../assets/img/songbirds/Himalayan_Rubythroat.jpg",
-                "White-browed Rosefinch": "../assets/img/songbirds/White_browed_Rosefinch.jpg",
-                "Alpine Chough": "../assets/img/songbirds/Alpine_Chough.jpg",
-                "Common Waxbill": "../assets/img/songbirds/Common_Waxbill.jpg"
+                "Wood Thrush": "assets/img/songbirds/Wood_Thrush.jpg",
+                "Black-throated Blue Warbler": "assets/img/songbirds/Black_throated_Blue_Warbler.jpg",
+                "Scarlet Tanager": "assets/img/songbirds/Scarlet_Tanager.jpg",
+                "Rose-breasted Grosbeak": "assets/img/songbirds/Rose_breasted_Grosbeak.jpg",
+                "Veery": "assets/img/songbirds/Veery.jpg",
+                "Hermit Thrush": "assets/img/songbirds/Hermit_Thrush.jpg",
+                "Black-capped Chickadee": "assets/img/songbirds/Black_capped_Chickadee.jpg",
+                "Musician Wren": "assets/img/songbirds/Musician_Wren.jpg",
+                "Screaming Piha": "assets/img/songbirds/Screaming_Piha.jpg",
+                "White-bellied Antbird": "assets/img/songbirds/White_bellied_Antbird.jpg",
+                "Amazonian Umbrellabird": "assets/img/songbirds/Amazonian_Umbrellabird.jpg",
+                "Spix's Guan": "assets/img/songbirds/Spixs_Guan.jpg",
+                "Hoatzin": "assets/img/songbirds/Hoatzin.jpg",
+                "Amazonian Royal Flycatcher": "assets/img/songbirds/Amazonian_Royal_Flycatcher.jpg",
+                "Superb Lyrebird": "assets/img/songbirds/Superb_Lyrebird.jpg",
+                "Australian Magpie": "assets/img/songbirds/Australian_Magpie.jpg",
+                "Pied Butcherbird": "assets/img/songbirds/Pied_Butcherbird.jpg",
+                "Grey Shrike-thrush": "assets/img/songbirds/Grey_Shrike_thrush.jpg",
+                "Rufous Whistler": "assets/img/songbirds/Rufous_Whistler.jpg",
+                "Golden Whistler": "assets/img/songbirds/Golden_Whistler.jpg",
+                "Eastern Whipbird": "assets/img/songbirds/Eastern_Whipbird.jpg",
+                "African Grey Hornbill": "assets/img/songbirds/African_Grey_Hornbill.jpg",
+                "Lilac-breasted Roller": "assets/img/songbirds/Lilac_breasted_Roller.jpg",
+                "Red-billed Oxpecker": "assets/img/songbirds/Red_billed_Oxpecker.jpg",
+                "Superb Starling": "assets/img/songbirds/Superb_Starling.jpg",
+                "Fiscal Shrike": "assets/img/songbirds/Fiscal_Shrike.jpg",
+                "Yellow-billed Hornbill": "assets/img/songbirds/Yellow_billed_Hornbill.jpg",
+                "Red-chested Cuckoo": "assets/img/songbirds/Red_chested_Cuckoo.jpg",
+                "Siberian Rubythroat": "assets/img/songbirds/Siberian_Rubythroat.jpg",
+                "Bluethroat": "assets/img/songbirds/Bluethroat.jpg",
+                "Pallas's Leaf Warbler": "assets/img/songbirds/Pallass_Leaf_Warbler.jpg",
+                "Siberian Accentor": "assets/img/songbirds/Siberian_Accentor.jpg",
+                "Red-flanked Bluetail": "assets/img/songbirds/Red_flanked_Bluetail.jpg",
+                "Siberian Jay": "assets/img/songbirds/Siberian_Jay.jpg",
+                "Pine Grosbeak": "assets/img/songbirds/Pine_Grosbeak.jpg",
+                "Common Nightingale": "assets/img/songbirds/Common_Nightingale.jpg",
+                "European Robin": "assets/img/songbirds/European_Robin.jpg",
+                "Blackcap": "assets/img/songbirds/Blackcap.jpg",
+                "Sardinian Warbler": "assets/img/songbirds/Sardinian_Warbler.jpg",
+                "Subalpine Warbler": "assets/img/songbirds/Subalpine_Warbler.jpg",
+                "Cirl Bunting": "assets/img/songbirds/Cirl_Bunting.jpg",
+                "Thekla Lark": "assets/img/songbirds/Thekla_Lark.jpg",
+                "Himalayan Monal": "assets/img/songbirds/Himalayan_Monal.png",
+                "Blood Pheasant": "assets/img/songbirds/Blood_Pheasant.jpg",
+                "Himalayan Bulbul": "assets/img/songbirds/Himalayan_Bulbul.jpg",
+                "Rufous-breasted Accentor": "assets/img/songbirds/Rufous_breasted_Accentor.jpg",
+                "Himalayan Rubythroat": "assets/img/songbirds/Himalayan_Rubythroat.jpg",
+                "White-browed Rosefinch": "assets/img/songbirds/White_browed_Rosefinch.jpg",
+                "Alpine Chough": "assets/img/songbirds/Alpine_Chough.jpg",
+                "Common Waxbill": "assets/img/songbirds/Common_Waxbill.jpg"
             };
         }
     }
@@ -907,7 +912,7 @@ class GameTableWindowManager {
             recordingNumber = 3;
         }
         
-        return `../assets/audio/birdsongs/downloads/${birdFolder}/${birdFolder}_recording_${recordingNumber}.mp3`;
+        return `assets/audio/birdsongs/downloads/${birdFolder}/${birdFolder}_recording_${recordingNumber}.mp3`;
     }
     
     async getBirdAudioPathWithFallback(birdName, playerRole) {
@@ -926,11 +931,11 @@ class GameTableWindowManager {
         if (isFileProtocol) {
             // When running from file://, just return the preferred path
             // The audio will fail to load gracefully if the file doesn't exist
-            return `../assets/audio/birdsongs/downloads/${birdFolder}/${birdFolder}_recording_${preferredRecordingNumber}.mp3`;
+            return `assets/audio/birdsongs/downloads/${birdFolder}/${birdFolder}_recording_${preferredRecordingNumber}.mp3`;
         }
         
         // Try preferred recording first (only for http/https protocols)
-        const preferredPath = `../assets/audio/birdsongs/downloads/${birdFolder}/${birdFolder}_recording_${preferredRecordingNumber}.mp3`;
+        const preferredPath = `assets/audio/birdsongs/downloads/${birdFolder}/${birdFolder}_recording_${preferredRecordingNumber}.mp3`;
         
         try {
             // Check if the preferred file exists
@@ -946,7 +951,7 @@ class GameTableWindowManager {
         }
         
         // Fallback to recording 1 if preferred doesn't exist
-        return `../assets/audio/birdsongs/downloads/${birdFolder}/${birdFolder}_recording_1.mp3`;
+        return `assets/audio/birdsongs/downloads/${birdFolder}/${birdFolder}_recording_1.mp3`;
     }
     
     playBirdAudio(audioPath, playerIndex) {
@@ -1066,7 +1071,7 @@ class GameTableWindowManager {
         
         // Create window element
         this.gameTableWindow = document.createElement('div');
-        this.gameTableWindow.className = 'game-table-window modalContainer modalContainer--gameTable';
+        this.gameTableWindow.className = 'game-table-window ftModalContainer ftModalContainer--gameTable';
         this.gameTableWindow.id = 'game-table-window';
         
         // Generate random color for box-shadow
@@ -1160,12 +1165,12 @@ class GameTableWindowManager {
         
         // Create window content with 4-square grid
         this.gameTableWindow.innerHTML = `
-            <div class="game-table-header modalHeader">
-                <h3 class="game-table-title modalTitle" style="font-size: 14px;">Game Table</h3>
+            <div class="game-table-header ftModalHeader">
+                <div class="aquaButton aquaButton--gameTable" style="background: ${this.gameTableWindow.dataset.aquaButtonColor}; box-shadow: 0px 5px 10px ${this.gameTableWindow.dataset.boxShadowColor};">×</div>
+                <h3 class="game-table-title ftModalTitle">Game Table</h3>
                 <button id="play-domino" class="btn" disabled style="font-size: 11px; margin-left: 10px;">Play Domino</button>
                 <button id="game-table-play-next-trick-btn" class="btn game-table-play-next-trick-btn" style="display: none; font-size: 11px;">Next Trick</button>
                 <button id="game-table-shuffle-next-hand-btn" class="btn game-table-shuffle-next-hand-btn" style="display: none; font-size: 11px;">New Hand</button>
-                <div class="aquaButton aquaButton--gameTable" style="background: ${this.gameTableWindow.dataset.aquaButtonColor}; box-shadow: 0px 5px 10px ${this.gameTableWindow.dataset.boxShadowColor};">×</div>
             </div>
             <div class="game-table-content">
                 <div class="game-table-grid">
@@ -1711,7 +1716,7 @@ class GameTableWindowManager {
             // Use modulated orientation for proper display
             const modulatedEnds = domino.modulate(this.game.trump, this.game.currentTrick?.currentSuit);
             const dominoKey = `${modulatedEnds[0]}-${modulatedEnds[1]}`;
-            dominoImage.src = `../assets/img/dominoes/${dominoKey}.png`;
+            dominoImage.src = `assets/img/dominoes/${dominoKey}.png`;
             dominoImage.onerror = () => {
                 console.warn(`Failed to load domino image: ${dominoKey}.png`);
                 dominoImage.style.display = 'none';
@@ -4511,9 +4516,15 @@ class Game {
         
         // Bind event listeners
         this.bindEventListeners();
+
+        // Rescale/re-seat the hand's dominoes live as the window is resized
+        let dominoResizeFrame = null;
+        window.addEventListener('resize', () => {
+            if (dominoResizeFrame) cancelAnimationFrame(dominoResizeFrame);
+            dominoResizeFrame = requestAnimationFrame(() => this.relayoutDominoWindows());
+        });
         
-        // Create start game button in window-controls-container
-        this.createStartGameButton();
+        // (The Start New Game control is the 5-5 domino button on the main page)
         
         // Display team introductions on page load
         this.displayTeamIntroductions();
@@ -4814,7 +4825,13 @@ class Game {
         }
         
         // Create game table window
+        this.gameOver = false;
         this.gameTableManager.createGameTableWindow();
+        // closeGameTableWindow() above may have re-added the reopen button
+        const staleReopenButton = document.querySelector('.game-table-reopen-btn');
+        if (staleReopenButton) {
+            staleReopenButton.remove();
+        }
         
         // Add hand scoreboard reopen button (window will be created when button is clicked)
         this.handScoreboardManager.addReopenButton();
@@ -4890,6 +4907,87 @@ class Game {
         // The play button is now in the game table header
     }
     
+    // Where (and how big) the hand's domino windows go for the current window size.
+    // Dominoes stay full size (200px) as long as a row of four fits; below that they
+    // shrink with the window so the row of four just fits. They sit in one row if all
+    // seven fit at full spacing; otherwise two rows (4 on top, 3 below), both centered.
+    getDominoLayout(index, totalDominoes) {
+        const screenWidth = document.documentElement.clientWidth || document.body.clientWidth;
+        const screenHeight = document.documentElement.clientHeight || document.body.clientHeight;
+        const isMobile = screenWidth <= 600;
+
+        const FULL_DOMINO_W = 200, MIN_DOMINO_W = 60;
+        const minGap = isMobile ? 8 : 20;           // smallest gap between dominoes in a row
+        const rowGap = isMobile ? 12 : 15;          // gap between rows
+        const edge = isMobile ? 6 : 10;             // margin kept at the screen edges
+
+        // Dominoes stay at full size for as long as a row of four fits side by side.
+        // Once the window is narrower than that, they shrink in step with the window so
+        // the row of four never overlaps (down to a floor for very narrow screens).
+        const rowGapForFour = isMobile ? 8 : 10;    // gap between dominoes while shrinking
+        const widthForRowOfFour = (screenWidth - 2 * edge - 3 * rowGapForFour) / 4;
+        const dominoWidth = Math.round(Math.max(MIN_DOMINO_W, Math.min(FULL_DOMINO_W, widthForRowOfFour)));
+        const dominoHeight = Math.round(dominoWidth / 2);
+
+        const singleRowFits = Math.floor((screenWidth - minGap) / (dominoWidth + minGap)) >= totalDominoes;
+        const rowCount = singleRowFits ? 1 : 2;
+        const perRow = Math.ceil(totalDominoes / rowCount);
+        const currentRow = Math.floor(index / perRow);
+        const positionInRow = index % perRow;
+        const dominoesInThisRow = Math.min(perRow, totalDominoes - currentRow * perRow);
+
+        // Horizontal. Normally each row is spread evenly across the screen. If even the
+        // widest row can't keep minGap, both rows share one step (dominoes overlap
+        // slightly rather than leave the screen) and are centered on the same axis.
+        const widestRowWidth = perRow * dominoWidth;
+        let left;
+        if ((screenWidth - widestRowWidth) / (perRow + 1) >= minGap || perRow === 1) {
+            const rowWidth = dominoesInThisRow * dominoWidth;
+            const spacing = Math.max(minGap, (screenWidth - rowWidth) / (dominoesInThisRow + 1));
+            left = spacing + (positionInRow * (dominoWidth + spacing));
+        } else {
+            const step = Math.min(dominoWidth + minGap, (screenWidth - 2 * edge - dominoWidth) / (perRow - 1));
+            const rowSpan = (dominoesInThisRow - 1) * step + dominoWidth;
+            left = (screenWidth - rowSpan) / 2 + positionInRow * step;
+        }
+
+        // Vertical: a single row sits low; two rows start higher and run downward.
+        // The footer box (the game's buttons) is kept clear along the bottom edge.
+        const footerEl = document.getElementById('window-controls-container');
+        const footerReserve = (footerEl && footerEl.offsetHeight > 0)
+            ? footerEl.offsetHeight + 20   // its height + 10px off the edge + 10px gap
+            : 70;                          // not shown yet: the buttons are about to appear
+        const usableHeight = screenHeight - footerReserve;
+        const blockHeight = rowCount * dominoHeight + (rowCount - 1) * rowGap;
+        let startTop;
+        if (rowCount === 1) {
+            startTop = Math.min(screenHeight * (isMobile ? 0.75 : 0.8), usableHeight - dominoHeight);
+        } else {
+            startTop = Math.min(screenHeight * 0.70, usableHeight - blockHeight);
+        }
+        startTop = Math.max(0, startTop);
+        const top = startTop + currentRow * (dominoHeight + rowGap);
+
+        return { left, top, width: dominoWidth, height: dominoHeight, screenWidth, isMobile };
+    }
+
+    // Live resize: every domino rescales; ones the player hasn't dragged also re-seat
+    // themselves in their slot. (Dragged ones keep their spot, just at the new size.)
+    relayoutDominoWindows() {
+        if (!this.dominoWindows) return;
+        this.dominoWindows.forEach(win => {
+            if (!win.isConnected) return;
+            const layout = this.getDominoLayout(parseInt(win.dataset.layoutIndex), parseInt(win.dataset.layoutTotal));
+            win.style.width = `${layout.width}px`;
+            win.style.height = `${layout.height}px`;
+            if (win.dataset.userMoved !== '1') {
+                win.style.left = `${layout.left}px`;
+                win.style.top = `${layout.top}px`;
+            }
+            win.dataset.slotLeft = layout.left;
+            win.dataset.slotTop = layout.top;
+        });
+    }
     createDraggableDominoWindow(domino, index) {
         // Create the window container
         const window = document.createElement('div');
@@ -4898,60 +4996,28 @@ class Game {
         // Add to the page first so we can get accurate screen dimensions
         document.body.appendChild(window);
         
-        // Calculate position for even distribution across screen width
-        const screenWidth = document.documentElement.clientWidth || document.body.clientWidth;
-        const screenHeight = document.documentElement.clientHeight || document.body.clientHeight;
-        const isMobile = screenWidth <= 900; // Mobile detection
-        const dominoWidth = isMobile ? 120 : 200; // Smaller on mobile
-        const dominoHeight = isMobile ? 60 : 100; // Smaller height on mobile
+        // Position and size come from getDominoLayout(), which scales the dominoes with
+        // the window width. The same function is re-run live on window resize.
         const totalDominoes = this.players[0].hand.length;
-        
-        let leftPosition, topPosition;
-        
-        if (isMobile) {
-            // Mobile layout: arrange dominoes in a more compact way to fit all 7 on screen
-            if (totalDominoes <= 4) {
-                // Single row for 4 or fewer dominoes
-                const totalWidth = totalDominoes * dominoWidth;
-                const spacing = Math.max(10, (screenWidth - totalWidth) / (totalDominoes + 1));
-                leftPosition = spacing + (index * (dominoWidth + spacing));
-                topPosition = screenHeight * 0.75; // Higher up on mobile
-            } else {
-                // Two rows for 5-7 dominoes
-                const dominoesPerRow = Math.ceil(totalDominoes / 2);
-                const currentRow = Math.floor(index / dominoesPerRow);
-                const positionInRow = index % dominoesPerRow;
-                const dominoesInThisRow = currentRow === 0 ? dominoesPerRow : totalDominoes - dominoesPerRow;
-                
-                // Calculate horizontal position within the row
-                const totalRowWidth = dominoesInThisRow * dominoWidth;
-                const horizontalSpacing = Math.max(5, (screenWidth - totalRowWidth) / (dominoesInThisRow + 1));
-                leftPosition = horizontalSpacing + (positionInRow * (dominoWidth + horizontalSpacing));
-                
-                // Calculate vertical position (two rows)
-                const verticalSpacing = 15; // Space between rows
-                const startingTop = screenHeight * 0.70; // Start higher for two rows
-                topPosition = startingTop + (currentRow * (dominoHeight + verticalSpacing));
-            }
-        } else {
-            // Desktop layout: single row as before
-            const totalWidth = totalDominoes * dominoWidth;
-            const spacing = Math.max(20, (screenWidth - totalWidth) / (totalDominoes + 1));
-            leftPosition = spacing + (index * (dominoWidth + spacing));
-            topPosition = screenHeight * 0.8;
-        }
+        const layout = this.getDominoLayout(index, totalDominoes);
+        const screenWidth = layout.screenWidth;
+        const isMobile = layout.isMobile;
+        const leftPosition = layout.left;
+        const topPosition = layout.top;
 
         window.style.top = `${topPosition}px`;
         window.style.left = `${leftPosition}px`;
+        window.dataset.layoutIndex = index;
+        window.dataset.layoutTotal = totalDominoes;
+        window.dataset.slotLeft = leftPosition;
+        window.dataset.slotTop = topPosition;
         
         // Set initial z-index for domino window
         window.style.zIndex = getNextDominoZIndex();
         
-        // Set explicit dimensions for mobile
-        if (isMobile) {
-            window.style.width = `${dominoWidth}px`;
-            window.style.height = `${dominoHeight}px`;
-        }
+        // Explicit dimensions (inline, so they win over the stylesheet defaults)
+        window.style.width = `${layout.width}px`;
+        window.style.height = `${layout.height}px`;
         
         // Create content area
         const content = document.createElement('div');
@@ -4959,7 +5025,7 @@ class Game {
         
         // Create domino image
         const img = document.createElement('img');
-        img.src = `../assets/img/dominoes/${domino.ends[0]}-${domino.ends[1]}.png`;
+        img.src = `assets/img/dominoes/${domino.ends[0]}-${domino.ends[1]}.png`;
         img.alt = `Domino ${domino.toString()}`;
         
         // Handle image load error
@@ -5192,6 +5258,8 @@ class Game {
                 window.style.transition = 'none';
                 
                 // Update initial position based on current mouse position and window offset
+                xOffset = parseInt(window.style.left) || 0;
+                yOffset = parseInt(window.style.top) || 0;
                 initialX = e.clientX - xOffset;
                 initialY = e.clientY - yOffset;
             }
@@ -5207,6 +5275,9 @@ class Game {
                 
                 window.style.left = `${currentX}px`;
                 window.style.top = `${currentY}px`;
+                if (Math.abs(currentX - parseFloat(window.dataset.slotLeft)) > 6 || Math.abs(currentY - parseFloat(window.dataset.slotTop)) > 6) {
+                    window.dataset.userMoved = '1';
+                }
             }
         });
         
@@ -5238,6 +5309,8 @@ class Game {
             
             const touch = e.touches[0];
             // Update initial position based on current touch position and window offset
+            xOffset = parseInt(window.style.left) || 0;
+            yOffset = parseInt(window.style.top) || 0;
             initialX = touch.clientX - xOffset;
             initialY = touch.clientY - yOffset;
         });
@@ -5254,6 +5327,9 @@ class Game {
                 
                 window.style.left = `${currentX}px`;
                 window.style.top = `${currentY}px`;
+                if (Math.abs(currentX - parseFloat(window.dataset.slotLeft)) > 6 || Math.abs(currentY - parseFloat(window.dataset.slotTop)) > 6) {
+                    window.dataset.userMoved = '1';
+                }
             }
         });
         
@@ -6095,6 +6171,7 @@ class Game {
         
         // Check for game over
         if (this.scores[0] >= 7) {
+            this.gameOver = true;
             this.updateStatus("Game Over! Team Us wins the game!");
             setTimeout(() => {
                 if (confirm("Game completed! Start a new game?")) {
@@ -6102,6 +6179,7 @@ class Game {
                 }
             }, 3000);
         } else if (this.scores[1] >= 7) {
+            this.gameOver = true;
             this.updateStatus("Game Over! Team Them wins the game!");
             setTimeout(() => {
                 if (confirm("Game completed! Start a new game?")) {
@@ -6328,7 +6406,7 @@ class Game {
         
         // Create the modal dynamically
         this.scoreboardHistoryModal = document.createElement('div');
-        this.scoreboardHistoryModal.className = 'modalContainer modalContainer--scoreboard';
+        this.scoreboardHistoryModal.className = 'ftModalContainer ftModalContainer--scoreboard';
         this.scoreboardHistoryModal.id = 'scoreboard-history-modal';
         
         // Generate random color for this modal
@@ -6384,11 +6462,11 @@ class Game {
         
         // Create modal content
         this.scoreboardHistoryModal.innerHTML = `
-            <header class="modalHeader">
-                <h2 class="modalTitle">Scorecard - Us: <span id="scorecard-us-score">${this.scores[0]}</span> Them: <span id="scorecard-them-score">${this.scores[1]}</span></h2>
+            <header class="ftModalHeader">
                 <div class="aquaButton aquaButton--scoreboard" style="background: ${complementaryColor}; box-shadow: 0px 5px 10px ${randomColor};">×</div>
+                <h2 class="ftModalTitle">Scorecard - Us: <span id="scorecard-us-score">${this.scores[0]}</span> Them: <span id="scorecard-them-score">${this.scores[1]}</span></h2>
             </header>
-            <div class="modalInnerContainer">
+            <div class="ftModalInner">
                 <div id="history-content"></div>
             </div>
         `;
@@ -6521,7 +6599,7 @@ class Game {
                         const play = playerPlays[i];
                         const mod = play.domino.modulate(hand.trump, null);
                         const dominoKey = `${mod[0]}-${mod[1]}`;
-                        display += `<span class="domino-display"><img src="../assets/img/dominoes/${dominoKey}.png" alt="${dominoKey}" class="domino-small" style="transform: none;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"><span class="domino-fallback" style="display:none;">[ ${dominoKey} ]</span></span>`;
+                        display += `<span class="domino-display"><img src="assets/img/dominoes/${dominoKey}.png" alt="${dominoKey}" class="domino-small" style="transform: none;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"><span class="domino-fallback" style="display:none;">[ ${dominoKey} ]</span></span>`;
                     } else {
                         display += '<span class="domino-display">[     ]</span>';
                     }
@@ -6602,7 +6680,7 @@ class Game {
             }
             
             // Check if the touch is on a scrollable element
-            const scrollableElement = e.target.closest('.modalInnerContainer');
+            const scrollableElement = e.target.closest('.ftModalInner');
             if (scrollableElement) {
                 // Allow scrolling on scrollable content - don't prevent default
                 return;
@@ -6628,7 +6706,7 @@ class Game {
             }
             
             // Check if the touch is on a scrollable element
-            const scrollableElement = e.target.closest('.modalInnerContainer');
+            const scrollableElement = e.target.closest('.ftModalInner');
             if (scrollableElement) {
                 // Allow scrolling on scrollable content - don't prevent default
                 return;
@@ -6661,7 +6739,7 @@ class Game {
             }
             
             // Check if the touch is on a scrollable element
-            const scrollableElement = e.target.closest('.modalInnerContainer');
+            const scrollableElement = e.target.closest('.ftModalInner');
             if (scrollableElement) {
                 // Allow scrolling on scrollable content
                 return;
@@ -6708,9 +6786,30 @@ class Game {
     }
 }
 
-// Initialize the game when the page loads
-let game;
+// ---------------------------------------------------------------------------
+// Public entry point for the main page
+// ---------------------------------------------------------------------------
+// The game is created lazily the first time the 5-5 domino button is clicked.
+// Clicking again later starts a fresh game only if there is no game in
+// progress (none yet, or the last one is over); otherwise it brings the
+// current game table back, so a stray click can't wipe a game mid-hand.
+let game = null;
 
-document.addEventListener('DOMContentLoaded', function() {
-    game = new Game();
-}); 
+window.Fortytwo = {
+    startNewGame() {
+        if (!game) {
+            game = new Game();
+        } else if (!game.gameOver) {
+            const manager = game.gameTableManager;
+            if (manager && !manager.isOpen) {
+                manager.reopenGameTableWindow();
+            } else if (manager && manager.gameTableWindow) {
+                bringWindowToFrontWithLayering(manager.gameTableWindow, 'game-window');
+            }
+            return;
+        }
+        game.startNewGame();
+    }
+};
+
+})();

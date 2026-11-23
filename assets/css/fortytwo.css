@@ -1,14 +1,5 @@
-body {
-    background-color: #e44644;
-    background-image: url(../img/background/grape.gif);
-    background-repeat: repeat;
-    background-size: 50px 50px;
-    image-rendering: smooth;
-    margin: 0;
-    padding: 0;
-    font-family: 'Courier New', monospace;
-    color: #0000ff;
-}
+/* Styles for the 42 domino game windows. Loaded by index.html alongside style.css.
+   Generic window chrome classes are prefixed (ftModal*); the close button uses the main page's .aquaButton from style.css so they never clash with the site's modals. */
 
 
 
@@ -42,8 +33,8 @@ body {
 .domino {
     display: inline-block;
     background: black;
-    border: 2px solid lime;
-    border-radius: 4px;
+    border: 1px solid lime;
+    border-radius: 0;
     padding: 8px 12px;
     margin: 2px;
     cursor: pointer;
@@ -92,8 +83,8 @@ body {
 .played-domino {
     display: inline-block;
     background: black;
-    border: 2px solid lime;
-    border-radius: 4px;
+    border: 1px solid lime;
+    border-radius: 0;
     padding: 10px 15px;
     margin: 5px;
     font-weight: bold;
@@ -108,9 +99,9 @@ body {
 .btn {
     background: black;
     color: lime;
-    border: 2px solid lime;
+    border: 1px solid lime;
     padding: 10px 20px;
-    border-radius: 4px;
+    border-radius: 0;
     cursor: pointer;
     font-size: 16px;
     margin: 5px;
@@ -149,7 +140,7 @@ body {
     padding: 8px;
     font-size: 16px;
     border: 1px solid lime;
-    border-radius: 4px;
+    border-radius: 0;
     margin-right: 10px;
     background: black;
     color: lime;
@@ -170,7 +161,7 @@ body {
     padding: 5px 10px;
     margin: 2px;
     border: 1px solid lime;
-    border-radius: 4px;
+    border-radius: 0;
     cursor: pointer;
     background: black;
     color: lime;
@@ -224,7 +215,7 @@ body {
     padding: 10px;
     border: 1px solid #333;
     background: rgba(0, 0, 0, 0.3);
-    border-radius: 4px;
+    border-radius: 0;
     min-height: 180px; /* Height for team row with content */
 }
 
@@ -247,7 +238,7 @@ body {
     padding: 10px;
     background: rgba(0, 0, 0, 0.1);
     border: 1px solid #0000ff;
-    border-radius: 4px;
+    border-radius: 0;
 }
 
 .hand-display-header {
@@ -322,28 +313,7 @@ body {
     display: none;
 }
 
-.back-link {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 1000;
-}
-
-.back-link a {
-    display: inline-block;
-    padding: 8px 16px;
-    background: black;
-    color: lime;
-    border: 1px solid lime;
-    text-decoration: none;
-    font-family: 'Courier New', monospace;
-    transition: all 0.3s ease;
-}
-
-.back-link a:hover {
-    background: lime;
-    color: black;
-} 
+ 
 
 /* Game Table Window - now in main body */
 .game-table-window {
@@ -378,7 +348,7 @@ body {
 .ready-to-start {
     background: rgba(0, 0, 0, 0.7);
     padding: 20px;
-    border: 2px solid lime;
+    border: 1px solid lime;
     margin: 15px 0;
     text-align: center;
     color: #0000ff;
@@ -389,7 +359,7 @@ body {
     margin-top: 0;
 }
 
-.modalContainer--scoreboard {
+.ftModalContainer--scoreboard {
     position: fixed;
     top: 10%;
     bottom: 10%;
@@ -399,8 +369,8 @@ body {
     box-shadow: 0px 0px 32px #ff6347;
     animation: morph 180s infinite;
     background: rgba(0, 0, 0, 0.95);
-    border: 3px solid lime;
-    border-radius: 8px;
+    border: 1px solid lime;
+    border-radius: 0;
     color: #0000ff;
     z-index: 1000;
     font-family: 'Courier New', monospace;
@@ -414,10 +384,10 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
-.modalHeader {
+.ftModalHeader {
     background: rgba(0, 0, 0, 0.8);
     padding: 10px 15px;
-    border-bottom: 2px solid lime;
+    border-bottom: 1px solid lime;
     cursor: move;
     display: flex;
     justify-content: space-between;
@@ -427,7 +397,7 @@ body {
     user-select: none;
 }
 
-.modalTitle {
+.ftModalTitle {
     width: 100%;
     text-transform: uppercase;
     text-align: center;
@@ -437,23 +407,10 @@ body {
     margin: 0;
 }
 
-.modalInnerContainer {
+.ftModalInner {
     padding: 15px;
     height: calc(100% - 60px);
     overflow-y: auto;
-}
-
-.aquaButton--scoreboard {
-    /* Use same styling as other aqua buttons - colors will be set dynamically */
-    background: #04c204; /* Default green, will be overridden by JavaScript */
-}
-
-.aquaButton--scoreboard:hover {
-    background: #12ee12;
-}
-
-.aquaButton--scoreboard:active {
-    background: #06c506;
 }
 
 .hand-history-item {
@@ -480,8 +437,8 @@ body {
     width: 900px;
     height: 700px;
     background: rgba(0, 0, 0, 0.95);
-    border: 3px solid lime;
-    border-radius: 8px;
+    border: 1px solid lime;
+    border-radius: 0;
     z-index: 1000;
     font-family: 'Courier New', monospace;
     color: #0000ff;
@@ -496,7 +453,7 @@ body {
 }
 
 /* Collected Tricks Modal Container */
-.modalContainer--collectedTricks {
+.ftModalContainer--collectedTricks {
     position: fixed;
     top: 10%;
     left: 10%;
@@ -509,8 +466,8 @@ body {
     box-shadow: 0px 0px 32px #ff6347;
     animation: morph 180s infinite;
     background: rgba(0, 0, 0, 0.95);
-    border: 3px solid lime;
-    border-radius: 8px;
+    border: 1px solid lime;
+    border-radius: 0;
     color: #0000ff;
     z-index: 1000;
     font-family: 'Courier New', monospace;
@@ -550,17 +507,17 @@ body {
 }
 
 /* Hide hand display headers in the scorecard modal */
-.modalContainer--scoreboard .hand-display-header {
+.ftModalContainer--scoreboard .hand-display-header {
     display: none;
 }
 
 /* Hide hand display headers in the collected tricks modal */
-.modalContainer--collectedTricks .hand-display-header {
+.ftModalContainer--collectedTricks .hand-display-header {
     display: none;
 }
 
 /* Collected tricks modal specific styling */
-.modalContainer--collectedTricks .modalInnerContainer {
+.ftModalContainer--collectedTricks .ftModalInner {
     height: auto;
     display: flex;
     flex-direction: column;
@@ -573,7 +530,7 @@ body {
     padding: 10px;
     background: rgba(0, 0, 0, 0.1);
     border: 1px solid #0000ff;
-    border-radius: 4px;
+    border-radius: 0;
 }
 
 .hand-display-header {
@@ -647,8 +604,8 @@ body {
     width: 570px;
     height: 700px;
     background: rgba(0, 0, 0, 0.95);
-    border: 3px solid lime;
-    border-radius: 8px;
+    border: 1px solid lime;
+    border-radius: 0;
     z-index: 1000;
     font-family: 'Courier New', monospace;
     color: #0000ff;
@@ -664,82 +621,11 @@ body {
 
 
 
-/* Base aqua button styles to match index.html */
-.aquaButton {
-    width: 1.5rem;
-    height: 1.5rem;
-    display: inline-block;
-    position: absolute;
-    left: 1rem;
-    border-radius: 50%;
-    text-align: center;
-    font-weight: bold;
-    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
-    transition: all 0.2s ease-in-out;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    border: none;
-    outline: none;
-    /* Ensure proper touch handling */
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    /* Prevent text selection */
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    /* Ensure proper z-index */
-    z-index: 10001;
-}
-
-.aquaButton::after {
-    content: "";
-    position: absolute;
-    background: linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 0.8) 0%,
-        rgba(255, 255, 255, 0.1) 100%
-    );
-    top: 1px;
-    z-index: 1;
-    left: 15%;
-    right: 15%;
-    height: 60%;
-    border-radius: 50%;
-}
-
-.aquaButton::before {
-    content: "";
-    position: absolute;
-    background: #ffffff;
-    bottom: 5%;
-    left: 5%;
-    right: 5%;
-    height: 50%;
-    border-radius: 9999px;
-    filter: blur(6px);
-    mix-blend-mode: overlay;
-    z-index: 2;
-}
-
-.aquaButton:hover {
-    transform: translateY(-2px);
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
-    cursor: pointer;
-}
-
-.aquaButton:active {
-    transform: translateY(-1px);
-    box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-}
-
 /* Modal header styles to match index.html */
-.modalHeader {
+.ftModalHeader {
     background: rgba(0, 0, 0, 0.8);
     padding: 10px 15px;
-    border-bottom: 2px solid lime;
+    border-bottom: 1px solid lime;
     cursor: move;
     display: flex;
     justify-content: space-between;
@@ -749,11 +635,11 @@ body {
     user-select: none;
 }
 
-.modalHeader:hover {
+.ftModalHeader:hover {
     cursor: move;
 }
 
-.modalTitle {
+.ftModalTitle {
     width: 100%;
     text-transform: uppercase;
     text-align: center;
@@ -767,8 +653,8 @@ body {
 .role-slot {
     position: relative;
     background: rgba(0, 0, 0, 0.7);
-    border: 2px solid lime;
-    border-radius: 6px;
+    border: 1px solid lime;
+    border-radius: 0;
     padding: 10px;
     display: flex;
     flex-direction: column;
@@ -785,7 +671,7 @@ body {
     background: rgba(0, 255, 0, 0.9);
     color: black;
     padding: 2px 6px;
-    border-radius: 3px;
+    border-radius: 0;
     font-size: 10px;
     font-weight: bold;
     z-index: 10;
@@ -813,7 +699,7 @@ body {
     font-size: 14px;
     cursor: pointer;
     padding: 4px 12px;
-    border-radius: 4px;
+    border-radius: 0;
     transition: all 0.3s ease;
     margin-right: 10px;
 }
@@ -830,7 +716,7 @@ body {
     font-size: 14px;
     cursor: pointer;
     padding: 4px 12px;
-    border-radius: 4px;
+    border-radius: 0;
     transition: all 0.3s ease;
     margin-right: 10px;
 }
@@ -845,15 +731,6 @@ body {
 #scorecard-them-score {
     color: lime;
     font-weight: bold;
-}
-
-/* Aqua button styles for game table */
-.aquaButton--gameTable:hover {
-    filter: brightness(1.2);
-}
-
-.aquaButton--gameTable:active {
-    filter: brightness(0.9);
 }
 
 .game-table-content {
@@ -876,8 +753,8 @@ body {
 /* Player hand in game table window */
 .game-table-content .player-hand {
     background: rgba(0, 0, 0, 0.8);
-    border: 2px solid lime;
-    border-radius: 6px;
+    border: 1px solid lime;
+    border-radius: 0;
     padding: 10px;
     margin-top: 10px;
     flex-shrink: 0;
@@ -909,8 +786,8 @@ body {
 
 .player-slot {
     background: rgba(0, 0, 0, 0.7);
-    border: 2px solid lime;
-    border-radius: 6px;
+    border: 1px solid lime;
+    border-radius: 0;
     padding: 15px;
     display: flex;
     flex-direction: column;
@@ -945,7 +822,7 @@ body {
     font-weight: bold;
     padding: 2px 6px;
     background: rgba(0, 255, 0, 0.2);
-    border-radius: 3px;
+    border-radius: 0;
 }
 
 .player-slot-content {
@@ -1059,7 +936,7 @@ body {
 .player-status-message {
     padding: 4px 8px;
     margin: 2px 0;
-    border-radius: 3px;
+    border-radius: 0;
     font-size: 11px;
     word-wrap: break-word;
 }
@@ -1092,7 +969,7 @@ body {
     padding: 8px;
     background: rgba(0, 0, 0, 0.5);
     border: 1px solid lime;
-    border-radius: 4px;
+    border-radius: 0;
     width: 100%;
     box-sizing: border-box;
     overflow: hidden;
@@ -1110,7 +987,7 @@ body {
     padding: 4px 6px;
     font-size: 16px; /* Increased from 12px */
     border: 1px solid lime;
-    border-radius: 3px;
+    border-radius: 0;
     background: black;
     color: lime;
     font-family: 'Courier New', monospace;
@@ -1129,7 +1006,7 @@ body {
     color: lime;
     border: 1px solid lime;
     padding: 4px 8px;
-    border-radius: 3px;
+    border-radius: 0;
     cursor: pointer;
     font-size: 11px;
     font-family: 'Courier New', monospace;
@@ -1155,7 +1032,7 @@ body {
     padding: 8px;
     background: rgba(0, 0, 0, 0.5);
     border: 1px solid lime;
-    border-radius: 4px;
+    border-radius: 0;
     width: 100%;
     box-sizing: border-box;
     overflow: hidden;
@@ -1189,7 +1066,7 @@ body {
     user-select: none;
     border: 1px solid lime;
     padding: 3px 6px;
-    border-radius: 3px;
+    border-radius: 0;
     cursor: pointer;
     font-size: 10px;
     font-family: 'Courier New', monospace;
@@ -1212,7 +1089,7 @@ body {
     color: lime;
     border: 1px solid lime;
     padding: 4px 8px;
-    border-radius: 3px;
+    border-radius: 0;
     cursor: pointer;
     font-size: 11px;
     font-family: 'Courier New', monospace;
@@ -1250,9 +1127,9 @@ body {
 .game-table-reopen-btn {
     background: black;
     color: lime;
-    border: 2px solid lime;
+    border: 1px solid lime;
     padding: 10px 20px;
-    border-radius: 6px;
+    border-radius: 0;
     cursor: pointer;
     font-size: 14px;
     font-family: 'Courier New', monospace;
@@ -1272,9 +1149,9 @@ body {
 .hand-scoreboard-reopen-btn {
     background: black;
     color: lime;
-    border: 2px solid lime;
+    border: 1px solid lime;
     padding: 10px 20px;
-    border-radius: 6px;
+    border-radius: 0;
     cursor: pointer;
     font-size: 14px;
     font-family: 'Courier New', monospace;
@@ -1294,9 +1171,9 @@ body {
 .history-btn {
     background: black;
     color: lime;
-    border: 2px solid lime;
+    border: 1px solid lime;
     padding: 10px 20px;
-    border-radius: 6px;
+    border-radius: 0;
     cursor: pointer;
     font-size: 14px;
     font-family: 'Courier New', monospace;
@@ -1398,12 +1275,12 @@ body {
         min-height: 44px;
     }
     
-    .modalContainer--scoreboard {
+    .ftModalContainer--scoreboard {
         width: 95vw !important;
         height: 500px !important;
     }
     
-    .modalContainer--collectedTricks {
+    .ftModalContainer--collectedTricks {
         min-width: 95vw !important;
         min-height: 60vh !important;
         max-width: 95vw !important;
@@ -1420,86 +1297,20 @@ body {
         min-height: 140px !important; /* Reduced for mobile */
     }
     
-    .modalHeader {
+    .ftModalHeader {
         min-height: 50px;
         padding: 12px 15px;
     }
     
-    .modalTitle {
+    .ftModalTitle {
         font-size: 16px;
     }
     
-    .aquaButton--gameTable {
-        min-width: 44px;
-        min-height: 44px;
-        font-size: 20px;
-        /* Ensure proper touch handling */
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
-        /* Prevent text selection */
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        /* Better touch feedback */
-        transition: all 0.15s ease;
-        /* Ensure proper z-index */
-        z-index: 10001;
-        position: relative;
-    }
     
-    .aquaButton--gameTable:active {
-        transform: scale(0.95);
-        opacity: 0.8;
-    }
     
-    .aquaButton--scoreboard {
-        min-width: 44px;
-        min-height: 44px;
-        font-size: 20px;
-        /* Ensure proper touch handling */
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
-        /* Prevent text selection */
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        /* Better touch feedback */
-        transition: all 0.15s ease;
-        /* Ensure proper z-index */
-        z-index: 10001;
-        position: relative;
-    }
     
-    .aquaButton--scoreboard:active {
-        transform: scale(0.95);
-        opacity: 0.8;
-    }
     
-    .aquaButton--gameTable {
-        min-width: 44px;
-        min-height: 44px;
-        font-size: 20px;
-        /* Ensure proper touch handling */
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
-        /* Prevent text selection */
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        /* Better touch feedback */
-        transition: all 0.15s ease;
-        /* Ensure proper z-index */
-        z-index: 10001;
-        position: relative;
-    }
     
-    .aquaButton--gameTable:active {
-        transform: scale(0.95);
-        opacity: 0.8;
-    }
     
     .game-table-play-next-trick-btn {
         min-width: 44px;
@@ -1523,8 +1334,7 @@ body {
     
     /* Domino Window Styles for Mobile */
     .domino-window {
-        width: 150px;
-        height: 75px;
+        /* size is set inline by fortytwo.js (full size until the screen is phone-sized) */
         transition: all 0.3s ease, transform 0.2s ease;
         transform-origin: center center;
         --domino-rotation: 0deg;
@@ -1605,10 +1415,7 @@ body {
 
 /* Improved mobile responsiveness for domino windows */
 @media (max-width: 768px) {
-    .domino-window {
-        width: 120px !important;
-        height: 60px !important;
-    }
+    /* .domino-window size: set inline by fortytwo.js, see createDraggableDominoWindow */
     
     .domino-window img {
         max-width: 100%;
@@ -1637,8 +1444,8 @@ body {
     /* Enhanced mobile accessibility for bidding prompt */
     .player-bid-input-area {
         background: rgba(0, 0, 0, 0.9) !important; /* Darker background for better visibility */
-        border: 2px solid lime !important; /* More prominent border */
-        border-radius: 8px !important;
+        border: 1px solid lime !important; /* More prominent border */
+        border-radius: 0 !important;
         padding: 15px !important;
         margin: 10px 0 !important;
         min-height: 120px; /* Ensure enough space */
@@ -1658,8 +1465,8 @@ body {
         min-height: 50px !important; /* Better touch target */
         width: 100% !important;
         box-sizing: border-box !important;
-        border: 2px solid lime !important;
-        border-radius: 6px !important;
+        border: 1px solid lime !important;
+        border-radius: 0 !important;
         background: black !important;
         color: lime !important;
         text-align: center !important;
@@ -1683,8 +1490,8 @@ body {
         -webkit-tap-highlight-color: rgba(0,255,0,0.2);
         position: relative;
         z-index: 10;
-        border: 2px solid lime !important;
-        border-radius: 6px !important;
+        border: 1px solid lime !important;
+        border-radius: 0 !important;
         background: black !important;
         color: lime !important;
         font-weight: bold !important;
@@ -1729,8 +1536,8 @@ body {
      /* Enhanced mobile accessibility for trump selection */
      .player-trump-selection-area {
          background: rgba(0, 0, 0, 0.9) !important;
-         border: 2px solid lime !important;
-         border-radius: 8px !important;
+         border: 1px solid lime !important;
+         border-radius: 0 !important;
          padding: 15px !important;
          margin: 10px 0 !important;
      }
@@ -1755,8 +1562,8 @@ body {
          font-size: 14px !important;
          padding: 12px 8px !important;
          min-height: 44px !important;
-         border: 2px solid lime !important;
-         border-radius: 6px !important;
+         border: 1px solid lime !important;
+         border-radius: 0 !important;
          background: black !important;
          color: lime !important;
          text-align: center !important;
@@ -1784,8 +1591,8 @@ body {
          padding: 12px 20px !important;
          min-height: 50px !important;
          width: 100% !important;
-         border: 2px solid lime !important;
-         border-radius: 6px !important;
+         border: 1px solid lime !important;
+         border-radius: 0 !important;
          background: black !important;
          color: lime !important;
          font-weight: bold !important;
@@ -1818,12 +1625,12 @@ body {
     }
     
     /* Hide hand display headers in the scorecard modal on mobile */
-    .modalContainer--scoreboard .hand-display-header {
+    .ftModalContainer--scoreboard .hand-display-header {
         display: none !important;
     }
     
     /* Hide hand display headers in the collected tricks modal on mobile */
-    .modalContainer--collectedTricks .hand-display-header {
+    .ftModalContainer--collectedTricks .hand-display-header {
         display: none !important;
     }
     
@@ -1967,4 +1774,93 @@ body {
     .team-tricks {
         max-height: 200px !important;
     }
+}
+
+/* Narrow phones (<= 430px): the game table is sized to the screen instead of a fixed 400px minimum,
+   and its four player slots share the width. */
+@media (max-width: 430px) {
+    .game-table-window {
+        width: 96vw;
+        min-width: 0;
+        left: 2vw !important;
+    }
+
+    .game-table-grid {
+        gap: 4px;
+    }
+
+    .role-slot,
+    .player-slot,
+    .role-slot .player-slot {
+        width: auto;
+        max-width: none;
+        min-width: 0;
+    }
+
+    .game-table-content {
+        padding: 8px;
+    }
+}
+
+/* ==========================================================================
+   Match the main page: 1px lime outlines with square corners (done above),
+   one body font, and logo-style headers that stay lime.
+   ========================================================================== */
+
+/* One font for the game's text: the same Courier New the main page modals use */
+.game-table-window,
+.game-table-window *,
+.ftModalContainer--scoreboard,
+.ftModalContainer--scoreboard *,
+.ftModalContainer--collectedTricks,
+.ftModalContainer--collectedTricks * {
+    font-family: "Courier New", monospace;
+}
+
+/* Window headers: the LAND BUOY logo style (bold, italic, caps), lime, in an outlined box
+   like the main page's modal headers */
+.ftModalHeader {
+    background: transparent;
+    border: 1px solid lime;
+    min-height: 3rem;
+    box-sizing: border-box;
+}
+
+.ftModalTitle,
+.game-table-title {
+    font-family: "MingLiU", serif;
+    font-style: italic;
+    font-stretch: ultra-expanded;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: lime;
+    line-height: 1.1;
+    font-size: 1.1rem;
+    min-width: 0;
+}
+
+/* The buttons in the footer box look like the main page's nav buttons */
+.hand-scoreboard-reopen-btn,
+.game-table-reopen-btn,
+.history-btn {
+    background: black;
+    color: lime;
+    border: 1px solid lime;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0.25rem 0.75rem;
+    min-height: 0;
+    min-width: 0;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: normal;
+}
+
+.hand-scoreboard-reopen-btn:hover,
+.game-table-reopen-btn:hover,
+.history-btn:hover {
+    background: lime;
+    color: black;
+    transform: none;
+    box-shadow: none;
 }

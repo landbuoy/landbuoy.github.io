@@ -33,6 +33,42 @@ $(document).ready(function () {
     $(".modalContainer--resume").fadeIn().css("zIndex", "9999");
     fitModalTitles();
   });
+  // 42 domino game: the 5-5 domino starts a new game and opens the game table.
+  // fortytwo.css / fortytwo.js are only fetched the first time it is clicked.
+  var fortytwoLoading = null;
+  function loadFortytwo() {
+    if (window.Fortytwo) {
+      return $.Deferred().resolve().promise();
+    }
+    if (!fortytwoLoading) {
+      $("head").append(
+        '<link rel="stylesheet" type="text/css" href="assets/css/fortytwo.css" />'
+      );
+      // A plain <script> tag (not $.ajax) so this also works when index.html is
+      // opened straight from disk (file://), where XHR is blocked.
+      var loaded = $.Deferred();
+      var script = document.createElement("script");
+      script.src = "assets/js/fortytwo.js";
+      script.onload = function () {
+        loaded.resolve();
+      };
+      script.onerror = function () {
+        fortytwoLoading = null;
+        loaded.reject();
+      };
+      document.head.appendChild(script);
+      fortytwoLoading = loaded.promise();
+    }
+    return fortytwoLoading;
+  }
+  $(".button--fortytwo").on("click keydown", function (e) {
+    if (e.type === "keydown" && e.which !== 13 && e.which !== 32) return;
+    e.preventDefault();
+    loadFortytwo().done(function () {
+      window.Fortytwo.startNewGame();
+    });
+  });
+
   // Color data modal
   $(".button--colordata").click(function () {
     $(".modalContainer").css("zIndex", "0");
@@ -157,6 +193,9 @@ $(document).ready(function () {
 
     // The Bandcamp modals' shifting background cycle starts at the inverted color
     document.documentElement.style.setProperty("--morph-start", c2);
+
+    // CV button text uses the page background color so it reads on the inverted fill
+    document.documentElement.style.setProperty("--page-bg", c1);
 
     // Color data button: an icon filled with the inverted color
     $(".button--colordata").css("background-color", c2);

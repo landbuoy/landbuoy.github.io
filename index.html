@@ -38,24 +38,37 @@
   <div class="mainContainer">
     <!-- Title Bar -->
     <div class="titleBar">
-      <div class="logoContainer">
-        <div class="logoContainer__inner">
-          LAND BUOY
-        </div>
-      </div>
-    </div>
-    
-    <!-- Navigation -->
-    <nav class="nav">
-      <div class="button button--resume">
-        Max Coker CV
-      </div>
       <div
         class="button--colordata"
         role="button"
         title="Color data"
         aria-label="Color data"
       ></div>
+      <div class="logoContainer">
+        <div class="logoContainer__inner">
+          LAND BUOY
+        </div>
+      </div>
+      <div class="button button--resume">
+        Max Coker CV
+      </div>
+    </div>
+    
+    <!-- Navigation -->
+    <nav class="nav">
+      <div
+        class="button--fortytwo"
+        role="button"
+        tabindex="0"
+        title="Start new game of 42"
+        aria-label="Start new game of 42"
+      >
+        <img
+          src="assets/img/dominoes/reverse.png"
+          alt="Start new game of 42"
+        />
+        <span class="button--fortytwo__label">Play 42</span>
+      </div>
       <a class="button--videogallery" href="videoFeedback.html">
         <img
           src="assets/img/project icons/mossComposites/marchComp3-6.gif"
@@ -66,12 +79,6 @@
         <img
           src="assets/img/gifs/grass.gif"
           alt="Video Compositing with TouchDesigner Systems"
-        />
-      </a>
-      <a class="button--fortytwo" href="pages/fortytwo.html">
-        <img
-          src="assets/img/dominoes/5-5.png"
-          alt="42 Domino Game"
         />
       </a>
       <div class="glyph glyph--uploadIThought">
@@ -103,7 +110,10 @@
           <span class="c5">Max Coker</span>
         </p>
         <p class="c0">
-          <span class="c9">instagram: @maks_oker</span>
+          <span class="c9">instagram: </span>
+          <span class="c3">
+            <a class="c4" href="https://www.instagram.com/maskoker/" target="_blank" rel="noopener noreferrer">@maskoker</a>
+          </span>
         </p>
         <p class="c0">
           <span class="c9">email: </span>
@@ -399,6 +409,10 @@
     </div>
 
   </div>
+
+  <!-- Footer box: the 42 game puts its buttons here (Collected Tricks, Scorecard,
+       Game Table). It stays hidden until the game adds a button. -->
+  <div class="footer" id="window-controls-container" style="display: none"></div>
 
   <script type="text/javascript" src="assets/js/scripts.js"></script>
   <script type="text/javascript" src="assets/js/hausaufgabe.js"></script>
