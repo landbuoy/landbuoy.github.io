@@ -3438,9 +3438,17 @@ class Player {
         const suit = domino.getSuit(trump);
         const degree = domino.getDegree(trump);
         
+        // The double of this suit (e.g. 5-5 when leading 5-3) beats every other domino of the suit.
+        // If it hasn't been played and isn't in our own hand, it's still a threat.
+        const suitDouble = new Domino(suit, suit);
+        if (!this.hasDominoBeenPlayed(suitDouble) &&
+            !this.hand.some(h => h.toString() === suitDouble.toString())) {
+            return false;
+        }
+        
         // Check all possible dominoes of this suit with higher degree
         for (let d = 6; d > degree; d--) {
-            if (d === suit) continue; // skip double
+            if (d === suit) continue; // double already handled above
             const higherDomino = new Domino(suit, d);
             if (!this.hasDominoBeenPlayed(higherDomino)) {
                 // Higher domino is still out there - not safe to lead
