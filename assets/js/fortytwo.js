@@ -2480,10 +2480,10 @@ class Player {
     isCountDomino(domino) {
         // Count dominoes: any domino that adds up to 5 or 10 (5-0, 1-4, 2-3, 4-6, 5-5)
         // This includes trumps that are count dominoes
-        const countDominoes = new Set([
-            [5, 5], [4, 6], [6, 4], [0, 5], [5, 0], [1, 4], [4, 1], [2, 3], [3, 2]
-        ]);
-        return countDominoes.has(JSON.stringify(domino.ends));
+        // (Compare by sum: a Set of arrays can never match a JSON string, which previously
+        // made this always return false so bots never protected count.)
+        const sum = domino.ends[0] + domino.ends[1];
+        return sum === 5 || sum === 10;
     }
     
     isCatchableDouble(domino) {
@@ -3392,19 +3392,27 @@ class Player {
     }
     
     // Helper method to check if a higher trump is still out there
+    // `degree` is the getDegree() of the trump we hold. The trump double outranks every other
+    // trump (and is the only trump whose degree equals the trump suit). A trump is only "out there"
+    // if it has not been played and is not in our own hand.
     isHigherTrumpOutThere(trump, degree) {
-        // Check if any domino with higher trump degree has been played
-        const higherTrumpDominoes = [
-            [trump, 6], [trump, 5], [trump, 4], [trump, 3], [trump, 2], [trump, 1], [trump, 0]
-        ];
+        // Holding the trump double: nothing can be higher
+        if (degree === trump) {
+            return false;
+        }
         
-        for (const [a, b] of higherTrumpDominoes) {
-            const dominoKey = JSON.stringify([a, b]);
-            const hasBeenPlayed = this.game.playedDominoesThisHand.some(entry => 
-                entry.domino.toString() === dominoKey
-            );
-            if (!hasBeenPlayed) {
-                // This higher trump is still out there
+        const isAccountedFor = (domino) => this.hasDominoBeenPlayed(domino) ||
+            this.hand.some(h => h.toString() === domino.toString());
+        
+        // The trump double beats every other trump
+        if (!isAccountedFor(new Domino(trump, trump))) {
+            return true;
+        }
+        
+        // Any trump with a higher degree than ours
+        for (let d = 6; d > degree; d--) {
+            if (d === trump) continue; // double handled above
+            if (!isAccountedFor(new Domino(trump, d))) {
                 return true;
             }
         }
@@ -3413,11 +3421,9 @@ class Player {
     
     // Helper method to check if trump double is still out there
     isTrumpDoubleOutThere(trump) {
-        const trumpDoubleKey = JSON.stringify([trump, trump]);
-        const hasBeenPlayed = this.game.playedDominoesThisHand.some(entry => 
-            entry.domino.toString() === trumpDoubleKey
-        );
-        return !hasBeenPlayed;
+        const trumpDouble = new Domino(trump, trump);
+        return !this.hasDominoBeenPlayed(trumpDouble) &&
+            !this.hand.some(h => h.toString() === trumpDouble.toString());
     }
     
     // Helper method to check if a specific domino has been played
