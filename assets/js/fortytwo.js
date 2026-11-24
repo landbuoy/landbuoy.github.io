@@ -2188,6 +2188,13 @@ const PlayerRole = {
     SETTER2: 'SETTER2'      // Second opponent trying to prevent bid
 };
 
+// Bidding model constants (see Player.estimateBidPoints / Game.makeAIBid)
+const BID_MIN = 30;                       // lowest legal bid; also what a stuck dealer gets
+const BID_POINT_SCALE = 1.12;             // calibration: about 1 in 3 random hands is worth a bid of 30+
+const BID_DEFAULT_PARTNER_POINTS = 10;    // partner's expected points when we know nothing about them
+const BID_PARTNER_PASSED_POINTS = 4;      // partner passed: probably a weak hand
+const BID_PARTNER_BID_POINTS = 14;        // partner bid: probably a strong hand
+
 // Domino class
 class Domino {
     constructor(a, b) {
@@ -2540,291 +2547,145 @@ class Player {
         return this.hand;
     }
     
-    evaluateBidConfidence() {
-        const suitCount = new Counter();
-        const doubles = [];
-        const dominoBySuit = new DefaultDict(() => []);
-        const hand = this.hand.map(d => d.ends);
+    // Estimate how many points (out of 42) this hand can expect to take if `trump` is called.
+    // Uses ONLY this player's own hand: every domino not in hand is simply "unseen".
+    //   points = expected tricks (1 each) + count this hand expects to capture
+    //            + the count the other players' dominoes add to each trick we win.
+    // Partner's contribution is added separately by the bidding code (it depends on the bidding so far).
+    estimateBidPoints(trump) {
+        const mine = new Set(this.hand.map(d => d.toString()));
+        const isUnseen = (a, b) => !mine.has(new Domino(a, b).toString());
+        const countValue = (d) => {
+            const sum = d.ends[0] + d.ends[1];
+            return (sum === 5 || sum === 10) ? sum : 0; // 5-0, 4-1, 3-2 = 5; 5-5, 6-4 = 10
+        };
         
-        for (const [a, b] of hand) {
-            suitCount.increment(a);
-            suitCount.increment(b);
-            if (a === b) {
-                doubles.push([a, b]);
-            }
-            dominoBySuit.get(a).push([a, b]);
-            if (a !== b) {
-                dominoBySuit.get(b).push([a, b]);
-            }
+        // --- Trump tricks ---
+        // Trump ranking: double, then (trump-6 ... trump-0). Each unseen trump above one of ours
+        // is a chance for that trump to lose. (Partner may hold some, so each is only ~half a threat.)
+        const trumpOrder = [new Domino(trump, trump)];
+        for (let d = 6; d >= 0; d--) {
+            if (d !== trump) trumpOrder.push(new Domino(trump, d));
         }
-        const handSet = new Set(hand.map(h => JSON.stringify(h)));
-        
-        // --- Enhanced suit scoring logic with modality consideration ---
-        const suitScores = {};
-        for (let suit = 0; suit < 7; suit++) {
-            // Never pick 5's as trump unless 5-5 is in hand
-            if (suit === 5 && !handSet.has(JSON.stringify([5, 5]))) {
-                suitScores[suit] = 0;
-                continue;
-            }
-            
-            // Calculate potential trumps for this candidate suit
-            const potentialTrumps = []; // Dominoes that would become trumps if this suit is chosen
-            const potentialTrumpPlays = []; // Off dominoes that could be played as trumps when needed
-            
-            for (const domino of this.hand) {
-                if (domino.isDouble() && domino.ends[0] === suit) {
-                    // This double would become the trump double
-                    potentialTrumps.push(domino);
-                } else if (domino.ends.includes(suit)) {
-                    // This domino would become a trump if this suit is chosen
-                    potentialTrumps.push(domino);
-                    if (!domino.isDouble()) {
-                        // Off dominoes that could be played as trumps when needed
-                        potentialTrumpPlays.push(domino);
-                    }
-                }
-            }
-            
-            // Count potential trumps by type
-            const potentialTrumpDoubles = potentialTrumps.filter(d => d.isDouble());
-            const potentialTrumpNonDoubles = potentialTrumps.filter(d => !d.isDouble());
-            const potentialTrumpCount = potentialTrumpPlays.length;
-            
-            // Base score: number of potential trumps for this suit
-            let score = potentialTrumps.length;
-            
-            // Bonus for potential trump double
-            if (potentialTrumpDoubles.length > 0) {
-                score += 3;
-            }
-            
-            // Bonus for high potential trump dominoes
-            if (potentialTrumpNonDoubles.length > 0) {
-                const highestTrump = Math.max(...potentialTrumpNonDoubles.map(d => d.getDegree(suit)));
-                score += highestTrump * 0.5; // Higher trump degree = better
-            }
-            
-            // Bonus for potential trump plays (off dominoes that could be played as trumps when needed)
-            // Higher quality potential trump plays are more valuable
-            let potentialTrumpBonus = 0;
-            for (const potentialTrumpPlay of potentialTrumpPlays) {
-                const otherEnd = potentialTrumpPlay.ends[0] === suit ? potentialTrumpPlay.ends[1] : potentialTrumpPlay.ends[0];
-                // Higher other end = more valuable potential trump play
-                potentialTrumpBonus += otherEnd * 0.1; // 6-4 = 0.4, 6-3 = 0.3, etc.
-            }
-            score += potentialTrumpBonus;
-            
-            // Check for three highest dominoes in suit (excluding double)
-            const nonDoubleDominoes = hand.filter(d => d.includes(suit) && !(d[0] === suit && d[1] === suit));
-            if (nonDoubleDominoes.length > 0) {
-                const allPossible = [];
-                for (let x = 0; x < 7; x++) {
-                    if (x !== suit) {
-                        allPossible.push(suit < x ? [suit, x] : [x, suit]);
-                    }
-                }
-                allPossible.sort((a, b) => Math.max(b[0], b[1]) - Math.max(a[0], a[1]));
-                const threeHighestPossible = allPossible.slice(0, 3);
-                const hasThreeHighest = threeHighestPossible.every(d => 
-                    nonDoubleDominoes.some(nd => 
-                        (nd[0] === d[0] && nd[1] === d[1]) || (nd[0] === d[1] && nd[1] === d[0])
-                    )
-                );
-                if (hasThreeHighest) {
-                    score += 2;
-                }
-            }
-            
-            // Count other doubles (not the trump double)
-            const otherDoubles = doubles.filter(d => d[0] !== suit);
-            score += otherDoubles.length * 0.5;
-            
-            // Penalize 5-offs if 5-5 not in hand
-            const fiveOffs = hand.filter(d => d.includes(5) && !d.includes(suit) && !handSet.has(JSON.stringify([5, 5])));
-            score -= fiveOffs.length * 0.5;
-            
-            suitScores[suit] = score;
-        }
-        
-        // Pick best suit
-        const maxScore = Math.max(...Object.values(suitScores));
-        const bestSuits = Object.keys(suitScores).filter(s => suitScores[s] === maxScore);
-        const trump = bestSuits.length > 0 ? Math.min(...bestSuits.map(s => parseInt(s))) : null;
-        
-        // Find strongest domino in trump
-        let strongest = null;
-        if (trump !== null) {
-            const trumpDominoes = this.hand.filter(d => d.isTrump(trump));
-            if (trumpDominoes.length > 0) {
-                // Find the strongest trump (double first, then highest degree)
-                const trumpDoubles = trumpDominoes.filter(d => d.isDouble());
-                if (trumpDoubles.length > 0) {
-                    strongest = trumpDoubles[0];
-                } else {
-                    strongest = trumpDominoes.reduce((max, d) => 
-                        d.getDegree(trump) > max.getDegree(trump) ? d : max
-                    );
-                }
-            }
-        }
-        
-        // Calculate confidence based on actual trump strength
-        let confidence = 0;
-        if (trump !== null) {
-            // Count potential trumps for the chosen trump suit
-            const potentialTrumps = this.hand.filter(d => d.isTrump(trump));
-            const trumpCount = potentialTrumps.length;
-            
-            // Count all doubles in hand (separate consideration for bidding strength)
-            const doubleCount = doubles.length;
-            
-            // Count offs (dominoes that are not trumps or doubles)
-            const offs = this.hand.filter(d => !d.isTrump(trump) && !d.isDouble()).length;
-            
-            // Check if we have the trump double
-            const hasTrumpDouble = this.hand.some(d => d.isDouble() && d.isTrump(trump));
-            
-            // Check for three highest potential trump dominoes (excluding double)
-            const nonDoubleTrumps = potentialTrumps.filter(d => !d.isDouble());
-            let hasThreeHighest = false;
-            if (nonDoubleTrumps.length > 0) {
-                const allPossibleTrumps = [];
-                for (let x = 0; x < 7; x++) {
-                    if (x !== trump) {
-                        allPossibleTrumps.push(trump < x ? [trump, x] : [x, trump]);
-                    }
-                }
-                allPossibleTrumps.sort((a, b) => Math.max(b[0], b[1]) - Math.max(a[0], a[1]));
-                const threeHighestPossible = allPossibleTrumps.slice(0, 3);
-                hasThreeHighest = threeHighestPossible.every(d => 
-                    nonDoubleTrumps.some(nd => 
-                        (nd.ends[0] === d[0] && nd.ends[1] === d[1]) || (nd.ends[0] === d[1] && nd.ends[1] === d[0])
-                    )
-                );
-            }
-            
-            // Count count offs - dominoes with 4, 5, or 6 that could be captured by doubles
-            // These are dominoes that contain 4, 5, or 6 but are not trumps and not doubles
-            let countOffs = 0;
-            let countOffsProtected = 0; // Count dominoes that are protected by doubles
-            for (const d of this.hand) {
-                if (!d.isTrump(trump) && !d.isDouble()) {
-                    // Check if this domino contains 4, 5, or 6 (could be captured by 5-5 or 4-6)
-                    if (d.ends.includes(4) || d.ends.includes(5) || d.ends.includes(6)) {
-                        countOffs++;
-                        // Check if this count domino is protected by a double
-                        const hasProtectingDouble = this.hand.some(double => 
-                            double.isDouble() && (double.ends[0] === 4 || double.ends[0] === 5 || double.ends[0] === 6)
-                        );
-                        if (hasProtectingDouble) {
-                            countOffsProtected++;
-                        }
-                    }
-                }
-            }
-            
-            // Count count dominoes in trump suit
-            const trumpCountDominoes = potentialTrumps.filter(d => this.isCountDomino(d));
-            const trumpCountValue = trumpCountDominoes.reduce((total, d) => {
-                const [a, b] = d.ends.slice().sort((x, y) => x - y);
-                if ((a === 5 && b === 5) || (a === 4 && b === 6)) {
-                    return total + 10; // 10-count dominoes
-                } else {
-                    return total + 5;  // 5-count dominoes
-                }
-            }, 0);
-            
-            // Calculate confidence based on refined requirements
-            if (hasTrumpDouble) {
-                // With trump double - more nuanced scoring
-                let baseConfidence = 0;
-                
-                // Base confidence from trump count
-                if (trumpCount >= 3) baseConfidence = 1;
-                if (trumpCount >= 4) baseConfidence = 2;
-                if (trumpCount >= 5) baseConfidence = 3;
-                if (trumpCount >= 6) baseConfidence = 4;
-                
-                // Bonus for good double count
-                if (doubleCount >= 2) baseConfidence += 1;
-                if (doubleCount >= 3) baseConfidence += 1;
-                
-                // Bonus for count value in trump
-                if (trumpCountValue >= 10) baseConfidence += 1;
-                if (trumpCountValue >= 20) baseConfidence += 1;
-                
-                // Penalty for too many offs
-                if (offs > 2) baseConfidence = Math.max(0, baseConfidence - 1);
-                if (offs > 3) baseConfidence = Math.max(0, baseConfidence - 1);
-                
-                confidence = Math.min(6, baseConfidence);
-                
+        let unseenAbove = 0;
+        let trumpCount = 0;
+        let tricks = 0;
+        for (const dom of trumpOrder) {
+            if (mine.has(dom.toString())) {
+                trumpCount++;
+                // Floor: even a low trump can win a trick by ruffing in on an off-suit lead
+                tricks += Math.max(0.1, Math.pow(0.47, unseenAbove));
             } else {
-                // Without trump double - more flexible but still strict
-                let baseConfidence = 0;
-                
-                // Must have minimum requirements
-                if (trumpCount < 3) {
-                    confidence = 0;
-                } else if (!hasThreeHighest) {
-                    confidence = 0;
-                } else if (doubleCount < 1) {
-                    confidence = 0;
-                } else {
-                    // Base confidence from trump count
-                    if (trumpCount >= 3) baseConfidence = 0; // Minimum viable
-                    if (trumpCount >= 4) baseConfidence = 1;
-                    if (trumpCount >= 5) baseConfidence = 2;
-                    if (trumpCount >= 6) baseConfidence = 3;
-                    
-                    // Bonus for good double count
-                    if (doubleCount >= 2) baseConfidence += 1;
-                    if (doubleCount >= 3) baseConfidence += 1;
-                    
-                    // Bonus for count value in trump
-                    if (trumpCountValue >= 10) baseConfidence += 1;
-                    if (trumpCountValue >= 20) baseConfidence += 1;
-                    
-                    // Penalty for unprotected count offs (but allow some)
-                    const unprotectedCountOffs = countOffs - countOffsProtected;
-                    if (unprotectedCountOffs > 1) baseConfidence = Math.max(0, baseConfidence - 1);
-                    if (unprotectedCountOffs > 2) baseConfidence = Math.max(0, baseConfidence - 1);
-                    
-                    confidence = Math.min(4, baseConfidence); // Cap at 4 without trump double
-                }
+                unseenAbove++;
             }
         }
+        const unseenTrumps = 7 - trumpCount;
         
-        // Adjust max bid based on trump quality and strategic factors
-        let maxBid = confidence < 6 ? 30 + confidence : 42;
+        // How likely a lead of a non-trump domino is to survive being ruffed
+        const doubleSurvive = unseenTrumps <= 2 ? 0.9 : (unseenTrumps <= 4 ? 0.8 : 0.7);
+        const ruffFactor = 1 - Math.min(0.5, 0.08 * unseenTrumps);
         
-        // Bonus for very strong trump combinations
-        if (trump !== null) {
-            const trumpDominoes = this.hand.filter(d => d.isTrump(trump));
+        // --- Non-trump doubles and off dominoes ---
+        const offTrickProb = new Map();
+        for (const d of this.hand) {
+            if (d.isTrump(trump)) continue;
+            if (d.isDouble()) {
+                offTrickProb.set(d.toString(), doubleSurvive);
+                tricks += doubleSurvive;
+            } else {
+                // Suit it would be led in is its higher end. Unseen dominoes that could beat it:
+                // the suit's double and any other domino of that suit with a larger other end.
+                const suit = d.ends[0];
+                const low = d.ends[1];
+                let higher = isUnseen(suit, suit) ? 1 : 0;
+                for (let x = low + 1; x <= 6; x++) {
+                    if (x === suit || x === trump) continue;
+                    if (isUnseen(suit, x)) higher++;
+                }
+                const p = Math.pow(0.5, higher) * ruffFactor * 0.85;
+                offTrickProb.set(d.toString(), p);
+                tricks += p;
+            }
+        }
+        tricks = Math.min(7, tricks);
+        const control = tricks / 7;
+        
+        // --- Count in our own hand ---
+        let myCountInHand = 0;
+        let capturedOwnCount = 0;
+        for (const d of this.hand) {
+            const value = countValue(d);
+            if (value === 0) continue;
+            myCountInHand += value;
+            let p;
+            if (d.isTrump(trump)) {
+                p = 0.5 + 0.45 * control;
+            } else if (d.isDouble()) {
+                p = doubleSurvive;
+            } else {
+                // Count off: much safer when we hold the double of its suit
+                const protectedByDouble = mine.has(new Domino(d.ends[0], d.ends[0]).toString());
+                p = protectedByDouble ? 0.45 + 0.5 * control : 0.2 + 0.55 * control;
+            }
+            capturedOwnCount += value * p;
+        }
+        
+        // --- Count we take from the other players' dominoes ---
+        // Each won trick holds 3 dominoes from the other hands (21 unseen dominoes hold 35 - ours count)
+        const unseenCount = 35 - myCountInHand;
+        const capturedOtherCount = tricks * 3 * unseenCount / 21;
+        
+        return {
+            points: tricks + capturedOwnCount + capturedOtherCount,
+            tricks: tricks,
+            control: control,
+            trumpCount: trumpCount
+        };
+    }
+    
+    evaluateBidConfidence() {
+        // Pick the trump suit whose estimate is best (ties: more trumps, then lower suit)
+        let best = null;
+        for (let suit = 0; suit < 7; suit++) {
+            const est = this.estimateBidPoints(suit);
+            est.suit = suit;
+            if (!best ||
+                est.points > best.points + 1e-9 ||
+                (Math.abs(est.points - best.points) <= 1e-9 && est.trumpCount > best.trumpCount)) {
+                best = est;
+            }
+        }
+        const trump = best.suit;
+        
+        // Strongest trump in hand (double first, then highest degree)
+        let strongest = null;
+        const trumpDominoes = this.hand.filter(d => d.isTrump(trump));
+        if (trumpDominoes.length > 0) {
             const trumpDoubles = trumpDominoes.filter(d => d.isDouble());
-            const trumpNonDoubles = trumpDominoes.filter(d => !d.isDouble());
-            
-            // Bonus for having both trump double and high trumps
-            if (trumpDoubles.length > 0 && trumpNonDoubles.length >= 3) {
-                const highestTrump = Math.max(...trumpNonDoubles.map(d => d.getDegree(trump)));
-                if (highestTrump >= 5) {
-                    maxBid = Math.min(42, maxBid + 1); // Bonus for strong trump combination
-                }
-            }
-            
-            // Bonus for having multiple doubles in addition to trump
-            const otherDoubles = this.hand.filter(d => d.isDouble() && !d.isTrump(trump));
-            if (otherDoubles.length >= 2) {
-                maxBid = Math.min(42, maxBid + 1); // Bonus for multiple doubles
+            if (trumpDoubles.length > 0) {
+                strongest = trumpDoubles[0];
+            } else {
+                strongest = trumpDominoes.reduce((max, d) => 
+                    d.getDegree(trump) > max.getDegree(trump) ? d : max
+                );
             }
         }
+        
+        // Default team estimate: assume an average partner covers some of what we can't take.
+        // makeAIBid replaces this with a partner estimate based on the actual bidding.
+        const teamPoints = Math.min(42, (best.points + (1 - best.control) * BID_DEFAULT_PARTNER_POINTS) * BID_POINT_SCALE);
+        const maxBid = Math.min(42, Math.floor(teamPoints + 1e-6));
+        
+        // 0-6 summary of strength (for display / history only)
+        const confidence = Math.max(0, Math.min(6, Math.round((maxBid - 29) / 2)));
         
         return {
             trump: trump,
             strongestDomino: strongest,
             confidence: confidence,
-            maxBid: maxBid
+            maxBid: maxBid,
+            handPoints: best.points,
+            control: best.control
         };
     }
     
@@ -3456,7 +3317,9 @@ class Player {
         for (let d = 6; d > degree; d--) {
             if (d === suit) continue; // double already handled above
             const higherDomino = new Domino(suit, d);
-            if (!this.hasDominoBeenPlayed(higherDomino)) {
+            // A higher domino in our own hand is not a threat (we hold it)
+            const inOwnHand = this.hand.some(h => h.toString() === higherDomino.toString());
+            if (!inOwnHand && !this.hasDominoBeenPlayed(higherDomino)) {
                 // Higher domino is still out there - not safe to lead
                 return false;
             }
@@ -3670,6 +3533,26 @@ class Player {
             doubles.sort((a, b) => b.ends[0] - a.ends[0]);
             console.log(`LEADER: Using highest non-trump double:`, doubles[0].toString());
             return doubles[0]; // Highest double
+        }
+        
+        // Cash count winners: if the opponents can't ruff (no trumps left out there, or they have
+        // shown they're out of them), an off domino with nothing higher left in its suit can't lose.
+        // Leading it collects its count (e.g. a 6-4 once the 6-6 and 6-5 are gone), so do it
+        // now instead of leading a throwaway domino and risking the count later.
+        if (this.areTrumpsOnlyOnTeam(trickState)) {
+            const countWinners = this.getCountDominoes(this.hand).filter(d =>
+                !d.isTrump(trickState.trump) && !d.isDouble() && this.isSafeToLeadWith(d, trickState.trump)
+            );
+            if (countWinners.length > 0) {
+                // 10-counts first, then 5-counts
+                const best = countWinners.reduce((max, d) => {
+                    const dv = d.ends[0] + d.ends[1];
+                    const mv = max.ends[0] + max.ends[1];
+                    return dv > mv ? d : max;
+                });
+                console.log(`LEADER: Cashing count winner (nothing can beat it):`, best.toString());
+                return best;
+            }
         }
         
         // Second priority: trump dominoes (but avoid if higher trumps are still out there)
@@ -4054,10 +3937,26 @@ class Player {
         const leaderTeam = this.game.teams['Us'].includes(leader) ? 'Us' : 'Them';
         const setterTeam = leaderTeam === 'Us' ? 'Them' : 'Us';
         
-        // Check if any setter has trumps
+        // Public information only (never look at another player's hand):
+        // 1. If every trump not in our own hand has already been played, the opponents have none.
+        const trump = trickState.trump;
+        let unaccountedTrumps = 0;
+        for (let d = 0; d <= 6; d++) {
+            const domino = new Domino(trump, d);
+            const inOwnHand = this.hand.some(h => h.toString() === domino.toString());
+            if (!inOwnHand && !this.hasDominoBeenPlayed(domino)) {
+                unaccountedTrumps++;
+            }
+        }
+        if (unaccountedTrumps === 0) {
+            return true;
+        }
+        
+        // 2. Otherwise a setter may hold trumps unless they have shown they are out of them
+        //    (failed to follow when trumps were led).
         for (const setter of this.game.teams[setterTeam]) {
-            const hasTrumps = setter.hand.some(d => d.isTrump(trickState.trump));
-            if (hasTrumps) {
+            const setterIdx = this.game.players.indexOf(setter);
+            if (!this.game.playerHasNo[setterIdx].has(trump)) {
                 return false;
             }
         }
@@ -4647,9 +4546,9 @@ class Game {
         // Out-of-suit tracking
         if (this.currentTrick && this.currentTrick.currentSuit !== null) {
             const ledSuit = this.currentTrick.currentSuit;
-            // If player could have followed suit but didn't, record it
-            const couldFollow = player.hand.some(d => d.canFollowSuit(ledSuit, this.trump));
-            if (!domino.canFollowSuit(ledSuit, this.trump) && couldFollow) {
+            // Players must follow suit when they can, so anyone who plays a domino that
+            // doesn't follow the led suit has shown they are out of it (public information).
+            if (!domino.canFollowSuit(ledSuit, this.trump)) {
                 this.playerHasNo[playerIdx].add(ledSuit);
             }
         }
@@ -5424,6 +5323,8 @@ class Game {
                 keyToken: evalResult.strongestDomino,
                 confidence: evalResult.confidence,
                 maxBid: evalResult.maxBid,
+                handPoints: evalResult.handPoints,
+                control: evalResult.control,
                 supporting: false
             };
         }
@@ -5475,7 +5376,8 @@ class Game {
             this.showBiddingInterface(player, currentIndex, bidOrder, playerMap, playerData);
         } else {
             // AI player - make bid automatically
-            const bid = this.makeAIBid(currentPlayer, pdata, currentIndex, bidOrder, playerData);
+            // Bots get only their own evaluation, never anyone else's
+            const bid = this.makeAIBid(currentPlayer, pdata, currentIndex, bidOrder);
             this.bidHistory[player] = bid;
             this.lastHandBiddingInfo[player] = {
                 confidence: pdata.confidence,
@@ -5597,6 +5499,8 @@ class Game {
                 keyToken: evalResult.strongestDomino,
                 confidence: evalResult.confidence,
                 maxBid: evalResult.maxBid,
+                handPoints: evalResult.handPoints,
+                control: evalResult.control,
                 supporting: false
             };
         }
@@ -5605,93 +5509,72 @@ class Game {
         this.processBidding(bidOrder, playerMap, playerData, currentIndex + 1);
     }
     
-    makeAIBid(currentPlayer, pdata, currentIndex, bidOrder, playerData) {
-        // Enhanced AI bidding logic with strategic considerations
-        const partnerName = this.getPartnerName(currentPlayer);
-        const partnerBid = this.bidHistory[partnerName];
-        const partnerIsLeader = partnerBid !== undefined && partnerBid !== 'pass' && partnerBid === this.currentBid;
+    makeAIBid(currentPlayer, pdata, currentIndex, bidOrder) {
+        // Bot bidding. Uses ONLY the bot's own hand (pdata) and public information:
+        // the bids made so far, the score, and its seat in the bidding order.
+        // It deliberately does not receive any other player's hand evaluation.
+        const playerIndex = this.players.indexOf(currentPlayer);
+        const name = this.formatPlayerNameWithRelationship(currentPlayer);
+        const say = (text, type = 'info') => this.gameTableManager.addPlayerMessage(playerIndex, text, type);
+        const isDealer = currentIndex === bidOrder.length - 1;
         
-        // Get current game score for strategic adjustments
-        const currentTeam = this.teams['Us'].includes(currentPlayer) ? 'Us' : 'Them';
-        const ourScore = this.scores[currentTeam === 'Us' ? 0 : 1];
-        const theirScore = this.scores[currentTeam === 'Us' ? 1 : 0];
-        const scoreDifference = ourScore - theirScore;
-        
-        // Adjust confidence based on game situation
-        let adjustedConfidence = pdata.confidence;
-        
-        // More aggressive when behind
-        if (scoreDifference < -2) {
-            adjustedConfidence += 1;
-        }
-        // More conservative when ahead
-        if (scoreDifference > 2) {
-            adjustedConfidence = Math.max(0, adjustedConfidence - 1);
+        // The dealer is stuck with the bid at 30 when everyone else passes, and never raises it.
+        if (isDealer && this.currentBid === 0) {
+            console.log(`${name}: Dealer, everyone passed - stuck with the bid at ${BID_MIN}`);
+            say(`Everyone passed, stuck with the bid at ${BID_MIN}`, 'info');
+            return BID_MIN;
         }
         
-        // Adjust based on position in bidding order
-        if (currentIndex === 0) {
-            // First to bid - be more conservative
-            adjustedConfidence = Math.max(0, adjustedConfidence - 1);
-        } else if (currentIndex === bidOrder.length - 1) {
-            // Last to bid - be more aggressive if we can win
-            if (pdata.maxBid > this.currentBid) {
-                adjustedConfidence += 1;
+        // What the partner has told us (public): their bid, a pass, or nothing yet
+        const partnerBid = this.bidHistory[this.getPartnerName(currentPlayer)];
+        const partnerPassed = partnerBid === 'pass';
+        const partnerHasBid = typeof partnerBid === 'number';
+        const partnerIsLeader = partnerHasBid && partnerBid === this.currentBid;
+        
+        // Estimate team points: our own hand plus whatever of the remaining tricks partner can cover
+        let partnerPoints = BID_DEFAULT_PARTNER_POINTS;
+        if (partnerPassed) partnerPoints = BID_PARTNER_PASSED_POINTS;
+        else if (partnerHasBid) partnerPoints = BID_PARTNER_BID_POINTS;
+        let estimate = (pdata.handPoints + (1 - pdata.control) * partnerPoints) * BID_POINT_SCALE;
+        
+        // Game situation
+        const teamIdx = this.teams['Us'].includes(currentPlayer) ? 0 : 1;
+        const ourScore = this.scores[teamIdx];
+        const theirScore = this.scores[1 - teamIdx];
+        if (theirScore - ourScore >= 3) estimate += 1;  // far behind: take more risk
+        if (ourScore - theirScore >= 3) estimate -= 1;  // far ahead: play safe
+        if (theirScore >= 6) estimate -= 1;             // being set would hand them the game
+        if (ourScore >= 6) estimate += 1;               // one made bid wins it for us
+        
+        // A little variation so identical hands don't always bid identically
+        estimate += (Math.random() - 0.5) * 1.5;
+        
+        const cap = Math.min(42, Math.floor(estimate));
+        
+        // Partner already holds the bid: only take it if we look clearly stronger
+        if (partnerIsLeader) {
+            if (cap >= this.currentBid + 3) {
+                const bid = isDealer ? this.currentBid + 1 : cap;
+                console.log(`${name}: Much stronger than partner's ${partnerBid}, bidding ${bid}`);
+                say(`Bidding ${bid}`, 'action');
+                return bid;
             }
-        }
-        
-        // If partner is leader and AI has a supporting hand, may pass
-        if (partnerIsLeader && adjustedConfidence <= playerData[partnerName].confidence) {
-            console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Partner is leader, passing to support`);
-            const playerIndex = this.players.indexOf(currentPlayer);
-            this.gameTableManager.addPlayerMessage(playerIndex, `Partner is leading, passing to support`, 'info');
+            console.log(`${name}: Partner is leading, passing to support`);
+            say(`Partner is leading, passing to support`, 'info');
             return 'pass';
         }
         
-        // If AI's confidence is significantly higher than partner's, take the bid
-        if (partnerIsLeader && adjustedConfidence >= playerData[partnerName].confidence + 2) {
-            // Must outbid current bid by at least 1
-            if (pdata.maxBid > this.currentBid) {
-                // If last to bid, only outbid by 1
-                if (currentIndex === bidOrder.length - 1) {
-                    console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Last to bid, outbidding by 1`);
-                    return this.currentBid + 1;
-                } else {
-                    console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Taking bid from partner`);
-                    return pdata.maxBid;
-                }
-            } else {
-                console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Cannot outbid current bid, passing`);
-                return 'pass';
-            }
-        }
-        
-        // If last to bid and can win, only outbid by 1
-        if (currentIndex === bidOrder.length - 1 && pdata.maxBid > this.currentBid) {
-            console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Last to bid, minimal outbid`);
-            return this.currentBid + 1;
-        }
-        
-        // Check if we should be more aggressive based on hand strength
-        if (adjustedConfidence >= 4) {
-            // Very strong hand - be more aggressive
-            if (pdata.maxBid > this.currentBid) {
-                console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Strong hand, bidding aggressively`);
-                return pdata.maxBid;
-            }
-        }
-        
-        if (pdata.maxBid <= this.currentBid) {
-            console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Cannot outbid, passing`);
-            const playerIndex = this.players.indexOf(currentPlayer);
-            this.gameTableManager.addPlayerMessage(playerIndex, `Cannot outbid ${this.currentBid}, passing`, 'info');
+        if (cap < BID_MIN || cap <= this.currentBid) {
+            console.log(`${name}: Hand worth about ${cap}, cannot bid above ${Math.max(BID_MIN - 1, this.currentBid)}, passing`);
+            say(this.currentBid === 0 ? `Passing` : `Cannot outbid ${this.currentBid}, passing`, 'info');
             return 'pass';
-        } else {
-            console.log(`${this.formatPlayerNameWithRelationship(currentPlayer)}: Bidding ${pdata.maxBid}`);
-            const playerIndex = this.players.indexOf(currentPlayer);
-            this.gameTableManager.addPlayerMessage(playerIndex, `Bidding ${pdata.maxBid}`, 'action');
-            return pdata.maxBid;
         }
+        
+        // Bidding is a single round, so bid the full amount, except the dealer who just needs one more
+        const bid = isDealer ? this.currentBid + 1 : cap;
+        console.log(`${name}: Hand worth about ${cap}, bidding ${bid}`);
+        say(`Bidding ${bid}`, 'action');
+        return bid;
     }
     
     getPartnerName(currentPlayer) {
@@ -6165,6 +6048,13 @@ class Game {
             handResult = `${setTeam} set the bidding team!`;
         }
         
+        // Record who actually won this hand so the scorecard history can't disagree with the score
+        const savedHand = this.handHistory[this.handHistory.length - 1];
+        if (savedHand) {
+            savedHand.winner = handWinner;
+            savedHand.result = handResult;
+        }
+        
         // Update overall scores
         if (handWinner) {
             if (handWinner === 'Us') {
@@ -6524,9 +6414,8 @@ class Game {
                 const handDiv = document.createElement('div');
                 handDiv.className = 'hand-history-item';
                 
-                const winner = hand.usHandPoints >= hand.winningBid ? 'Us' : 
-                              hand.themHandPoints >= hand.winningBid ? 'Them' : 
-                              hand.usHandPoints > (42 - hand.winningBid) ? 'Us' : 'Them';
+                // Use the recorded winner (set in finishHand), which accounts for who held the bid
+                const winner = hand.winner;
                 
                 // Create hand display section
                 const handDisplay = this.createHandDisplay(hand);
